@@ -10,10 +10,20 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = ('nama',)
 
+class ListRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ('id', 'nama')
+
 class SessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Session
         fields = ('nama', 'start_time', 'end_time')
+
+class ListSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Session
+        fields = ('id', 'nama', 'start_time', 'end_time')
 
 class PengujiSerializer(serializers.ModelSerializer):
     dosen = SimpleUserSerializer()
@@ -35,7 +45,7 @@ class SimpleUjianSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('id', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
 
 class UjianSerializer(serializers.ModelSerializer):
     sesi = SessionSerializer()

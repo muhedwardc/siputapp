@@ -23,7 +23,7 @@ class SimpleEssaySerializer(serializers.ModelSerializer):
 
 class EssaySerializer(serializers.ModelSerializer):
     pembimbing1 = SimpleUserSerializer()
-    pembimbing1 = SimpleUserSerializer()
+    pembimbing2 = SimpleUserSerializer()
     mahasiswa = StudentSerializer(many=True, source='students')
 
     class Meta:
