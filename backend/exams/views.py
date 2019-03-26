@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import render
 from rest_framework import viewsets, views
 from rest_framework.response import Response
@@ -14,6 +15,11 @@ class ExamViewSet(viewsets.ModelViewSet):
         elif self.action == 'retrieve':
             return UjianSerializer
         return SimpleUjianSerializer
+
+class ListExamByDate(views.APIView):
+    def get(self, request, date, month, year, format=None):
+        list_ujian = Exam.objects.all().filter(tanggal=datetime.date(year, month, date))
+        return Response(SimpleUjianSerializer(list_ujian, many=True).data)
 
 class RoomSessionAPI(views.APIView):
     def get(self, request, format=None):
