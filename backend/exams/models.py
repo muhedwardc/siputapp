@@ -1,6 +1,6 @@
 from django.db import models
-from users.models import User
-from essays.models import Essay
+from backend.users.models import User
+from backend.essays.models import Essay
 
 class Room(models.Model):
     nama = models.CharField(max_length=20)
@@ -40,7 +40,7 @@ class Penguji(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '{} : {}'.format(self.pengguna.nama, self.ujian.tanggal)
+        return '{} : {}'.format(self.dosen.nama, self.ujian.tanggal)
 
     class Meta:
         verbose_name = 'Penguji'

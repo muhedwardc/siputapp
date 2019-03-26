@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from backend.users.models import User
 
 class Essay(models.Model):
     judul = models.CharField(max_length=250)

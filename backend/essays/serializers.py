@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Essay, Student, Subtitle
-from users.serializers import SimpleUserSerializer
-from users.models import User
+from backend.users.serializers import SimpleUserSerializer
+from backend.users.models import User
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -20,6 +20,15 @@ class SimpleEssaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Essay
         fields = ('judul', 'mahasiswa', 'is_capstone')
+
+class EssaySerializer(serializers.ModelSerializer):
+    pembimbing1 = SimpleUserSerializer()
+    pembimbing1 = SimpleUserSerializer()
+    mahasiswa = StudentSerializer(many=True, source='students')
+
+    class Meta:
+        model = Essay
+        fields = ('judul', 'intisari', 'naskah', 'pembimbing1', 'pembimbing2', 'is_capstone', 'mahasiswa')
 
 class CreateEssaySerializer(serializers.ModelSerializer):
     mahasiswa = StudentSerializer(many=True, required=False)

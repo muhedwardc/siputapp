@@ -15,6 +15,9 @@ urlpatterns = [
     # http://localhost:8000/api/users/
     path('api/users/', include('backend.users.urls')),
 
+    # http://localhost:8000/api/exams/
+    path('api/exams/', include('backend.exams.urls')),
+
     # http://localhost:8000/api/<router-viewsets>
     path('api/', include(router.urls)),
 

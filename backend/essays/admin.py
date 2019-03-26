@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import Essay, Student, Subtitle
 
-# Register your models here.
+admin.site.register(Essay)
+admin.site.register(Student)
