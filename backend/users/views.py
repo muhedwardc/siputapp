@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions, status, generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-# from knox.models import AuthToken
+from knox.models import AuthToken
 from django.db.models import Q
 
 from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer
@@ -64,14 +64,14 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class LoginAPI(generics.GenericAPIView):
-#     permission_classes = (permissions.AllowAny, )
+class LoginAPI(generics.GenericAPIView):
+    permission_classes = (permissions.AllowAny, )
 
-#     def post(self, request):
-#         serializer = LoginUserSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data
-#         return Response({
-#             "user": UserSerializer(user, context=self.get_serializer_context()).data,
-#             "token": AuthToken.objects.create(user)
-#         })
+    def post(self, request):
+        serializer = LoginUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data
+        return Response({
+            "user": FullUserSerializer(user, context=self.get_serializer_context()).data,
+            "token": AuthToken.objects.create(user)
+        })
