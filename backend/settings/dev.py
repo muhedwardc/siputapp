@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     'backend.api',
     'backend.users',
     'backend.exams',
-    'backend.essays'
+    'backend.essays',
+    'backend.siput'
 ]
 
 MIDDLEWARE = [
