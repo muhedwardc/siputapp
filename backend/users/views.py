@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, status, generics, mixins, stat
 from rest_framework.response import Response
 from rest_framework.decorators import action
 # from knox.models import AuthToken
+from django.db.models import Q
 
 from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer
 from .models import User
@@ -17,7 +18,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def dosen(self, request, *args, **kwargs):
-        list_dosen = self.get_queryset().filter(role__pk=2)
+        if 'q' in request.GET:
+            query = request.GET.get('q')
+            list_dosen = self.get_queryset().filter(Q(role__pk=2, nama__contains=query))
+        else:
+            list_dosen = self.get_queryset().filter(role__pk=2)
         serializer = self.get_serializer(list_dosen, many=True)
         return Response(serializer.data)
 
