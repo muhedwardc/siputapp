@@ -1,10 +1,10 @@
-from rest_framework import viewsets, permissions, status, generics, mixins, status
+from rest_framework import views, viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from knox.models import AuthToken
 from django.db.models import Q
 
-from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer
+from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer
 from .models import User
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -64,7 +64,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginAPI(generics.GenericAPIView):
+class LoginAPI(views.APIView):
     permission_classes = (permissions.AllowAny, )
 
     def post(self, request):
@@ -72,6 +72,18 @@ class LoginAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         return Response({
-            "user": FullUserSerializer(user, context=self.get_serializer_context()).data,
+            "user": FullUserSerializer(user).data,
             "token": AuthToken.objects.create(user)
+        })
+
+class ChangePasswordAPI(views.APIView):
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def post(self, request):
+        serializer = PasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.request.user.set_password(serializer.validated_data['password1'])
+        self.request.user.save()
+        return Response({
+            "msg": "User password has been changed."
         })

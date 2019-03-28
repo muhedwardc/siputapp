@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins, views
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .serializers import SimpleSiputSerializer, SiputSerializer
+from .serializers import SimpleSiputSerializer, SiputSerializer, SiputProfileSerializer
 from backend.exams.models import Penguji, Exam
 
 # class SiputAPI(views.APIView):
@@ -29,7 +29,7 @@ class SiputViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Retrie
         return SimpleSiputSerializer
 
     def list(self, request):
-        ujian = self.get_queryset().filter_by(ujian__is_finish=False).order_by('ujian__tanggal')
+        ujian = self.get_queryset().filter(ujian__is_finish=False).order_by('ujian__tanggal')
         serializer = self.get_serializer(ujian, many=True)
         return Response(serializer.data)
     
@@ -50,4 +50,25 @@ class SiputViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Retrie
         return Response({
             "msg": "Status kehadiran berhasil diubah."
         })
-    
+
+    @action(methods=['GET'], detail=False)
+    def history(self, request, *args, **kwargs):
+        ujian = self.get_queryset().filter(
+            ujian__is_finish=True).order_by('-ujian__tanggal')
+        serializer = self.get_serializer(ujian, many=True)
+        return Response(serializer.data)
+
+class UserProfileAPI(views.APIView):
+    def get(self, request, format=None):
+        serializer = SiputProfileSerializer(self.request.user)
+        return Response(serializer.data)
+
+    def put(self, request, format=None):
+        serializer = SiputProfileSerializer(self.request.user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "msg": "Profile updated.",
+                "user": serializer.data
+            })
+        return Response(serializer.errors)

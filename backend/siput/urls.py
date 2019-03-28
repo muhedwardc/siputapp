@@ -1,9 +1,12 @@
 from rest_framework import routers
 from django.urls import path, include
 
-from .views import SiputViewSet
+from .views import SiputViewSet, UserProfileAPI
 
 router = routers.DefaultRouter()
-router.register('', SiputViewSet, base_name='siput')
+router.register('ujian', SiputViewSet, base_name='siput')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+    path('profile/', UserProfileAPI.as_view())
+]

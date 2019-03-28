@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework import routers
 
 from .api.views import index_view, MessageViewSet
-from .users.views import LoginAPI
+from .users.views import LoginAPI, ChangePasswordAPI
 from knox.views import LogoutView
 
 
@@ -15,11 +15,14 @@ urlpatterns = [
     # http://localhost:8000/
     path('', index_view, name='index'),
 
-    # http://localhost:8000/api/auth/login
+    # http://localhost:8000/api/auth/login/
     path('api/auth/login/', LoginAPI.as_view()),
 
-    # http://localhost:8000/api/auth/login
-    path('api/auth/login/', LogoutView.as_view()),
+    # http://localhost:8000/api/auth/logout/
+    path('api/auth/logout/', LogoutView.as_view()),
+
+    # http://localhost:8000/api/auth/change_password/
+    path('api/auth/change_password/', ChangePasswordAPI.as_view()),
 
     # http://localhost:8000/api/users/
     path('api/users/', include('backend.users.urls')),
