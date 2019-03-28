@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Essay, Student, Subtitle
+from .models import Essay, Student, Subtitle, Comment, Grade
 from backend.users.serializers import SimpleUserSerializer
 from backend.users.models import User
 
@@ -52,3 +52,27 @@ class CreateEssaySerializer(serializers.ModelSerializer):
             mahasiswa = Student.objects.create(skripsi=skripsi, **data)
 
         return skripsi
+
+class CommentSerializer(serializers.ModelSerializer):
+    dosen = SimpleUserSerializer()
+    
+    class Meta:
+        model = Comment
+        fields = ('dosen', 'bab', 'halaman', 'komentar')
+
+class CreateCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('skripsi', 'dosen', 'bab', 'halaman', 'komentar')
+
+class GradeSerializer(serializers.ModelSerializer):
+    dosen = SimpleUserSerializer()
+
+    class Meta:
+        model = Grade
+        fields = ('dosen', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
+
+class CreateGradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grade
+        fields = ('mahasiswa', 'dosen', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
