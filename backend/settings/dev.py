@@ -29,12 +29,14 @@ INSTALLED_APPS = [
 
     # 3rd party app
     'rest_framework',
+    'knox',
 
     # local app
     'backend.api',
     'backend.users',
     'backend.exams',
-    'backend.essays'
+    'backend.essays',
+    'backend.siput'
 ]
 
 MIDDLEWARE = [
@@ -145,8 +147,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 ##################
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'knox.auth.TokenAuthentication',
     ),
     'DATE_FORMAT': '%d/%m/%Y',
 }

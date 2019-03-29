@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Essay, Student, Subtitle
+from .models import Essay, Student, Subtitle, Comment, Grade
 from backend.users.serializers import SimpleUserSerializer
 from backend.users.models import User
 
@@ -19,7 +19,7 @@ class SimpleEssaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Essay
-        fields = ('judul', 'mahasiswa', 'is_capstone')
+        fields = ('id', 'judul', 'mahasiswa', 'is_capstone')
 
 class EssaySerializer(serializers.ModelSerializer):
     pembimbing1 = SimpleUserSerializer()
@@ -28,7 +28,7 @@ class EssaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Essay
-        fields = ('judul', 'intisari', 'naskah', 'pembimbing1', 'pembimbing2', 'is_capstone', 'mahasiswa')
+        fields = ('id', 'judul', 'intisari', 'naskah', 'pembimbing1', 'pembimbing2', 'is_capstone', 'mahasiswa')
 
 class CreateEssaySerializer(serializers.ModelSerializer):
     mahasiswa = StudentSerializer(many=True, required=False)
@@ -52,3 +52,39 @@ class CreateEssaySerializer(serializers.ModelSerializer):
             mahasiswa = Student.objects.create(skripsi=skripsi, **data)
 
         return skripsi
+
+class CommentSerializer(serializers.ModelSerializer):
+    dosen = SimpleUserSerializer()
+    
+    class Meta:
+        model = Comment
+        fields = ('dosen', 'bab', 'halaman', 'komentar')
+
+class CreateCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('bab', 'halaman', 'komentar')
+
+    def save(self, skripsi, dosen):
+        new_comment = Comment.objects.create(
+            skripsi=skripsi,
+            dosen=dosen,
+            bab=self.validated_data['bab'],
+            halaman=self.validated_data['halaman'],
+            komentar=self.validated_data['komentar']
+        )
+        new_comment.save()
+        return new_comment
+
+class GradeSerializer(serializers.ModelSerializer):
+    dosen = SimpleUserSerializer()
+    mahasiswa = SimpleStudentSerializer()
+
+    class Meta:
+        model = Grade
+        fields = ('dosen', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
+
+class CreateGradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grade
+        fields = ('mahasiswa', 'dosen', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')

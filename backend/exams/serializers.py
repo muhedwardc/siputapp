@@ -30,7 +30,7 @@ class PengujiSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Penguji
-        fields = ('id', 'dosen', 'is_leader', 'is_attending')
+        fields = ('dosen',)
 
 class CreatePengujiSerializer(serializers.ModelSerializer):
     class Meta:

@@ -17,7 +17,7 @@ class Session(models.Model):
         return '{} : {} - {} WIB'.format(self.nama, self.start_time, self.end_time)
 
 class Exam(models.Model):
-    skripsi = models.OneToOneField(Essay, related_name='essay', on_delete=models.DO_NOTHING)
+    skripsi = models.OneToOneField(Essay, related_name='exams', on_delete=models.DO_NOTHING)
     tanggal = models.DateField()
     sesi = models.ForeignKey(Session, related_name='exams', on_delete=models.DO_NOTHING)
     ruang = models.ForeignKey(Room, related_name='exams', on_delete=models.DO_NOTHING)

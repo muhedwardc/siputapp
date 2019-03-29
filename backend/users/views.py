@@ -1,9 +1,10 @@
-from rest_framework import viewsets, permissions, status, generics, mixins, status
+from rest_framework import views, viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-# from knox.models import AuthToken
+from knox.models import AuthToken
+from django.db.models import Q
 
-from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer
+from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer
 from .models import User
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -17,7 +18,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def dosen(self, request, *args, **kwargs):
-        list_dosen = self.get_queryset().filter(role__pk=2)
+        if 'q' in request.GET:
+            query = request.GET.get('q')
+            list_dosen = self.get_queryset().filter(Q(role__pk=2, nama__contains=query))
+        else:
+            list_dosen = self.get_queryset().filter(role__pk=2)
         serializer = self.get_serializer(list_dosen, many=True)
         return Response(serializer.data)
 
@@ -59,14 +64,26 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class LoginAPI(generics.GenericAPIView):
-#     permission_classes = (permissions.AllowAny, )
+class LoginAPI(views.APIView):
+    permission_classes = (permissions.AllowAny, )
 
-#     def post(self, request):
-#         serializer = LoginUserSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data
-#         return Response({
-#             "user": UserSerializer(user, context=self.get_serializer_context()).data,
-#             "token": AuthToken.objects.create(user)
-#         })
+    def post(self, request):
+        serializer = LoginUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data
+        return Response({
+            "user": FullUserSerializer(user).data,
+            "token": AuthToken.objects.create(user)
+        })
+
+class ChangePasswordAPI(views.APIView):
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def post(self, request):
+        serializer = PasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.request.user.set_password(serializer.validated_data['password1'])
+        self.request.user.save()
+        return Response({
+            "msg": "User password has been changed."
+        })

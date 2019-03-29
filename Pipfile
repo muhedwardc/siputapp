@@ -11,6 +11,7 @@ whitenoise = "==4.0"
 dj-database-url = "*"
 psycopg2-binary = "*"
 pillow = "*"
+django-rest-knox = "*"
 
 [dev-packages]
 
