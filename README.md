@@ -120,3 +120,28 @@ This allows for an extremely simple setup without the need for a separate static
 [Cloudfront Setup Wiki](https://github.com/gtalarico/django-vue-template/wiki/Setup-CDN-on-Cloud-Front)
 
 ** this project template is adapted from [https://github.com/gtalarico/django-vue-template](https://github.com/gtalarico/django-vue-template)
+
+## API Endpoints
+Endpoint untuk umum:
+1. POST /api/auth/login/
+2. POST /api/auth/logout/
+3. POST /api/auth/change_password/
+
+Endpoint untuk akademik:
+4. GET /api/users/ atau /api/users/dosen/ atau /api/users/akademik/
+5. POST /api/users/dosen/ atau /api/users/akademik/
+6. GET /api/exams/
+7. POST /api/exams/
+8. GET /api/exams/\<id>\/
+
+Endpoint untuk dosen:
+9. GET /api/me/exams/
+10. GET /api/me/exams/\<id>\/
+11. POST /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
+12. GET /api/me/exams/\<id>\/comments/
+13. POST /api/me/exams/\<id>\/comments/
+14. POST /api/me/exams/\<id>\/essays/
+15. GET /api/me/profile/ 
+16. PUT /api/me/profile/
+17. GET /api/me/exams/history/
+
