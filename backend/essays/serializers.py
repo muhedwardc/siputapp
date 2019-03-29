@@ -19,7 +19,7 @@ class SimpleEssaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Essay
-        fields = ('judul', 'mahasiswa', 'is_capstone')
+        fields = ('id', 'judul', 'mahasiswa', 'is_capstone')
 
 class EssaySerializer(serializers.ModelSerializer):
     pembimbing1 = SimpleUserSerializer()
@@ -28,7 +28,7 @@ class EssaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Essay
-        fields = ('judul', 'intisari', 'naskah', 'pembimbing1', 'pembimbing2', 'is_capstone', 'mahasiswa')
+        fields = ('id', 'judul', 'intisari', 'naskah', 'pembimbing1', 'pembimbing2', 'is_capstone', 'mahasiswa')
 
 class CreateEssaySerializer(serializers.ModelSerializer):
     mahasiswa = StudentSerializer(many=True, required=False)
@@ -63,10 +63,22 @@ class CommentSerializer(serializers.ModelSerializer):
 class CreateCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('skripsi', 'dosen', 'bab', 'halaman', 'komentar')
+        fields = ('bab', 'halaman', 'komentar')
+
+    def save(self, skripsi, dosen):
+        new_comment = Comment.objects.create(
+            skripsi=skripsi,
+            dosen=dosen,
+            bab=self.validated_data['bab'],
+            halaman=self.validated_data['halaman'],
+            komentar=self.validated_data['komentar']
+        )
+        new_comment.save()
+        return new_comment
 
 class GradeSerializer(serializers.ModelSerializer):
     dosen = SimpleUserSerializer()
+    mahasiswa = SimpleStudentSerializer()
 
     class Meta:
         model = Grade
