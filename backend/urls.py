@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework import routers
 
 from .api.views import index_view, MessageViewSet
@@ -13,7 +13,7 @@ router.register('messages', MessageViewSet)
 urlpatterns = [
 
     # http://localhost:8000/
-    path('', index_view, name='index'),
+    re_path(r'^.*', index_view, name='index'),
 
     # http://localhost:8000/api/auth/login/
     path('api/auth/login/', LoginAPI.as_view()),
