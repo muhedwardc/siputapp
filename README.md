@@ -145,3 +145,55 @@ Endpoint untuk dosen:
 16. PUT /api/me/profile/
 17. GET /api/me/exams/history/
 
+```
+{
+	"tanggal": "2019-06-12",
+	"sesi": 2,
+	"ruang": 1,
+	"skripsi": {
+		"judul": "Pengembangan Aplikasi Disabilitas",
+		"intisari": "Ini adalah intisari dari aplikasi ini...",
+		"pembimbing1": 3,
+		"pembimbing2": 4,
+		"is_capstone": true,
+		"mahasiswa": [
+			{
+				"nama": "Muhammad Ashil Al Lathief",
+				"nim": "15/385406/TK/44068",
+				"prodi": "Teknologi Informasi",
+				"konsentrasi": "Rekayasa Perangkat Lunak",
+				"tempat_lahir": "Purwokerto",
+				"tanggal_lahir": "1996-10-31",
+				"telepon": "087738305630"
+			},
+			{
+				"nama": "Muhammad Edward Chakin",
+				"nim": "15/385407/TK/44069",
+				"prodi": "Teknologi Informasi",
+				"konsentrasi": "Rekayasa Perangkat Lunak",
+				"tempat_lahir": "Solo",
+				"tanggal_lahir": "1997-05-21",
+				"telepon": "08234785324"
+			},
+			{
+				"nama": "Steven Amadeus",
+				"nim": "15/385456/TK/44078",
+				"prodi": "Teknologi Informasi",
+				"konsentrasi": "Rekayasa Perangkat Lunak",
+				"tempat_lahir": "Jakarta",
+				"tanggal_lahir": "1996-01-01",
+				"telepon": "085632162427"
+			}
+		]
+	},
+	"penguji": [
+		{
+			"dosen": 2
+		},
+		{
+			"dosen": 5
+		}
+	]
+}
+```
+
