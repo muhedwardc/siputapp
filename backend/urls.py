@@ -12,9 +12,6 @@ router.register('messages', MessageViewSet)
 
 urlpatterns = [
 
-    # http://localhost:8000/
-    re_path(r'^.*', index_view, name='index'),
-
     # http://localhost:8000/api/auth/login/
     path('api/auth/login/', LoginAPI.as_view()),
 
@@ -38,5 +35,8 @@ urlpatterns = [
 
     # http://localhost:8000/api/admin/
     path('admin/', admin.site.urls),
+
+    # http://localhost:8000/
+    re_path(r'^.*', index_view, name='index'),
 ]
 
