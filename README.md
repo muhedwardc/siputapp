@@ -123,25 +123,96 @@ This allows for an extremely simple setup without the need for a separate static
 
 ## API Endpoints
 Endpoint untuk umum:
-1. POST /api/auth/login/
-2. POST /api/auth/logout/
-3. POST /api/auth/change_password/
+1. **POST** /api/auth/login/
+1. **POST** /api/auth/logout/
+1. **POST** /api/auth/change_password/
 
-Endpoint untuk akademik:
-4. GET /api/users/ atau /api/users/dosen/ atau /api/users/akademik/
-5. POST /api/users/dosen/ atau /api/users/akademik/
-6. GET /api/exams/
-7. POST /api/exams/
-8. GET /api/exams/\<id>\/
+1. **GET** /api/users/ atau /api/users/dosen/ atau /api/users/akademik/ : list all users / list dosen users / list akademik users
+1. **POST** /api/users/dosen/ atau /api/users/akademik/ : create dosen users / create akademik users
+1. **GET** /api/exams/ : list all exams
+1. **GET** /api/exams/get_room_session/ : list room and session
+1. **POST** /api/exams/ : create exams
+1. **GET** /api/exams/\<id>\/ : retrive an exam
 
-Endpoint untuk dosen:
-9. GET /api/me/exams/
-10. GET /api/me/exams/\<id>\/
-11. POST /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
-12. GET /api/me/exams/\<id>\/comments/
-13. POST /api/me/exams/\<id>\/comments/
-14. POST /api/me/exams/\<id>\/essays/
-15. GET /api/me/profile/ 
-16. PUT /api/me/profile/
-17. GET /api/me/exams/history/
+1. **GET** /api/me/exams/
+1. **GET** /api/me/exams/\<id>\/
+1. **POST** /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
+1. **GET** /api/me/exams/\<id>\/comments/ : list all comments from selected penguji
+1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
+1. **GET** /api/me/exams/\<id>\/essays/ : retrieve essays detail for selected exam
+1. **GET** /api/me/profile/ 
+1. **PUT** /api/me/profile/
+1. **GET** /api/me/exams/history/
+
+## API Data Structures
+#### Data Structure for Creating User (/api/exams/)
+```JSON
+{
+	"email": "ridi.ferdiana@mail.ugm.ac.id",
+	"password": "Passw0rd"
+}
+```
+
+#### Data Structure for Creating Exam (/api/exams/)
+```JSON
+{
+	"tanggal": "2019-06-12",
+	"sesi": 2,
+	"ruang": 1,
+	"skripsi": {
+		"judul": "Pengembangan Aplikasi Disabilitas",
+		"intisari": "Ini adalah intisari dari aplikasi ini...",
+		"pembimbing1": 3,
+		"pembimbing2": 4,
+		"is_capstone": true,
+		"mahasiswa": [
+			{
+				"nama": "Muhammad Ashil Al Lathief",
+				"nim": "15/385406/TK/44068",
+				"prodi": "Teknologi Informasi",
+				"konsentrasi": "Rekayasa Perangkat Lunak",
+				"tempat_lahir": "Purwokerto",
+				"tanggal_lahir": "1996-10-31",
+				"telepon": "087738305630"
+			},
+			{
+				"nama": "Muhammad Edward Chakin",
+				"nim": "15/385407/TK/44069",
+				"prodi": "Teknologi Informasi",
+				"konsentrasi": "Rekayasa Perangkat Lunak",
+				"tempat_lahir": "Solo",
+				"tanggal_lahir": "1997-05-21",
+				"telepon": "08234785324"
+			},
+			{
+				"nama": "Steven Amadeus",
+				"nim": "15/385456/TK/44078",
+				"prodi": "Teknologi Informasi",
+				"konsentrasi": "Rekayasa Perangkat Lunak",
+				"tempat_lahir": "Jakarta",
+				"tanggal_lahir": "1996-01-01",
+				"telepon": "085632162427"
+			}
+		]
+	},
+	"penguji": [
+		{
+			"dosen": 2
+		},
+		{
+			"dosen": 5
+		}
+	]
+}
+```
+
+#### Data Structure for Creating Comment
+```JSON
+{
+	"bab": "Bab 1",
+	"halaman": 78,
+	"komentar": "Penjelasan pada diagram proses bisnis kurang detail"
+}
+```
+
 

@@ -2,6 +2,11 @@ from rest_framework import serializers
 from .models import User, Role
 from django.contrib.auth import authenticate
 
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ('id', 'nama',)
+
 class FullUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
