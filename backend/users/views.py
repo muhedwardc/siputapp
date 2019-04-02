@@ -4,13 +4,28 @@ from rest_framework.decorators import action
 from knox.models import AuthToken
 from django.db.models import Q
 
-from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer
-from .models import User
+from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer, RoleSerializer
+from .models import User, Role
+
+class RoleAPI(views.APIView):
+    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+
+    def post(self, request):
+        serializer = RoleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        roles = Role.objects.all()
+        serializer = RoleSerializer(roles, many=True)
+        return Response(serializer.data)
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = FullUserSerializer
     queryset = User.objects.all()
-    # permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
 
     def create(self, request, *args, **kwargs):
         # Menghilangkan metode 'create' diganti dengan register dosen/akademik dibawah.
