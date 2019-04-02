@@ -118,7 +118,7 @@ export default {
 		]),
 
 		logout() {
-			axios.post('/auth/logout', {}, {
+			axios.post('/auth/logout/', {}, {
 				headers: {
 					'Authorization': 'Token ' + this.$store.state.auth.token
 				}

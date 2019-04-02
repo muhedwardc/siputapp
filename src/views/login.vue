@@ -89,10 +89,10 @@ export default {
             const valid = this.validate()
             if (valid) {
                 this.isSubmitting = true
-                axios.post('/auth/login', {
+                axios.post('/auth/login/', {
                     email: this.email,
                     password: this.password
-                }, {})
+                })
                 .then(r => {
                     this.logUserIn(r.data)
                     this.$router.push('/')

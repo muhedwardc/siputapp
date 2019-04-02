@@ -73,7 +73,7 @@ export default {
         },
 
         getExams() {
-            axios.get('/me', {
+            axios.get('/me/exams/', {
                 headers: {
                     'Authorization': 'Token ' + this.$store.state.auth.token
                 }

@@ -97,7 +97,7 @@ export default {
                 let index = this.index
                 this.$emit('status-has-change', { status, index })
 
-                axios.post(`me/${this.item.id}/${status ? 'terima' : 'tolak'}/`, {}, {
+                axios.post(`me/exams/${this.item.id}/${status ? 'terima' : 'tolak'}/`, {}, {
                     headers: {
                         'Authorization': 'Token ' + this.$store.state.auth.token
                     }
