@@ -137,12 +137,21 @@ Endpoint untuk umum:
 1. **GET** /api/me/exams/
 1. **GET** /api/me/exams/\<id>\/
 1. **POST** /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
-1. **GET** /api/me/exams/\<id>\/comments/
-1. **POST** /api/me/exams/\<id>\/comments/
-1. **POST** /api/me/exams/\<id>\/essays/
+1. **GET** /api/me/exams/\<id>\/comments/ : list all comments from selected penguji
+1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
+1. **GET** /api/me/exams/\<id>\/essays/ : retrieve essays detail for selected exam
 1. **GET** /api/me/profile/ 
 1. **PUT** /api/me/profile/
 1. **GET** /api/me/exams/history/
+
+## API Data Structures
+#### Data Structure for Creating User (/api/exams/)
+```JSON
+{
+	"email": "ridi.ferdiana@mail.ugm.ac.id",
+	"password": "Passw0rd"
+}
+```
 
 #### Data Structure for Creating Exam (/api/exams/)
 ```JSON
@@ -196,4 +205,14 @@ Endpoint untuk umum:
 	]
 }
 ```
+
+#### Data Structure for Creating Comment
+```JSON
+{
+	"bab": "Bab 1",
+	"halaman": 78,
+	"komentar": "Penjelasan pada diagram proses bisnis kurang detail"
+}
+```
+
 
