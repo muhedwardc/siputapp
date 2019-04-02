@@ -123,29 +123,29 @@ This allows for an extremely simple setup without the need for a separate static
 
 ## API Endpoints
 Endpoint untuk umum:
-1. POST /api/auth/login/
-2. POST /api/auth/logout/
-3. POST /api/auth/change_password/
+1. **POST** /api/auth/login/
+1. **POST** /api/auth/logout/
+1. **POST** /api/auth/change_password/
 
-Endpoint untuk akademik:
-4. GET /api/users/ atau /api/users/dosen/ atau /api/users/akademik/
-5. POST /api/users/dosen/ atau /api/users/akademik/
-6. GET /api/exams/
-7. POST /api/exams/
-8. GET /api/exams/\<id>\/
+1. **GET** /api/users/ atau /api/users/dosen/ atau /api/users/akademik/ : list all users / list dosen users / list akademik users
+1. **POST** /api/users/dosen/ atau /api/users/akademik/ : create dosen users / create akademik users
+1. **GET** /api/exams/ : list all exams
+1. **GET** /api/exams/get_room_session/ : list room and session
+1. **POST** /api/exams/ : create exams
+1. **GET** /api/exams/\<id>\/ : retrive an exam
 
-Endpoint untuk dosen:
-9. GET /api/me/exams/
-10. GET /api/me/exams/\<id>\/
-11. POST /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
-12. GET /api/me/exams/\<id>\/comments/
-13. POST /api/me/exams/\<id>\/comments/
-14. POST /api/me/exams/\<id>\/essays/
-15. GET /api/me/profile/ 
-16. PUT /api/me/profile/
-17. GET /api/me/exams/history/
+1. **GET** /api/me/exams/
+1. **GET** /api/me/exams/\<id>\/
+1. **POST** /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
+1. **GET** /api/me/exams/\<id>\/comments/
+1. **POST** /api/me/exams/\<id>\/comments/
+1. **POST** /api/me/exams/\<id>\/essays/
+1. **GET** /api/me/profile/ 
+1. **PUT** /api/me/profile/
+1. **GET** /api/me/exams/history/
 
-```
+#### Data Structure for Creating Exam (/api/exams/)
+```JSON
 {
 	"tanggal": "2019-06-12",
 	"sesi": 2,
