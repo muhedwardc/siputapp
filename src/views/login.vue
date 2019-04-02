@@ -31,6 +31,7 @@
                                 :rules="passwordRules"
                                 label="Password"
                                 type="password"
+                                autocomplete="new-password"
                                 required
                                 :disabled="isSubmitting"
                                 ></v-text-field>
@@ -52,8 +53,8 @@ export default {
     data() {
         return {
             valid: true,
-            email: 'marcus.rudiantara@mail.ugm.ac.id',
-            password: 'Passw0rd',
+            email: '',
+            password: '',
             message: '',
             emailRules: [
                 v => !!v || 'E-mail is required',
@@ -79,13 +80,6 @@ export default {
         },
 
         login(r) {
-            if (r == 1) {
-                this.email = 'admin@admin.com',
-                this.password = '4dmin'
-            } else {
-                this.email = 'marcus.rudiantara@mail.ugm.ac.id',
-                this.password = 'Passw0rd'
-            }
             const valid = this.validate()
             if (valid) {
                 this.isSubmitting = true
