@@ -11,7 +11,7 @@ class FullUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'nama', 'email', 'nip',
-                  'foto')
+                  'foto', 'role')
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
