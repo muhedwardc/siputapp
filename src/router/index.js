@@ -9,6 +9,7 @@ import routes from './routes'
 Vue.use(Router)
 
 const router = new Router({
+  mode: 'history',
   routes: routes,
   scrollBehavior (to, from, savedPosition) {
     if (savedPosition) {
@@ -33,8 +34,8 @@ router.beforeEach((to, from, next) => {
   const authDosenRequired = dosenPages.includes(to.path)
   const authAkademikRequired = akademikPages.includes(to.path)
   const isLoggedIn = userData && userData.token
-  const isDosen = userData && userData.user.is_dosen
-  const isAkademik = userData && userData.user.is_akademik
+  const isDosen = userData && userData.user.role == 2
+  const isAkademik = userData && userData.user.role == 1
   // const isOnExam = store.state.onExam.id
 
   if (authRequired && !isLoggedIn) {
