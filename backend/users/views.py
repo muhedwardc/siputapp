@@ -86,9 +86,10 @@ class LoginAPI(views.APIView):
         serializer = LoginUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
+        instance, token = AuthToken.objects.create(user)
         return Response({
             "user": FullUserSerializer(user).data,
-            "token": AuthToken.objects.create(user)
+            "token": token
         })
 
 class ChangePasswordAPI(views.APIView):
