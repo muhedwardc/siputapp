@@ -136,14 +136,14 @@ export default {
         ]),
 
         fetchExams() {
-            axios.get('/me/', {
+            axios.get('/me/exams/', {
                 headers: {
                     'Authorization': 'Token ' + this.$store.state.auth.token
                 }
             })
             .then(r => this.exams.push.apply(this.exams, r.data))
             .then(() => {
-                axios.get('/me/history/', {
+                axios.get('/me/exams/history/', {
                     headers: {
                         'Authorization': 'Token ' + this.$store.state.auth.token
                     }

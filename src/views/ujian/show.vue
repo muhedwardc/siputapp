@@ -152,7 +152,7 @@ export default {
         ]),
 
         async getExam() {
-            const exam = await axios.get(`/me/${this.$router.currentRoute.params.id}/`, {
+            const exam = await axios.get(`/me/exams/${this.$router.currentRoute.params.id}/`, {
                 headers: {
                     'Authorization': 'Token ' + this.$store.state.auth.token
                 }

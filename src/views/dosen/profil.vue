@@ -5,7 +5,7 @@
 <script>
 export default {
     created() {
-        axios.get('/me/profil', {
+        axios.get('/me/profile/', {
             headers: {
                 'Authorization': 'Token ' + this.$store.state.auth.token
             }
