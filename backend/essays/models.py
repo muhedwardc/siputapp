@@ -44,26 +44,26 @@ class Subtitle(models.Model):
     def __str__(self):
         return self.nama
 
-class Comment(models.Model):
-    skripsi = models.ForeignKey(Essay, related_name='comments', on_delete=models.CASCADE)
-    dosen = models.ForeignKey(User, related_name='comments', on_delete=models.DO_NOTHING)
-    bab = models.CharField(max_length=30)
-    halaman = models.IntegerField()
-    komentar = models.TextField()
+# class Comment(models.Model):
+#     skripsi = models.ForeignKey(Essay, related_name='comments', on_delete=models.CASCADE)
+#     penguji = models.ForeignKey('exams.Penguji', related_name='comments', on_delete=models.DO_NOTHING)
+#     bab = models.CharField(max_length=30)
+#     halaman = models.IntegerField()
+#     komentar = models.TextField()
 
-    def __str__(self):
-        return self.skripsi.judul
+#     def __str__(self):
+#         return self.skripsi.judul
 
-class Grade(models.Model):
-    mahasiswa = models.ForeignKey(Student, related_name='grades', on_delete=models.CASCADE)
-    dosen = models.ForeignKey(User, related_name='grades', on_delete=models.DO_NOTHING)
-    so1 = models.IntegerField()
-    so2 = models.IntegerField()
-    so3 = models.IntegerField()
-    so4 = models.IntegerField()
-    so5 = models.IntegerField()
-    so6 = models.IntegerField()
+# class Grade(models.Model):
+#     mahasiswa = models.ForeignKey(Student, related_name='grades', on_delete=models.CASCADE)
+#     penguji = models.ForeignKey('exams.Penguji', related_name='grades', on_delete=models.DO_NOTHING)
+#     so1 = models.IntegerField()
+#     so2 = models.IntegerField()
+#     so3 = models.IntegerField()
+#     so4 = models.IntegerField()
+#     so5 = models.IntegerField()
+#     so6 = models.IntegerField()
 
-    def __str__(self):
-        return self.mahasiswa.nama
+#     def __str__(self):
+#         return self.mahasiswa.nama
 

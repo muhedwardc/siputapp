@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Essay, Student, Subtitle, Comment, Grade
+from .models import Essay, Student, Subtitle
 from backend.users.serializers import SimpleUserSerializer
 from backend.users.models import User
 
@@ -12,7 +12,7 @@ class StudentSerializer(serializers.ModelSerializer):
 class SimpleStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ('nama', 'nim')
+        fields = ('id', 'nama', 'nim')
 
 class SimpleEssaySerializer(serializers.ModelSerializer):
     mahasiswa = SimpleStudentSerializer(many=True, source='students')
@@ -53,38 +53,35 @@ class CreateEssaySerializer(serializers.ModelSerializer):
 
         return skripsi
 
-class CommentSerializer(serializers.ModelSerializer):
-    dosen = SimpleUserSerializer()
-    
-    class Meta:
-        model = Comment
-        fields = ('dosen', 'bab', 'halaman', 'komentar')
+# class CommentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Comment
+#         fields = ('bab', 'halaman', 'komentar')
 
-class CreateCommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = ('bab', 'halaman', 'komentar')
+# class CreateCommentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Comment
+#         fields = ('bab', 'halaman', 'komentar')
 
-    def save(self, skripsi, dosen):
-        new_comment = Comment.objects.create(
-            skripsi=skripsi,
-            dosen=dosen,
-            bab=self.validated_data['bab'],
-            halaman=self.validated_data['halaman'],
-            komentar=self.validated_data['komentar']
-        )
-        new_comment.save()
-        return new_comment
+#     def save(self, skripsi, penguji):
+#         new_comment = Comment.objects.create(
+#             skripsi=skripsi,
+#             penguji=penguji,
+#             bab=self.validated_data['bab'],
+#             halaman=self.validated_data['halaman'],
+#             komentar=self.validated_data['komentar']
+#         )
+#         new_comment.save()
+#         return new_comment
 
-class GradeSerializer(serializers.ModelSerializer):
-    dosen = SimpleUserSerializer()
-    mahasiswa = SimpleStudentSerializer()
+# class GradeSerializer(serializers.ModelSerializer):
+#     mahasiswa = SimpleStudentSerializer()
 
-    class Meta:
-        model = Grade
-        fields = ('dosen', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
+#     class Meta:
+#         model = Grade
+#         fields = ('penguji', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
 
-class CreateGradeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Grade
-        fields = ('mahasiswa', 'dosen', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
+# class CreateGradeSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Grade
+#         fields = ('mahasiswa', 'penguji', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
