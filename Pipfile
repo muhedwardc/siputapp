@@ -12,6 +12,7 @@ dj-database-url = "*"
 psycopg2-binary = "*"
 pillow = "*"
 django-rest-knox = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 
