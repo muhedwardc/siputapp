@@ -98,12 +98,8 @@ export default {
 	},
 
 	computed: {
-		role() {
-			return this.$store.state.auth.user.is_akademik ? 'akademik' : 'dosen'
-		},
-
 		routes() {
-			return this.role == 'akademik' ? this.akademikRoutes : this.dosenRoutes
+			return this.$store.state.auth.user.role  == 1 ? this.akademikRoutes : this.dosenRoutes
 		},
 
 		thispath() {
