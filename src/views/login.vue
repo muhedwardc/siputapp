@@ -23,6 +23,7 @@
                                 label="Email"
                                 required
                                 :disabled="isSubmitting"
+                                autocomplete="email"
                                 class="mb-2"
                                 ></v-text-field>
 
@@ -31,12 +32,12 @@
                                 :rules="passwordRules"
                                 label="Password"
                                 type="password"
+                                autocomplete="password"
                                 required
                                 :disabled="isSubmitting"
                                 ></v-text-field>
                             
-                            <v-btn class="mt-4 font-weight-light" round color="primary" @click="login(0)" :loading="isSubmitting" :disabled="isSubmitting">Login</v-btn>
-                            <v-btn class="mt-4 font-weight-light" round color="primary" @click="login(1)" :loading="isSubmitting" :disabled="isSubmitting">Login as Admin</v-btn>
+                            <v-btn class="mt-4 font-weight-light" round color="primary" @click="login()" :loading="isSubmitting" :disabled="isSubmitting">Login</v-btn>
                         </v-form>
                     </v-layout>
                 </v-layout>
@@ -52,8 +53,8 @@ export default {
     data() {
         return {
             valid: true,
-            email: 'marcus.rudiantara@mail.ugm.ac.id',
-            password: 'Passw0rd',
+            email: '',
+            password: '',
             message: '',
             emailRules: [
                 v => !!v || 'E-mail is required',
@@ -78,18 +79,11 @@ export default {
             return this.$refs.form.validate()
         },
 
-        login(r) {
-            if (r == 1) {
-                this.email = 'admin@admin.com',
-                this.password = '4dmin'
-            } else {
-                this.email = 'marcus.rudiantara@mail.ugm.ac.id',
-                this.password = 'Passw0rd'
-            }
+        login() {
             const valid = this.validate()
             if (valid) {
                 this.isSubmitting = true
-                axios.post('/auth/login', {
+                axios.post('/auth/login/', {
                     email: this.email,
                     password: this.password
                 }, {})
