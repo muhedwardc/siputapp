@@ -137,9 +137,12 @@ Endpoint untuk umum:
 1. **GET** /api/me/exams/
 1. **GET** /api/me/exams/\<id>\/
 1. **POST** /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
-1. **GET** /api/me/exams/\<id>\/comments/ : list all comments from selected penguji
-1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
 1. **GET** /api/me/exams/\<id>\/essays/ : retrieve essays detail for selected exam
+1. **GET** /api/me/exams/\<id>\/comments/ : list all comments
+1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
+1. **GET** /api/me/exams/\<id>\/students/ : List all students for selected exam
+1. **GET** /api/me/exams/\<id>\/grades/ : list all grades
+1. **POST** /api/me/exams/\<id>\/grades/ : create grades for students
 1. **GET** /api/me/profile/ 
 1. **PUT** /api/me/profile/
 1. **GET** /api/me/exams/history/
@@ -212,6 +215,41 @@ Endpoint untuk umum:
 	"bab": "Bab 1",
 	"halaman": 78,
 	"komentar": "Penjelasan pada diagram proses bisnis kurang detail"
+}
+```
+
+#### Data Structure for Creating Grades
+```JSON
+{
+	"grades": [
+		{
+			"mahasiswa": 3,
+			"so1": 87,
+			"so2": 90,
+			"so3": 83,
+			"so4": 95,
+			"so5": 90,
+			"so6": 90
+		},
+		{
+			"mahasiswa": 4,
+			"so1": 85,
+			"so2": 81,
+			"so3": 87,
+			"so4": 92,
+			"so5": 96,
+			"so6": 93
+		},
+		{
+			"mahasiswa": 5,
+			"so1": 87,
+			"so2": 83,
+			"so3": 84,
+			"so4": 90,
+			"so5": 91,
+			"so6": 89
+		}
+	]
 }
 ```
 
