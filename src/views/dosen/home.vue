@@ -80,7 +80,7 @@ export default {
             })
                 .then(r => {
                     this.exams = r.data
-                    this.filterUjian()
+                    this.exams.length > 0 ? this.filterUjian() : null
                     let message = this.todayExams.length > 0 ? 'Hari ini ada ' + this.todayExams.length + ' ujian' : 'Hari ini tidak ada ujian'
                     if (!Cookie.get('visit_home')) {
                         this.showSnackbar({
@@ -94,16 +94,13 @@ export default {
                     const errArr = err.message.split(' ')
                     if (errArr[errArr.length-1] == '401') {
                         this.removeCookies()
-                        this.showSnackbar({
-                            type: 'error',
-                            message: err.message
-                        })
                         this.$router.replace('/login')
+                    } else {
+                        this.showSnackbar({
+                            message: err.message,
+                            type: 'error'
+                        })
                     }
-                    this.showSnackbar({
-                        message: err.message,
-                        type: 'error'
-                    })
                 })
         }
     },

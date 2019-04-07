@@ -14,6 +14,11 @@ export default [
         component: () => import('@/views/akademik/home.vue')
     },
     {
+        path: '/daftar-pengguna',
+        name: 'Daftar Pengguna',
+        component: () => import('@/views/akademik/list/user.vue')
+    },
+    {
         path: '/tambah/ujian',
         name: 'Akademik Add Ujian',
         component: () => import('@/views/akademik/add/exam.vue')

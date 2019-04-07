@@ -76,7 +76,7 @@ export default {
 				{
 					title: 'Daftar Pengguna',
 					icon: 'list',
-					path: '/users'
+					path: '/daftar-pengguna'
 				},
 				{
 					title: 'Daftar Skripsi',

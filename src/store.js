@@ -34,6 +34,7 @@ export default new Vuex.Store({
 		sidebar: true,
 		dashboard: false,
 		dialog: false,
+		drawer: true,
 	},
 	mutations: {
 		logUserIn(state, payload) {
