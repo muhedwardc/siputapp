@@ -1,0 +1,222 @@
+<template>
+    <div>
+        <v-layout row flat color="white">
+            <v-toolbar-title>Daftar Pengguna</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-dialog v-model="dialog" max-width="500px">
+                <template v-slot:activator="{ on }">
+                    <v-btn color="primary" dark class="mb-2" v-on="on">Tambah pengguna</v-btn>
+                </template>
+                <v-card>
+                    <v-card-title>
+                    <span class="headline">{{ formTitle }}</span>
+                    </v-card-title>
+
+                    <v-card-text>
+                    <v-container grid-list-md>
+                        <v-form ref="form" v-model="valid" lazy-validation>
+                        <v-layout wrap>
+                        <v-flex xs12 sm6 md4>
+                            <v-text-field v-model="editedItem.name" label="Nama"></v-text-field>
+                        </v-flex>
+                        <v-flex xs12 sm6 md4>
+                            <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
+                        </v-flex>
+                        <v-flex xs12 sm6 md4>
+                            <v-select
+                                v-model="editedItem.role"
+                                :items="roles"
+                                :rules="[v => !!v || 'Item is required']"
+                                label="Status"
+                                required
+                                ></v-select>
+                        </v-flex>
+                        <v-flex xs12 sm6 md4>
+                            <v-text-field v-model="editedItem.password" label="Password"></v-text-field>
+                        </v-flex>
+                        <v-flex xs12 sm6 md4>
+                            <v-text-field v-model="editedItem.confirmPassword" :error-messages="matchPassword()" label="Konfirmasi Password"></v-text-field>
+                        </v-flex>
+                        </v-layout>
+                        </v-form>
+                    </v-container>
+                    </v-card-text>
+
+                    <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
+                    <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+        </v-layout>
+        <v-data-table
+            :headers="headers"
+            :items="users"
+            class="elevation-1"
+        >
+            <template v-slot:items="props">
+            <td class="text-xs-left">{{ props.item.nama }}</td>
+            <td class="text-xs-left">{{ props.item.email }}</td>
+            <td class="text-xs-left">{{ props.item.role == 1 ? 'Akademik' : 'Dosen' }}</td>
+            <td class="text-xs-left">{{ props.item.nip }}</td>
+            <td class="justify-center layout px-0">
+                <v-icon
+                small
+                class="mr-2"
+                @click="editItem(props.item)"
+                >
+                edit
+                </v-icon>
+                <v-icon
+                small
+                @click="deleteItem(props.item)"
+                >
+                delete
+                </v-icon>
+            </td>
+            </template>
+            <template v-slot:no-data>
+            <v-btn color="primary" @click="initialize">Reset</v-btn>
+            </template>
+        </v-data-table>
+    </div>
+</template>
+
+<script>
+import { mapActions } from 'vuex'
+export default {
+    data() {
+        return {
+            valid: true,
+            dialog: false,
+            headers: [
+                { text: 'Nama', align: 'left', sortable: true, value: 'nama' },
+                { text: 'Email', value: 'email', sortable: true },
+                { text: 'Status', value: 'status', sortable: true },
+                { text: 'NIP', value: 'nip', sortable: false },
+                { text: 'Actions', value: 'nama', sortable: false },
+            ],
+            roles: ['Dosen', 'Akademik'],
+            users: [],
+            editedIndex: -1,
+            editedItem: {
+                name: '',
+                email: '',
+                role: '',
+                nip: '',
+                password: '',
+                confirmPassword: ''
+            },
+            defaultItem: {
+                name: '',
+                email: '',
+                role: '',
+                nip: '',
+                password: '',
+                confirmPassword: ''
+            }
+        }
+    },
+
+    computed: {
+        formTitle () {
+            return this.editedIndex === -1 ? 'New User' : 'Edit User'
+        }
+    },
+
+    watch: {
+        dialog (val) {
+            val || this.close()
+        }
+    },
+
+    created () {
+        this.initialize()
+    },
+
+    methods: {
+        ...mapActions([
+			'showSnackbar'
+        ]),
+        
+        initialize () {
+            axios.get('/users/', {
+                headers: {
+                    'Authorization': 'Token ' + this.$store.state.auth.token
+                }
+            })
+            .then(r => {
+                this.users = r.data
+                console.log(this.users)
+            })
+            .catch(err => {
+                this.showSnackbar({
+                    message: err.message,
+                    type: 'error'
+                })
+            })
+        },
+
+        matchPassword () {
+            return (this.editedItem.password == this.editedItem.confirmPassword) ? '' : 'Password doesn\'t match'
+        },
+
+        editItem (item) {
+            this.editedIndex = this.desserts.indexOf(item)
+            this.editedItem = Object.assign({}, item)
+            this.dialog = true
+        },
+
+        deleteItem (item) {
+            const index = this.desserts.indexOf(item)
+            confirm('Apakah anda yakin untuk menghapus pengguna ini?') && this.desserts.splice(index, 1)
+        },
+
+        close () {
+            this.dialog = false
+            setTimeout(() => {
+            this.editedItem = Object.assign({}, this.defaultItem)
+            this.editedIndex = -1
+            }, 300)
+        },
+
+        save () {
+            const valid = this.$refs.form.validate()
+            if (valid) {
+                const { name, email, role, password } = this.editedItem
+                axios.post(`/users/${role.toLowerCase()}/`, {
+                    nama: name,
+                    email,
+                    password
+                }, {
+                    headers: {
+                        'Authorization': 'Token ' + this.$store.state.auth.token
+                    }
+                })
+                .then(r => {
+                    this.users.push(r.data.users)
+                    this.showSnackbar({
+                        message: r.data.message,
+                        type: 'success'
+                    })
+                    this.close()
+                })
+                .catch(err => {
+                    this.showSnackbar({
+                        message: err.message,
+                        type: 'error'
+                    })
+                    this.close()
+                })
+            }
+            // if (this.editedIndex > -1) {
+            //     Object.assign(this.desserts[this.editedIndex], this.editedItem)
+            // } else {
+            //     this.desserts.push(this.editedItem)
+            // }
+        }
+    }
+}
+</script>
+
