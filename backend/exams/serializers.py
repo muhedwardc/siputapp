@@ -25,37 +25,56 @@ class ListSessionSerializer(serializers.ModelSerializer):
         model = Session
         fields = ('id', 'nama', 'start_time', 'end_time')
 
-class PengujiSerializer(serializers.ModelSerializer):
+class SimplePengujiSerializer(serializers.ModelSerializer):
     dosen = SimpleUserSerializer()
 
     class Meta:
         model = Penguji
         fields = ('dosen',)
 
+class PengujiSerializer(serializers.ModelSerializer):
+    dosen = SimpleUserSerializer()
+    
+    class Meta:
+        model = Penguji
+        fields = ('id', 'dosen', 'is_attending')
+
 class CreatePengujiSerializer(serializers.ModelSerializer):
     class Meta:
         model = Penguji
-        fields = ('dosen', 'is_leader')
+        fields = ('dosen',)
+
+class ChangePengujiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Penguji
+        fields = ('dosen',)
+
+    def update(self, instance, validated_data):
+        instance.dosen = validated_data.get('dosen', instance.dosen)
+        instance.is_attending = None
+        instance.save()
+        return instance
 
 class SimpleUjianSerializer(serializers.ModelSerializer):
     sesi = SessionSerializer()
     ruang = RoomSerializer()
     skripsi = SimpleEssaySerializer()
-    penguji = PengujiSerializer(many=True)
+    penguji = SimplePengujiSerializer(many=True)
 
     class Meta:
         model = Exam
         fields = ('id', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
 
-class UjianSerializer(serializers.ModelSerializer):
+class UjianOnlySerializer(serializers.ModelSerializer):
     sesi = SessionSerializer()
     ruang = RoomSerializer()
-    skripsi = EssaySerializer()
-    penguji = PengujiSerializer(many=True)
+    skripsi = SimpleEssaySerializer()
 
     class Meta:
         model = Exam
-        fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('tanggal', 'sesi', 'ruang', 'skripsi')
+
+
 
 class CreateUjianSerializer(serializers.ModelSerializer):
     skripsi = CreateEssaySerializer()
@@ -98,3 +117,22 @@ class CreateUjianSerializer(serializers.ModelSerializer):
             )
         
         return new_ujian
+
+class FullPengujiSerializer(serializers.ModelSerializer):
+    ujian = UjianOnlySerializer()
+    dosen = SimpleUserSerializer()
+
+    class Meta:
+        model = Penguji
+        fields = ('ujian', 'dosen', 'is_leader', 'is_attending')
+
+class UjianSerializer(serializers.ModelSerializer):
+    sesi = SessionSerializer()
+    ruang = RoomSerializer()
+    skripsi = EssaySerializer()
+    penguji = PengujiSerializer(many=True)
+
+    class Meta:
+        model = Exam
+        fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+

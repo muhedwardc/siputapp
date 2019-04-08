@@ -1,9 +1,10 @@
 import datetime
 from django.shortcuts import render
-from rest_framework import viewsets, views, permissions
+from rest_framework import viewsets, views, permissions, status, mixins
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
-from .serializers import UjianSerializer, CreateUjianSerializer, SimpleUjianSerializer, ListRoomSerializer, ListSessionSerializer
+from .serializers import UjianSerializer, CreateUjianSerializer, SimpleUjianSerializer, ListRoomSerializer, ListSessionSerializer, PengujiSerializer, FullPengujiSerializer, ChangePengujiSerializer
 from .models import Exam, Penguji, Room, Session
 
 class ExamViewSet(viewsets.ModelViewSet):
@@ -29,11 +30,34 @@ class ExamViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(exams, many=True)
         return Response(serializer.data)
 
+    @action(detail=True)
+    def penguji(self, request):
+        exam = self.get_object()
+        list_penguji = exam.penguji.all()
+        serializer = PengujiSerializer(list_penguji, many=True)
+        return Response(serializer.data)
 
-# class ListExamByDate(views.APIView):
-#     def get(self, request, date, month, year, format=None):
-#         list_ujian = Exam.objects.all().filter(tanggal=datetime.date(year, month, date))
-#         return Response(SimpleUjianSerializer(list_ujian, many=True).data)
+class PengujiViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.UpdateModelMixin):
+    queryset = Penguji.objects.all()
+    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.action == 'retrieve':
+            return FullPengujiSerializer
+        elif self.action == 'update':
+            return ChangePengujiSerializer
+        else:
+            return PengujiSerializer
+
+    def update(self, request, *args, **kwargs):
+        penguji = self.get_object()
+        serializer = self.get_serializer(penguji, data=request.data)
+        if serializer.is_valid():
+            new_penguji = serializer.save()
+            return Response(FullPengujiSerializer(new_penguji).data)
+
+        return Response(serializer.errors)
+
 
 class RoomSessionAPI(views.APIView):
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
