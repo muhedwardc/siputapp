@@ -8,44 +8,44 @@
                     <v-btn color="primary" dark class="mb-2" v-on="on">Tambah pengguna</v-btn>
                 </template>
                 <v-card>
-                    <v-card-title>
-                    <span class="headline">{{ formTitle }}</span>
+                    <v-card-title class="mb-0 pb-0 pl-4">
+                        <span class="headline">{{ formTitle }}</span>
                     </v-card-title>
 
-                    <v-card-text>
-                    <v-container grid-list-md>
-                        <v-form ref="form" v-model="valid" lazy-validation>
-                        <v-layout wrap>
-                        <v-flex xs12 sm6 md4>
-                            <v-text-field v-model="editedItem.name" label="Nama"></v-text-field>
-                        </v-flex>
-                        <v-flex xs12 sm6 md4>
-                            <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
-                        </v-flex>
-                        <v-flex xs12 sm6 md4>
-                            <v-select
-                                v-model="editedItem.role"
-                                :items="roles"
-                                :rules="[v => !!v || 'Item is required']"
-                                label="Status"
-                                required
-                                ></v-select>
-                        </v-flex>
-                        <v-flex xs12 sm6 md4>
-                            <v-text-field v-model="editedItem.password" label="Password"></v-text-field>
-                        </v-flex>
-                        <v-flex xs12 sm6 md4>
-                            <v-text-field v-model="editedItem.confirmPassword" :error-messages="matchPassword()" label="Konfirmasi Password"></v-text-field>
-                        </v-flex>
-                        </v-layout>
-                        </v-form>
-                    </v-container>
+                    <v-card-text class="pt-2 pb-0">
+                        <v-container>
+                            <v-form ref="form" v-model="valid" lazy-validation>
+                            <v-layout wrap>
+                            <v-flex xs12>
+                                <v-text-field v-model="editedItem.name" label="Nama"></v-text-field>
+                            </v-flex>
+                            <v-flex xs12>
+                                <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
+                            </v-flex>
+                            <v-flex xs12>
+                                <v-select
+                                    v-model="editedItem.role"
+                                    :items="roles"
+                                    :rules="[v => !!v || 'Item is required']"
+                                    label="Status"
+                                    required
+                                    ></v-select>
+                            </v-flex>
+                            <v-flex xs12>
+                                <v-text-field v-model="editedItem.password" label="Password" type="password"></v-text-field>
+                            </v-flex>
+                            <v-flex xs12>
+                                <v-text-field v-model="editedItem.confirmPassword" :error-messages="matchPassword()" label="Konfirmasi Password" type="password"></v-text-field>
+                            </v-flex>
+                            </v-layout>
+                            </v-form>
+                        </v-container>
                     </v-card-text>
 
-                    <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
-                    <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+                    <v-card-actions class="pa-4">
+                        <v-spacer></v-spacer>
+                        <v-btn color="error" @click="close">Simpan</v-btn>
+                        <v-btn color="success" @click="save">Batal</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -121,7 +121,7 @@ export default {
 
     computed: {
         formTitle () {
-            return this.editedIndex === -1 ? 'New User' : 'Edit User'
+            return this.editedIndex === -1 ? 'Tambah Pengguna' : 'Ubah Pengguna'
         }
     },
 
