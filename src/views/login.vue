@@ -15,6 +15,7 @@
                             ref="form"
                             class="login-form"
                             v-model="valid"
+                            @keyup.native.enter="login"
                             lazy-validation>
 
                             <v-text-field
