@@ -133,6 +133,9 @@ Endpoint untuk umum:
 1. **GET** /api/exams/get_room_session/ : list room and session
 1. **POST** /api/exams/ : create exams
 1. **GET** /api/exams/\<id>\/ : retrive an exam
+1. **GET** /api/exams/penguji/\<id>\/ : retrieve single penguji
+1. **PUT** /api/exams/penguji/\<id>\/ : Mengubah penguji terpilih --> akan mengubah status *is_attending* menjadi *null* kembali
+
 
 1. **GET** /api/me/exams/
 1. **GET** /api/me/exams/\<id>\/
@@ -206,6 +209,13 @@ Endpoint untuk umum:
 			"dosen": 5
 		}
 	]
+}
+```
+
+### Data Structure for Changing Penguji
+```JSON
+{
+	"dosen" : <id> "id dosen yang ingin dijadikan penguji"
 }
 ```
 
