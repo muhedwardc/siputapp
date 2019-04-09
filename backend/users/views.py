@@ -50,31 +50,23 @@ class UserViewSet(viewsets.ModelViewSet):
     @dosen.mapping.post
     def register_dosen(self, request, *args, **kwargs):
         serializer = RegisterUserSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            new_dosen = User.objects.create_user(
-                email=serializer.validated_data['email'],
-                role=2,
-                password=serializer.validated_data['password']
-            )
-            new_dosen.save()  # bisa dihapus karena dalam metode 'create_user' sudah di save
+        if serializer.is_valid():
+            new_dosen = serializer.save(role=2)
             return Response({
-                "message": "Pengguna berhasil didaftarkan.",
-                "users": self.get_serializer(new_dosen).data
+                "msg": "Dosen baru berhasil ditambahkan.",
+                "user": self.get_serializer(new_dosen).data
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     @akademik.mapping.post
     def register_akademik(self, request, *args, **kwargs):
         serializer = RegisterUserSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            new_akademik = User.objects.create_superuser(
-                email=serializer.validated_data['email'],
-                password=serializer.validated_data['password']
-            )
-            new_akademik.save()  # bisa dihapus karena dalam metode 'create_superuser' sudah di save
+        if serializer.is_valid():
+            new_akademik = serializer.save(role=1)
             return Response({
-                "message": "Pengguna berhasil didaftarkan.",
-                "users": self.get_serializer(new_akademik).data
+                "msg": "Akademik baru berhasil ditambahkan.",
+                "user": self.get_serializer(new_akademik).data
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
