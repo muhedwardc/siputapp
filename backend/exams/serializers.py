@@ -59,7 +59,7 @@ class SimpleUjianSerializer(serializers.ModelSerializer):
     sesi = SessionSerializer()
     ruang = RoomSerializer()
     skripsi = SimpleEssaySerializer()
-    penguji = SimplePengujiSerializer(many=True)
+    penguji = SimplePengujiSerializer(required=False, many=True)
 
     class Meta:
         model = Exam
@@ -91,7 +91,7 @@ class CreateUjianSerializer(serializers.ModelSerializer):
         new_skripsi = Essay.objects.create(
             judul=skripsi_data['judul'],
             intisari=skripsi_data['intisari'],
-            # naskah=skripsi_data['naskah'],
+            naskah=skripsi_data['naskah'],
             pembimbing1=skripsi_data['pembimbing1'],
             pembimbing2=skripsi_data['pembimbing2'],
             is_capstone=skripsi_data['is_capstone']

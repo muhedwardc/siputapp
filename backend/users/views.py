@@ -82,7 +82,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class LoginAPI(views.APIView):
     permission_classes = (permissions.AllowAny, )
 
-    def post(self, request):
+    def post(self, request, format=None):
         serializer = LoginUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data

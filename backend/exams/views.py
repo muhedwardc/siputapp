@@ -3,6 +3,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, views, permissions, status, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 
 from .serializers import UjianSerializer, CreateUjianSerializer, SimpleUjianSerializer, ListRoomSerializer, ListSessionSerializer, PengujiSerializer, FullPengujiSerializer, ChangePengujiSerializer
 from .models import Exam, Penguji, Room, Session
@@ -10,6 +11,7 @@ from .models import Exam, Penguji, Room, Session
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
 
     def get_serializer_class(self, *args, **kwargs):
         if self.action == 'create':
