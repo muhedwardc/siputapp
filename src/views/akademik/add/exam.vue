@@ -9,16 +9,16 @@
                     <v-form
                         ref="form"
                         v-model="valid">
-                        <v-radio-group v-model="tipe">
+                        <v-radio-group v-model="is_capstone">
                             <template v-slot:label>
                                 <div>Tipe Ujian</div>
                             </template>
-                            <v-radio value="0" color="primary">
+                            <v-radio :value="false" color="primary">
                                 <template v-slot:label>
                                 <div>Individu</div>
                                 </template>
                             </v-radio>
-                            <v-radio value="1" color="primary">
+                            <v-radio :value="true" color="primary">
                                 <template v-slot:label>
                                 <div>Capstone</div>
                                 </template>
@@ -26,18 +26,17 @@
                         </v-radio-group>
 
                         <v-text-field
-                            v-model="judul"
+                            v-model="exam.skripsi.judul"
                             label="Judul Ujian"
                             prepend-icon="bookmark"
                             required
-                            :rules="rules.judul"
                             ></v-text-field>
 
                         <v-container grid-list-xl pa-0>
                             <v-layout row wrap>
                                 <v-flex xs12 sm4>
                                     <v-text-field
-                                        v-model="ruang"
+                                        v-model="exam.ruang"
                                         label="Ruangan"
                                         prepend-icon="room"
                                         required
@@ -55,7 +54,7 @@
                                         min-width="290px">
                                         <template v-slot:activator="{ on }">
                                         <v-text-field
-                                            v-model="tanggal"
+                                            v-model="exam.tanggal"
                                             label="tanggal"
                                             readonly
                                             prepend-icon="event"
@@ -77,7 +76,7 @@
                                         min-width="290px">
                                         <template v-slot:activator="{ on }">
                                         <v-text-field
-                                            v-model="jam"
+                                            v-model="exam.sesi"
                                             label="jam"
                                             prepend-icon="schedule"
                                             readonly
@@ -90,7 +89,7 @@
                             </v-layout>
                         </v-container>
                         <v-textarea
-                            :value="intisari"
+                            :value="exam.skripsi.intisari"
                             label="Intisari"
                             prepend-icon="subject"
                             required
@@ -101,7 +100,7 @@
                     <v-layout column>
                         <v-form refs="formMahasiswa">
                             <v-form ref="mhsInfo" v-model="mhsValid" lazy-validation>
-                                <div v-for="(mahasiswa, index) in (tipe == '0' ? mahasiswa : mahasiswaCapstone)" :key="index" class="mb-4">
+                                <div v-for="(mahasiswa, index) in exam.skripsi.mahasiswa" :key="index" class="mb-4">
                                     <v-layout row wrap align-center>
                                         <h3>Mahasiswa {{ index + 1 }}</h3>
                                         <v-btn color="error" v-if="index > 1" @click="deleteMahasiswa(index)">Hapus mahasiswa</v-btn>                                            
@@ -111,7 +110,6 @@
                                         :label="'Nama Mahasiswa ' + (index + 1)" 
                                         prepend-icon="person"
                                         required
-                                        :rules="rules.required"
                                     ></v-text-field>
                                     <v-container grid-list-xl class="pa-0">
                                         <v-layout row wrap>
@@ -121,7 +119,6 @@
                                                     label="NIM"
                                                     required
                                                     prepend-icon="picture_in_picture"
-                                                    :rules="rules.required"
                                                 ></v-text-field>
                                             </v-flex>
                                             <v-flex xs12 sm3>
@@ -130,7 +127,6 @@
                                                     label="IPK"
                                                     prepend-icon="grade"
                                                     required
-                                                    :rules="rules.required"
                                                     ></v-text-field>
                                             </v-flex>
                                             <v-flex xs12 sm3>
@@ -139,7 +135,6 @@
                                                     label="Tempat Lahir"
                                                     required
                                                     prepend-icon="home"
-                                                    :rules="rules.required"
                                                 ></v-text-field>
                                             </v-flex>
                                             <v-flex xs12 sm3>
@@ -159,7 +154,6 @@
                                                             readonly
                                                             prepend-icon="event"
                                                             v-on="on"
-                                                            :rules="rules.required"
                                                         ></v-text-field>
                                                     </template>
                                                     <v-date-picker v-model="mahasiswa['tanggal_lahir']" @input="mahasiswa['tanggal_dialog'] = false"></v-date-picker>
@@ -171,12 +165,20 @@
                             </v-form>
                         </v-form>
                     </v-layout>
-                    <v-btn color="primary" v-if="tipe == '1' && mahasiswaCapstone.length <= 4" @click="addMahasiswa()">Tambah mahasiswa</v-btn>
+                    <v-btn color="primary" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa <= 4" @click="addMahasiswa()">Tambah mahasiswa</v-btn>
                 </tab-content>
                 <tab-content title="Dosen Penguji" icon="fas fa-chalkboard-teacher">
+                    <v-text-field
+                        v-model="search"
+                        append-icon="search"
+                        label="Search"
+                        single-line
+                        hide-details
+                    ></v-text-field>
                     <v-data-table
                         :headers="dosenHeaders"
-                        :items="dosen">
+                        :items="dosen"
+                        :search="search">
                         <template v-slot:items="props">
                             <td>{{ props.item.nama || props.item.email }}</td>
                             <td>
@@ -197,7 +199,7 @@
                                     </template>
                                     <v-list>
                                         <v-list-tile
-                                            v-for="(type, i) in (tipe == '0' ? dosenTypes.slice(0, 4) : dosenTypes)"
+                                            v-for="(type, i) in (exam.skripsi.is_capstone ? dosenTypes : dosenTypes.slice(0, 4))"
                                             :key="i"
                                             @click="setType(i, props.item.id)"
                                             >
@@ -222,12 +224,38 @@ import 'vue-form-wizard/dist/vue-form-wizard.min.css'
 export default {
     data() {
         return {
+            exam: {
+                tanggal: '',
+                sesi: null,
+                ruang: null,
+                skripsi: {
+                    judul: '',
+                    intisari: '',
+                    pembimbing1: null,
+                    pembimbing2: null,
+                    is_capstone: false,
+                    mahasiswa: [
+                        {
+                            nama: "Muhammad Edward Chakin",
+                            nim: "15/385407/TK/44069",
+                            prodi: "Teknologi Informasi",
+                            konsentrasi: "Rekayasa Perangkat Lunak",
+                            tempat_lahir: "Solo",
+                            tanggal_lahir: "1997-05-21",
+                            telepon: "08234785324"
+                        }
+                    ],
+                    berkas: null
+                },
+                penguji: []
+            },
+            is_capstone: false,
+            search: '',
             dosen: [],
             dosenHeaders: [
                 { text: 'Nama', align: 'left', value: 'nama' },
                 { text: 'Aksi', align: 'left', sortable: false, value: 'selectedType' }
             ],
-            dosenSelected: [],
             dosenTypes: [
                 'Pembimbing 1 (Ketua)',
                 'Pembimbing 2',
@@ -254,49 +282,25 @@ export default {
                 'Item 3',
                 'Item 4'
             ],
-            checkbox: false,
-            rules: {
-                judul: [
-                    v => !!v || 'Judul ujian tidak boleh kosong'
-                ],
-                tipe: [
-                    v => !!v || 'Pilih salah satu tipe ujian'
-                ],
-                intisari: [
-                    v => !!v || 'Intisari ujian tidak boleh kosong'
-                ],
-                required: [
-                    v => !!v || 'Harap diisi terlebih dahulu'
-                ]
-            },
-            mahasiswa: [
-                {
-                    nama: '',
-                    nim: '',
-                    ipk: '',
-                    tempat_lahir: '',
-                    tanggal_lahir: '',
-                    tanggal_dialog: false
-                }
-            ],
-            mahasiswaCapstone: [
-                {
-                    nama: '',
-                    nim: '',
-                    ipk: '',
-                    tempat_lahir: '',
-                    tanggal_lahir: '',
-                    tanggal_dialog: false
-                },
-                {
-                    nama: '',
-                    nim: '',
-                    ipk: '',
-                    tempat_lahir: '',
-                    tanggal_lahir: '',
-                    tanggal_dialog: false
-                }
-            ]
+            checkbox: false
+        }
+    },
+
+    watch: {
+        is_capstone(val) {
+            console.log(val)
+            let mhs = {
+                nama: "",
+                nim: "",
+                prodi: "",
+                konsentrasi: "",
+                tempat_lahir: "",
+                tanggal_lahir: "",
+                telepon: ""
+            }
+            if (val) this.exam.skripsi.mahasiswa = [mhs, mhs]
+            else this.exam.skripsi.mahasiswa = [mhs]
+            this.exam.skripsi.is_capstone = val
         }
     },
 
@@ -319,27 +323,30 @@ export default {
             'showSnackbar'
         ]),
         setType(i, dosenId){
-            if (this.dosenSelected.includes(dosenId)) {
-                this.dosenSelected[this.dosenSelected.findIndex(e => e == dosenId)] = null
-                const index = this.dosen.findIndex(dosen => this.dosenSelected[i] == dosen.id)
+            if (this.exam.penguji.includes(dosenId)) {
+                this.exam.penguji[this.exam.penguji.findIndex(e => e == dosenId)] = null
+                const index = this.dosen.findIndex(dosen => this.exam.penguji[i] == dosen.id)
                 delete this.dosen[index].selectedType
             }
-            if (this.dosenSelected[i]) {
-                const index = this.dosen.findIndex(dosen => this.dosenSelected[i] == dosen.id)
+            if (this.exam.penguji[i]) {
+                const index = this.dosen.findIndex(dosen => this.exam.penguji[i] == dosen.id)
                 delete this.dosen[index].selectedType
             }
             const index = this.dosen.findIndex(dosen => dosen.id == dosenId)
             const { email, nama } = this.dosen[index]
-            this.dosenSelected[i] = dosenId
+            this.exam.penguji[i] = dosenId
             this.dosen[index].selectedType = this.dosenTypes[i]
             this.dosen[index].email = 'updating'
             this.dosen[index].nama = 'updating'
             this.dosen[index].email = email
             this.dosen[index].nama = nama
-            console.log(this.dosenSelected)
+            console.log(this.exam.penguji)
+        },
+        resetSelected() {
+
         },
         isSelected(i) {
-            return !!this.dosenSelected[i]
+            return !!this.exam.penguji[i]
         },
         onComplete: function(){
             alert('Selesai');

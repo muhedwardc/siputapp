@@ -31,6 +31,7 @@
 
 
 <script>
+import { mapActions } from 'vuex'
 import moment from 'moment'
 export default {
     data() {
@@ -67,11 +68,16 @@ export default {
                     exams: []
                 }
             ],
+            exams: [],
             activeTab: 0,
         }
     },
 
     methods: {
+        ...mapActions([
+            'showSnackbar'
+        ]),
+
         assignDates() {
             const startOfWeek = moment().startOf('isoWeek').toDate();
             this.days.map((day, i) => {
@@ -84,6 +90,26 @@ export default {
         getReadableFormat(date) {
             moment.locale('id')
             return moment(date, 'DD/MM/YYYY').format('LL')
+        },
+
+        classifyExamsByDate(exams){
+            console.log(exams)
+        },
+
+        fetchUjian() {
+            const startOfWeek = moment().startOf('isoWeek').toDate()
+            const startDate = moment(startOfWeek).format('YYYY-MM-DD')
+            const endDate = moment(startOfWeek).add('week', 1).format('YYYY-MM-DD')
+            axios.get(`/exams/?start_date=${startDate}&end_date=${endDate}`, { headers: { 'Authorization': 'Token ' + this.$store.state.auth.token }})
+                .then(r => {
+                    this.classifyExamsByDate(r.data)
+                })
+                .catch(err => {
+                    this.showSnackbar({
+                        message: err.message,
+                        type: 'error'
+                    })
+                })
         }
     },
 
@@ -95,6 +121,7 @@ export default {
     },
 
     created() {
+        this.fetchUjian()
         this.assignDates()
     }
 }
