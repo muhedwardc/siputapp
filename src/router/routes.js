@@ -47,5 +47,10 @@ export default [
         path: '/ujian/:id/mulai',
         name: 'Ujian Mulai',
         component: () => import('@/views/ujian/start.vue')
+    },
+    {
+        path: '/playground',
+        name: 'Playground',
+        component: () => import('@/views/playground/index.vue')
     }
 ]
