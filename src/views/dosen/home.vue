@@ -1,28 +1,18 @@
 <template>
     <div class="dosen-home">
         <v-container grid-list-md class="no-padding">
-            <h3 class="mb-1">
-                UJIAN SELANJUTNYA
-                <v-chip v-if="newAssignedExams" color="primary font-weight-regular" style="height: 24px; padding-top: 4px; padding-bottom: 4px; margin-top: 1.5px;" text-color="white">
-                    + {{ newAssignedExams }} ujian diterima
-                </v-chip>
-            </h3>
-            <span v-if="nextExams.length === 0">Tidak ada jadwal ujian yang telah diterima</span>
+            <h3 class="mb-1">UJIAN HARI INI</h3>
+            <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
             <v-layout row wrap v-else>
                 <v-flex xs12 sm4 md4 v-for="e in nextExams.slice(0, 3)" :key="e.id">
                     <app-exam-card :item="e" />
                 </v-flex>
             </v-layout>
-            <h3 class="mt-3 mb-1">UJIAN BARU</h3>
-            <span v-if="newExams.length === 0">Tidak ada ujian yang belum direspon</span>
+            <h3 class="mt-3 mb-1">UJIAN LAIN</h3>
+            <span v-if="nextExams.length === 0">Tidak ada ujian yang belum direspon</span>
             <v-layout row wrap v-else>
-                <v-flex xs12 sm4 md4 v-for="(e, i) in newExams" :key="e.id">
-                    <app-exam-card
-                        :item="e"
-                        :index="i"
-                        :action="true"
-                        @status-has-change="changeList($event)"
-                        class="mb-3" />
+                <v-flex xs12 sm4 md4 v-for="e in nextExams" :key="e.id">
+                    <app-exam-card :item="e" class="mb-3" />
                 </v-flex>
             </v-layout>
         </v-container>
@@ -40,7 +30,6 @@ export default {
             exams: [],
             todayExams: [],
             nextExams: [],
-            newExams: [],
             newAssignedExams: 0
         }
     },
@@ -51,24 +40,11 @@ export default {
             'removeCookies'
         ]),
 
-        changeList(payload) {            
-            let newExams = this.newExams[payload.index]
-            if (payload.status) {
-                this.newAssignedExams += 1
-                newExams.is_attending = true
-                this.nextExams.push(this.newExams[payload.index])
-            }
-
-            this.newExams.splice(payload.index, 1)
-        },
-
         filterUjian() {
             moment.locale('id')
             this.exams.map(e => {
-                if (e.is_attending && !e.ujian.is_finish) this.nextExams.push(e)
-                else if (e.is_attending == null && !e.ujian.is_finish) this.newExams.push(e)
-
-                if (e.ujian.tanggal == moment().format('L')) this.todayExams.push(e)
+                if (e.ujian.tanggal == moment().format('L')) return this.todayExams.push(e)
+                this.nextExams.push(e)
             })
         },
 
@@ -80,6 +56,7 @@ export default {
             })
                 .then(r => {
                     this.exams = r.data
+                    console.log(this.exams)
                     this.exams.length > 0 ? this.filterUjian() : null
                     let message = this.todayExams.length > 0 ? 'Hari ini ada ' + this.todayExams.length + ' ujian' : 'Hari ini tidak ada ujian'
                     if (!Cookie.get('visit_home')) {
