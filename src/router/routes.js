@@ -46,7 +46,14 @@ export default [
     {
         path: '/ujian/:id/mulai',
         name: 'Ujian Mulai',
+        meta: { exam: true },
         component: () => import('@/views/ujian/start.vue')
+    },
+    {
+        path: '/ujian/:id/tunggu',
+        name: 'Ruang Ujian',
+        meta: { exam: true },
+        component: () => import('@/views/ujian/waiting.vue')
     },
     {
         path: '/playground',
