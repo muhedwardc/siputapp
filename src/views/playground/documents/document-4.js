@@ -107,7 +107,7 @@ export default function (data) {
                                         { text: 'Nilai', fillColor: '#CCCCCC', alignment: 'center' },
                                     ],
                                     [ 
-                                        { text: '>= 84.6', alignment: 'center' }, 
+                                        { text: '≥ 84.6', alignment: 'center' }, 
                                         { text: 'A', alignment: 'center'} 
                                     ],
                                     [ 
@@ -139,7 +139,7 @@ export default function (data) {
                                         { text: 'C', alignment: 'center'} 
                                     ],
                                     [ 
-                                        { text: '<= 54.5', alignment: 'center' }, 
+                                        { text: '≤ 54.5', alignment: 'center' }, 
                                         { text: 'D', alignment: 'center'} 
                                     ],
                                 ],

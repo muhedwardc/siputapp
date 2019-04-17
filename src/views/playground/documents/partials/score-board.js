@@ -4,7 +4,7 @@ const scoreBoard = [
         { text: 'Nilai', fillColor: '#CCCCCC', alignment: 'center' },
     ],
     [ 
-        { text: '>= 84.6', alignment: 'center' }, 
+        { text: '≥ 84.6', alignment: 'center' }, 
         { text: 'A', alignment: 'center'} 
     ],
     [ 
@@ -36,7 +36,7 @@ const scoreBoard = [
         { text: 'C', alignment: 'center'} 
     ],
     [ 
-        { text: '<= 54.5', alignment: 'center' }, 
+        { text: '≤ 54.5', alignment: 'center' }, 
         { text: 'D', alignment: 'center'} 
     ],
 ]
