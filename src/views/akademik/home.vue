@@ -20,9 +20,14 @@
                 :value="'tab-' + i"
                 :transition="false" 
                 :reverse-transition="false">
-                <h3 class="mb-2">{{ day.name + ', ' + getReadableFormat(day.date) }}</h3>
+                <h3 class="mb-2">{{ day.name + (i == days.length-1 ? '' : ', ' + readableDate(day.date)) }}</h3>
                 <v-card flat>
-                    {{ i }}
+                    <v-layout class="exam-item" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
+                        <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
+                        {{ readableDate(exam.tanggal) }} - {{ exam.sesi.start_time}} - {{ exam.ruang.nama }}
+                        <p class="mb-0">Mahasiswa: <span v-for="(mahasiswa, i) in exam.skripsi.mahasiswa" :key="i">{{ mahasiswa.nama + (i == exam.skripsi.mahasiswa.length-1 ? '' : ', ') }}</span></p>
+                        <p class="mb-0">Penguji: <span v-for="(penguji, i) in exam.penguji" :key="i">{{ penguji.dosen.nama + (i == exam.penguji.length-1 ? '' : ', ') }}</span></p>
+                    </v-layout>
                 </v-card>
             </v-tab-item>
         </v-tabs>
@@ -66,9 +71,12 @@ export default {
                     day: '',    
                     date: '',
                     exams: []
+                },
+                {
+                    name: 'Selanjutnya',
+                    exams: []
                 }
             ],
-            exams: [],
             activeTab: 0,
         }
     },
@@ -84,22 +92,27 @@ export default {
                 let theDay = moment(startOfWeek).add('day', i)
                 day.date = moment(theDay, 'DD/MM/YYYY').format('DD/MM/YYYY')
                 if (day.date === this.today) this.activeTab = 'tab-' + i
+                else this.activeTab = 'tab-' + (this.days.length + 1)
             })
         },
 
-        getReadableFormat(date) {
+        readableDate(date) {
             moment.locale('id')
-            return moment(date, 'DD/MM/YYYY').format('LL')
+            return moment(date, 'DD/MM/YYYY').format('dddd, DD MMMM YYYY')
         },
 
         classifyExamsByDate(exams){
-            console.log(exams)
+            this.days.map(day => {
+                exams.map(exam => {
+                    if (exam.tanggal == day.date) day.exams.push(exam)
+                })
+            })
         },
 
         fetchUjian() {
             const startOfWeek = moment().startOf('isoWeek').toDate()
             const startDate = moment(startOfWeek).format('YYYY-MM-DD')
-            const endDate = moment(startOfWeek).add('week', 1).format('YYYY-MM-DD')
+            const endDate = moment(startOfWeek).add(2, 'week').format('YYYY-MM-DD')
             axios.get(`/exams/?start_date=${startDate}&end_date=${endDate}`, { headers: { 'Authorization': 'Token ' + this.$store.state.auth.token }})
                 .then(r => {
                     this.classifyExamsByDate(r.data)
@@ -143,6 +156,14 @@ export default {
 
     .day-active {
         color: white;
+    }
+
+    .exam-item {
+        padding: 8px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px 5px rgba(0, 0, 0, .03);
+        margin-top: 16px;
+        cursor: pointer;
     }
 </style>
 
