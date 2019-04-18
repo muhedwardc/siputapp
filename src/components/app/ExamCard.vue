@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <v-card class="exam-card" @click="$router.push(`/ujian/${item.id}`)">
+        <v-card class="exam-card" @click="$router.push(`/ujian/${item.ujian.id}`)">
             <v-layout style="height: 100%;" column justify-space-between>
                 <v-card-title class="pb-0">
                     <v-layout row align-start class="ma-0">
