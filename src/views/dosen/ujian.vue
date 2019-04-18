@@ -67,15 +67,7 @@ export default {
                 },
             ],
             exams: [],
-            perPage: [
-                10,
-                15,
-                25,
-                {
-                    "text": "$vuetify.dataIterator.rowsPerPageAll",
-                    "value": -1
-                }
-            ]
+            perPage: [ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]
         }   
     },
 
