@@ -92,6 +92,7 @@ export default {
         ]),
 
         readableData(date) {
+            if (moment().format('DD/MM/YYYY') == date) return 'Hari ini'
             return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
         },
 
@@ -155,4 +156,3 @@ export default {
                 th:last-of-type
                     padding-right: 0
 </style>
-
