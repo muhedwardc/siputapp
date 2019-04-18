@@ -12,6 +12,7 @@ import daftarHadir from './documents/document-2.js'
 import doc3 from './documents/document-3.js'
 import doc4 from './documents/document-4.js'
 import doc5 from './documents/document-5.js'
+import doc6 from './documents/document-6.js'
 
 export default {
     data() {
@@ -49,7 +50,7 @@ export default {
         generatePDF(type) {
             const doc1 = beritaAcara(this.data)
             const doc2 = daftarHadir(this.data)
-            let content = [...doc1, ...doc2, ...doc3(this.data), ...doc4(this.data), ...doc5(this.data)]
+            let content = [...doc1, ...doc2, ...doc3(this.data), ...doc4(this.data), ...doc5(this.data), ...doc6(this.data)]
 
             if (pdfMake.vfs == undefined) {
                 pdfMake.vfs = pdfFonts.pdfMake.vfs
