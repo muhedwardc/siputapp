@@ -134,7 +134,12 @@ export default {
 </script>
 
 
-<style lang="sass" scoped>
+<style lang="sass">
+	.sidebar .v-list__tile--active 
+		background: rgba(0, 0, 0, .02) !important
+		color: #3f51b5 !important
+		font-weight: bold !important
+
 	.sidebar 
 		min-width: 220px
 		width: 220px
