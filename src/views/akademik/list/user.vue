@@ -87,6 +87,7 @@ export default {
         return {
             valid: true,
             dialog: false,
+            loading: false,
             headers: [
                 { text: 'Nama', align: 'left', sortable: true, value: 'nama' },
                 { text: 'Email', value: 'email', sortable: true },
@@ -139,6 +140,7 @@ export default {
         ]),
         
         initialize () {
+            this.loading = true
             axios.get('/users/', {
                 headers: {
                     'Authorization': 'Token ' + this.$store.state.auth.token
@@ -146,13 +148,14 @@ export default {
             })
             .then(r => {
                 this.users = r.data
-                console.log(this.users)
+                this.loading = false
             })
             .catch(err => {
                 this.showSnackbar({
                     message: err.message,
                     type: 'error'
                 })
+                this.loading = false
             })
         },
 
