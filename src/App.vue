@@ -27,6 +27,6 @@ export default {
 
 <style lang="sass">
   main.v-content
-    background: #fafafa;
+    background: #fff;
 </style>
 
