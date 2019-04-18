@@ -71,22 +71,17 @@ export default {
 				{
 					title: 'Buat Ujian',
 					icon: 'add',
-					path: '/tambah/ujian'
-				},
-				{
-					title: 'Daftar Pengguna',
-					icon: 'list',
-					path: '/daftar-pengguna'
-				},
-				{
-					title: 'Daftar Skripsi',
-					icon: 'list',
-					path: '/skripsi',
+					path: '/ujian/tambah'
 				},
 				{
 					title: 'Daftar Ujian',
 					icon: 'list',
 					path: '/ujian'
+				},
+				{
+					title: 'Daftar Pengguna',
+					icon: 'list',
+					path: '/daftar-pengguna'
 				},
 				{
 					title: 'Profil',
