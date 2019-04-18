@@ -68,10 +68,6 @@ export default {
             }
 
             pdfMake.createPdf(docDefinition).open()
-        },
-
-        dataURL(url){
-            console.log(url)
         }
     }
 }

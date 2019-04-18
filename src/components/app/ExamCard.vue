@@ -1,19 +1,26 @@
 <template>
     <transition name="fade">
-        <v-card style="height: 100%;">
+        <v-card class="exam-card" @click="$router.push(`/ujian/${item.id}`)">
             <v-layout style="height: 100%;" column justify-space-between>
                 <v-card-title class="pb-0">
-                    <v-layout column>
+                    <v-layout row align-start class="ma-0">
                         <p v-line-clamp:20="2" class="font-weight-bold mb-1 exam-title">
-                            {{ item.ujian.skripsi.judul }}
+                            <span class="warning--text" v-if="item.ujian.skripsi.is_capstone">Capstone: </span>{{ item.ujian.skripsi.judul }}
                         </p>
-                        <span>{{ dateUjian }} - {{ item.ujian.sesi.start_time + ' - ' + item.ujian.sesi.end_time }} - {{ item.ujian.skripsi.is_capstone ? 'Capstone - ' + item.ujian.ruang.nama : item.ujian.ruang.nama}}</span>
+                        <v-spacer></v-spacer>
+                        <v-tooltip top>
+                            <template v-slot:activator="{ on }">
+                                <v-avatar color="warning" style="flex-shrink: 0" size=24 v-on="on">
+                                    <i class="fas fa-crown fa-sm" style="color: white;"></i>
+                                </v-avatar>
+                            </template>
+                            <span>Ketua</span>
+                        </v-tooltip>
                     </v-layout>
                 </v-card-title>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn flat @click="$router.push(`/ujian/${item.id}`)">Lihat</v-btn>
-                </v-card-actions>
+                <v-card-text class="pt-0">
+                    <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi.start_time + ' WIB' }} - {{ item.ujian.ruang.nama }}</span>
+                </v-card-text>
             </v-layout>
         </v-card>
     </transition>
@@ -36,7 +43,8 @@ export default {
 
     computed: {
         isToday() {
-            return this.item.ujian.tanggal == moment().format('L')
+            // return this.item.ujian.tanggal == moment().format('L')
+            return true
         },
 
         dateUjian() {
@@ -47,6 +55,7 @@ export default {
 
     created() {
         moment.locale('id')
+        console.log
     }
 }
 </script>
@@ -67,6 +76,14 @@ export default {
     .v-card__actions
         .v-btn 
             padding: 0 8px
+            text-transform: capitalize
+            &:before
+                background: none !important
+
+            &:hover
+                background: rgba(0, 0, 0, .03)
+                border-radius: 8px
+
             &.hover-success:hover
                 color: green
 
@@ -84,5 +101,15 @@ export default {
     
     .exam-title
         word-break: break-word !important;
+    
+    .exam-card 
+        height: 100%
+        border-radius: 8px
+        box-shadow: 0 0 10px 5px rgba(0, 0, 0, .03)
+        cursor: pointer
+
+        &:hover
+            transform: scale(1.025)
+
 </style>
 
