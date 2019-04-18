@@ -1,72 +1,33 @@
 <template>
-    <v-container grid-list-lg class="pa-0">
-        <v-layout row wrap>
-            <v-flex xs12 sm12 md8>
-                <div>
-                    <v-data-table
-                        :headers="headers"
-                        :items="exams"
-                        :rows-per-page-items="perPage"
-                        class="elevation-1"
-                        :loading="loading"
-                    >
-                    <template slot="headerCell" slot-scope="props">
-                        <v-tooltip bottom>
-                        <span slot="activator">
-                            {{ props.header.text }}
-                        </span>
-                        <span>
-                            {{ props.header.text }}
-                        </span>
-                        </v-tooltip>
-                    </template>
-                    <template v-slot:items="props">
-                        <td>{{ props.item.ujian.judul }}</td>
-                        <td>{{ props.item.ujian.tanggal }}</td>
-                        <td>{{ props.item.ujian.jam }}</td>
-                        <td>{{ props.item.ujian.ruang }}</td>
-                        <td>{{ props.item.is_ketua ? 'Ketua' : 'Anggota' }}</td>
-                        <td><v-chip :color="getStatus(props.item)" text-color="white">{{ props.item.ujian.is_finish ? 'Selesai' : props.item.is_attending == null ? 'belum konfirmasi' : props.item.is_attending ? 'menghadiri' : 'menolak' }}</v-chip></td>
-                    </template>
-                    </v-data-table>
-                </div>
-            </v-flex>
-            <v-flex xs12 sm12 md4>
-                <v-card
-                    class="mx-auto"
-                    color="#26c6da"
-                    dark >
-                    <v-card-title class="pb-0">
-                        <v-icon large left>
-                            assessment
-                        </v-icon>
-                        <span class="title font-weight-light">Laporan Bulan {{ thisMonth }}</span>
-                    </v-card-title>
-
-                    <v-card-text class="headline font-weight-light">
-                        <table>
-                            <tr>
-                                <td>Selesai</td>
-                                <td>: 1</td>
-                            </tr>
-                            <tr>
-                                <td>Diterima</td>
-                                <td>: 2</td>
-                            </tr>
-                            <tr>
-                                <td>Ditolak</td>
-                                <td>: 3</td>
-                            </tr>
-                            <tr>
-                                <td>Total</td>
-                                <td>: 5</td>
-                            </tr>
-                        </table>
-                    </v-card-text>
-                </v-card>
-            </v-flex>
-        </v-layout>
-    </v-container>
+    <v-layout column>
+        <p class="font-weight-bold pb-2 mb-0" style="color: #365075">Daftar Ujian Anda</p>
+        <div>
+            <v-data-table
+                :headers="headers"
+                :items="exams"
+                :rows-per-page-items="perPage"
+                :loading="loading"
+            >
+            <template slot="headerCell" slot-scope="props">
+                <span class="grey--text font-weight-medium" style="font-size: 13px">
+                    {{ props.header.text }}
+                </span>
+            </template>
+            <template v-slot:no-data>
+                <v-layout :value="!exams" class="pa-2" justify-center>
+                    Tidak ada ujian untuk ditampilkan.
+                </v-layout>
+            </template>
+            <template v-slot:items="props">
+                <td @click="$router.push(`/ujian/${props.item.ujian.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
+                <td>{{ readableData(props.item.ujian.tanggal) }}</td>
+                <td>{{ props.item.ujian.sesi.start_time.slice(0, 5) + ' WIB' }}</td>
+                <td>{{ props.item.ujian.ruang.nama }}</td>
+                <td>{{ props.item.is_leader ? 'Ketua' : 'Anggota' }}</td>
+            </template>
+            </v-data-table>
+        </div>
+    </v-layout>
 </template>
 
 <script>
@@ -81,18 +42,18 @@ export default {
                 {
                     text: 'Nama Ujian',
                     value: 'ujian.judul',
-                    sortable: false,
+                    sortable: true,
                     align: 'left'
                 },
                 {
                     text: 'Tanggal',
                     value: 'ujian.tanggal',
-                    sortable: true
+                    sortable: false
                 },
                 {
                     text: 'Jam',
                     value: 'ujian.jam',
-                    sortable: true
+                    sortable: false
                 },
                 {
                     text: 'Ruangan',
@@ -104,11 +65,6 @@ export default {
                     value: 'is_ketua',
                     sortable: true
                 },
-                {
-                    text: 'Status',
-                    value: 'ujian.is_finish',
-                    sortable: true
-                }
             ],
             exams: [],
             perPage: [
@@ -135,6 +91,10 @@ export default {
             'showSnackbar'
         ]),
 
+        readableData(date) {
+            return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
+        },
+
         fetchExams() {
             axios.get('/me/exams/', {
                 headers: {
@@ -150,6 +110,7 @@ export default {
                 })
                 .then(r => {
                     this.exams.push.apply(this.exams, r.data)
+                    console.log(this.exams)
                 })
                 .catch(err => {
                     this.exams = []
@@ -178,4 +139,20 @@ export default {
     }
 }
 </script>
+
+<style lang="sass">
+    .v-datatable 
+        tbody 
+            tr 
+                td:first-of-type
+                    padding-left: 0
+                td:last-of-type
+                    padding-right: 0
+        thead 
+            tr 
+                th:first-of-type
+                    padding-left: 0
+                th:last-of-type
+                    padding-right: 0
+</style>
 
