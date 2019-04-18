@@ -1,37 +1,48 @@
 <template>
-    <v-layout column>
-        <h3>Minggu Ini</h3>
-        <v-tabs
-            id="days-select"
-            v-model="activeTab"
-            grow
-            icons-and-text
-            active-class="day-active primary"
-            class="mt-2"
-            slider-color="primary">
-            <v-tab v-for="(week, i) in days" :key="i" :href="'#tab-' + i">
-                <span>{{ week.name }}</span>
-            </v-tab>
-            
-            <v-tab-item
-                class="mt-3"
-                v-for="(day, i) in days"
-                :key="day.date"
-                :value="'tab-' + i"
-                :transition="false" 
-                :reverse-transition="false">
-                <h3 class="mb-2">{{ day.name + (i == days.length-1 ? '' : ', ' + readableDate(day.date)) }}</h3>
-                <v-card flat>
-                    <v-layout class="exam-item" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
-                        <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
-                        {{ readableDate(exam.tanggal) }} - {{ exam.sesi.start_time}} - {{ exam.ruang.nama }}
-                        <p class="mb-0">Mahasiswa: <span v-for="(mahasiswa, i) in exam.skripsi.mahasiswa" :key="i">{{ mahasiswa.nama + (i == exam.skripsi.mahasiswa.length-1 ? '' : ', ') }}</span></p>
-                        <p class="mb-0">Penguji: <span v-for="(penguji, i) in exam.penguji" :key="i">{{ penguji.dosen.nama + (i == exam.penguji.length-1 ? '' : ', ') }}</span></p>
-                    </v-layout>
-                </v-card>
-            </v-tab-item>
-        </v-tabs>
+<v-container grid-list-md class="pa-0">
+    <v-layout row wrap>
+        <v-flex xs12 sm12 md12 lg8>
+            <v-layout column>
+                <h3>Minggu Ini</h3>
+                <v-tabs
+                    id="days-select"
+                    v-model="activeTab"
+                    grow
+                    icons-and-text
+                    active-class="day-active primary"
+                    class="mt-2"
+                    slider-color="primary">
+                    <v-tab v-for="(week, i) in days" :key="i" :href="'#tab-' + i">
+                        <span>{{ week.name }}</span>
+                    </v-tab>
+                    
+                    <v-tab-item
+                        class="mt-3"
+                        v-for="(day, i) in days"
+                        :key="day.date"
+                        :value="'tab-' + i"
+                        :transition="false" 
+                        :reverse-transition="false">
+                        <h3 class="mb-2">{{ i == days.length-1 ? day.name : readableDate(day.date) }}</h3>
+                        <v-card flat v-if="day.exams.length > 0" class="mt-3">
+                            <v-layout class="exam-item" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
+                                <v-layout row justify-space-between>
+                                    <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
+                                    <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
+                                </v-layout>
+                                <p class="mb-0"><span :class="isToday(exam.tanggal) ? 'purple--text font-weight-bold' : ''">{{ isToday(exam.tanggal) ? 'Hari ini' : readableDate(exam.tanggal) }}</span> - {{ exam.sesi.start_time}} - {{ exam.ruang.nama }}</p>
+                                <p class="mb-0">Mahasiswa: <span v-for="(mahasiswa, i) in exam.skripsi.mahasiswa" :key="i">{{ mahasiswa.nama + (i == exam.skripsi.mahasiswa.length-1 ? '' : ', ') }}</span></p>
+                                <p class="mb-0">Penguji: <span v-for="(penguji, i) in exam.penguji" :key="i">{{ penguji.dosen.nama + (i == exam.penguji.length-1 ? '' : ', ') }}</span></p>
+                            </v-layout>
+                        </v-card>
+                        <p v-else>Tidak ada ujian.</p>
+                    </v-tab-item>
+                </v-tabs>
+            </v-layout>
+        </v-flex>
+        <v-flex xs12 sm12 md12 lg4></v-flex>
     </v-layout>
+</v-container>
 </template>
 
 
@@ -109,6 +120,11 @@ export default {
             })
         },
 
+        isToday(date) {
+            moment.locale('id')
+            return moment().format('DD/MM/YYYY') === date
+        },
+
         fetchUjian() {
             const startOfWeek = moment().startOf('isoWeek').toDate()
             const startDate = moment(startOfWeek).format('YYYY-MM-DD')
@@ -126,13 +142,6 @@ export default {
         }
     },
 
-    computed: {
-        today() {
-            moment.locale('id')
-            return moment(new Date, 'DD/MM/YYYY').format('DD/MM/YYYY')
-        }
-    },
-
     created() {
         this.fetchUjian()
         this.assignDates()
@@ -141,8 +150,14 @@ export default {
 </script>
 
 <style>
+    .v-tabs__container {
+        height: 48px;
+        border: 1px solid #eee;
+    }
+
     .v-tabs__container > .v-tabs__div {
         border-right: 1px solid #eee;
+        min-width: 50px;
     }
 
     .v-tabs__container .v-tabs__div:last-of-type {
@@ -164,6 +179,12 @@ export default {
         box-shadow: 0 0 10px 5px rgba(0, 0, 0, .03);
         margin-top: 16px;
         cursor: pointer;
+    }
+
+    .exam-status > .v-chip__content {
+        height: auto;
+        padding-top: 2px;
+        padding-bottom: 2px;
     }
 </style>
 
