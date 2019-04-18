@@ -43,8 +43,8 @@ export default {
 
     computed: {
         isToday() {
-            // return this.item.ujian.tanggal == moment().format('L')
-            return true
+            return this.item.ujian.tanggal == moment().format('L')
+            // return true
         },
 
         dateUjian() {
