@@ -19,11 +19,6 @@ export default [
         component: () => import('@/views/akademik/list/user.vue')
     },
     {
-        path: '/tambah/ujian',
-        name: 'Akademik Add Ujian',
-        component: () => import('@/views/akademik/add/exam.vue')
-    },
-    {
         path: '/dosen',
         name: 'Dosen Home',
         component: () => import('@/views/dosen/home.vue')
@@ -39,8 +34,18 @@ export default [
         component: () => import('@/views/dosen/ujian.vue')
     },
     {
-        path: '/ujian/:id',
+        path: '/ujian',
         name: 'Ujian Show',
+        component: () => import('@/views/akademik/list/exam.vue')
+    },
+    {
+        path: '/ujian/tambah',
+        name: 'Akademik Add Ujian',
+        component: () => import('@/views/akademik/add/exam.vue')
+    },
+    {
+        path: '/ujian/:id',
+        name: 'Ujian Detail',
         component: () => import('@/views/ujian/show.vue')
     },
     {
