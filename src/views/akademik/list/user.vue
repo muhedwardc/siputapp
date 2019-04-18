@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-layout row flat color="white">
+        <v-layout row flat color="white" align-center>
             <v-toolbar-title>Daftar Pengguna</v-toolbar-title>
             <v-spacer></v-spacer>
             <v-dialog v-model="dialog" max-width="500px">
@@ -44,8 +44,8 @@
 
                     <v-card-actions class="pa-4">
                         <v-spacer></v-spacer>
-                        <v-btn color="error" @click="close">Simpan</v-btn>
-                        <v-btn color="success" @click="save">Batal</v-btn>
+                        <v-btn color="error" @click="save">Simpan</v-btn>
+                        <v-btn color="success" @click="close">Batal</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -53,31 +53,28 @@
         <v-data-table
             :headers="headers"
             :items="users"
-            class="elevation-1"
-        >
-            <template v-slot:items="props">
-            <td class="text-xs-left">{{ props.item.nama }}</td>
-            <td class="text-xs-left">{{ props.item.email }}</td>
-            <td class="text-xs-left">{{ props.item.role == 1 ? 'Akademik' : 'Dosen' }}</td>
-            <td class="text-xs-left">{{ props.item.nip }}</td>
-            <td class="justify-center layout px-0">
-                <v-icon
-                small
-                class="mr-2"
-                @click="editItem(props.item)"
-                >
-                edit
-                </v-icon>
-                <v-icon
-                small
-                @click="deleteItem(props.item)"
-                >
-                delete
-                </v-icon>
-            </td>
+            :rows-per-page-items="perPage"
+            :loading="loading">
+            <template slot="headerCell" slot-scope="props">
+                <span class="grey--text font-weight-medium" style="font-size: 13px">
+                    {{ props.header.text }}
+                </span>
             </template>
             <template v-slot:no-data>
-            <v-btn color="primary" @click="initialize">Reset</v-btn>
+                <v-layout :value="!users" class="pa-2" justify-center>
+                    Tidak ada pengguna untuk ditampilkan.<br>
+                    <v-btn color="primary" @click="initialize">Muat ulang</v-btn>
+                </v-layout>
+            </template>
+            <template v-slot:items="props">
+                <td class="text-xs-left">{{ props.item.nama }}</td>
+                <td class="text-xs-left">{{ props.item.email }}</td>
+                <td class="text-xs-left">{{ props.item.role == 1 ? 'Akademik' : 'Dosen' }}</td>
+                <td class="text-xs-left">{{ props.item.nip }}</td>
+                <td class="justify-center layout px-0">
+                    <v-icon small class="mr-2" @click="editItem(props.item)">edit</v-icon>
+                    <v-icon small @click="deleteItem(props.item)">delete</v-icon>
+                </td>
             </template>
         </v-data-table>
     </div>
@@ -115,7 +112,8 @@ export default {
                 nip: '',
                 password: '',
                 confirmPassword: ''
-            }
+            },
+            perPage: [ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]
         }
     },
 
@@ -163,21 +161,21 @@ export default {
         },
 
         editItem (item) {
-            this.editedIndex = this.desserts.indexOf(item)
-            this.editedItem = Object.assign({}, item)
-            this.dialog = true
+            // this.editedIndex = this.desserts.indexOf(item)
+            // this.editedItem = Object.assign({}, item)
+            // this.dialog = true
         },
 
         deleteItem (item) {
-            const index = this.desserts.indexOf(item)
-            confirm('Apakah anda yakin untuk menghapus pengguna ini?') && this.desserts.splice(index, 1)
+            // const index = this.desserts.indexOf(item)
+            // confirm('Apakah anda yakin untuk menghapus pengguna ini?') && this.desserts.splice(index, 1)
         },
 
         close () {
             this.dialog = false
             setTimeout(() => {
-            this.editedItem = Object.assign({}, this.defaultItem)
-            this.editedIndex = -1
+                this.editedItem = Object.assign({}, this.defaultItem)
+                this.editedIndex = -1
             }, 300)
         },
 
@@ -219,4 +217,21 @@ export default {
     }
 }
 </script>
+
+<style lang="sass">
+    .v-datatable 
+        tbody 
+            tr 
+                td:first-of-type
+                    padding-left: 0
+                td:last-of-type
+                    padding-right: 0
+        thead 
+            tr 
+                th:first-of-type
+                    padding-left: 0
+                th:last-of-type
+                    padding-right: 0
+</style>
+
 
