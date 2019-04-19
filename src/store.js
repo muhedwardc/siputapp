@@ -5,12 +5,13 @@ import Cookies from 'js-cookie'
 Vue.use(Vuex)
 
 const userData = Cookies.getJSON('_usr')
+const userToken = Cookies.getJSON('_tkn')
 
 export default new Vuex.Store({
 	state: {
 		auth: {
-			token: userData && userData.token ? userData.token : '',
-			user: userData && userData.user ? userData.user : {},
+			token: userToken || '',
+			user: userData || {},
 			loggedIn: false
 		},
 		snackbar: {
@@ -40,7 +41,8 @@ export default new Vuex.Store({
 		logUserIn(state, payload) {
 			state.auth.token = payload.token
 			state.auth.user = payload.user
-			Cookies.set('_usr', payload)
+			Cookies.set('_usr', payload.user)
+			Cookies.set('_tkn', payload.token)
 		},
 		showSnackbar(state, payload) {
 			state.snackbar = {
@@ -64,6 +66,10 @@ export default new Vuex.Store({
 				Cookies.remove(cookieName)
 			})
 		}
+	},
+	getters: {
+		authToken: (state) => 'Token ' + state.auth.token,
+		isLoggedIn: (state) => !!state.auth.token && !!state.auth.user
 	},
 	actions: {
 		logUserIn({ commit }, payload) {
