@@ -26,7 +26,6 @@ Vue.use(Meta)
 
 router.beforeEach((to, from, next) => {
   const user = Cookie.getJSON('_usr')
-  console.log('getters ' + store.getters.isLoggedIn)
 
   const authRequired = to.matched.some(record => record.meta.requiresAuth)
   const dosenRoute = to.matched.some(record => record.meta.dosenRoute)
@@ -35,7 +34,6 @@ router.beforeEach((to, from, next) => {
   const isLoggedIn = store.getters.isLoggedIn
   const isDosen = isLoggedIn && !!user && user.role == 2
   const isAkademik = isLoggedIn && !!user && user.role == 1
-  console.log(isLoggedIn, isDosen)
 
   if (authRequired && !isLoggedIn) {
     return next('/login')
@@ -44,6 +42,7 @@ router.beforeEach((to, from, next) => {
   } else if (to.fullPath === '/') {
     if (isDosen) return next('/dosen')
     else if (isAkademik) return next('/akademik')
+    else return next('/login')
   } else {
     if (dosenRoute && isLoggedIn && !isDosen) {
       return next(from.fullPath)
