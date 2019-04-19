@@ -1,54 +1,44 @@
 from rest_framework import serializers
-from .models import Essay, Student, Subtitle
+from .models import Essay, Student
 from backend.users.serializers import SimpleUserSerializer
 from backend.users.models import User
 
+class ListStudentSerializer(serializers.ListSerializer):
+    class Meta:
+        model = Student
+        fields = ('id', 'nama', 'nim', 'prodi', 'konsentrasi')
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ('nama', 'nim', 'prodi', 'konsentrasi', 'tempat_lahir', 'tanggal_lahir', 'telepon')
+        list_serializer_class = ListStudentSerializer
 
-class SimpleStudentSerializer(serializers.ModelSerializer):
+class CreateStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ('id', 'nama', 'nim')
+        fields = ('nama', 'nim', 'prodi', 'konsentrasi', 'tempat_lahir', 'tanggal_lahir', 'telepon')
+
 
 class SimpleEssaySerializer(serializers.ModelSerializer):
-    mahasiswa = SimpleStudentSerializer(many=True, source='students')
-
-    class Meta:
-        model = Essay
-        fields = ('id', 'judul', 'mahasiswa', 'is_capstone')
-
-class EssaySerializer(serializers.ModelSerializer):
-    pembimbing1 = SimpleUserSerializer()
-    pembimbing2 = SimpleUserSerializer()
     mahasiswa = StudentSerializer(many=True, source='students')
 
     class Meta:
         model = Essay
-        fields = ('id', 'judul', 'intisari', 'naskah', 'pembimbing1', 'pembimbing2', 'is_capstone', 'mahasiswa')
+        fields = ('judul', 'mahasiswa', 'is_capstone')
 
-class CreateEssaySerializer(serializers.ModelSerializer):
-    mahasiswa = StudentSerializer(many=True, required=False)
+class EssaySerializer(serializers.ModelSerializer):
+    pembimbing_satu = serializers.StringRelatedField()
+    pembimbing_dua = serializers.StringRelatedField()
+    mahasiswa = StudentSerializer(many=True, source='students')
 
     class Meta:
         model = Essay
-        fields = ('judul', 'intisari', 'naskah', 'pembimbing1', 'pembimbing2', 'is_capstone', 'mahasiswa')
+        fields = ('judul', 'intisari', 'naskah', 'pembimbing_satu', 'pembimbing_dua', 'is_capstone', 'mahasiswa')
+ 
+class CreateEssaySerializer(serializers.ModelSerializer):
+    mahasiswa = CreateStudentSerializer(many=True)
 
-    # def create(self, validated_data):
-    #     mahasiswa_data = validated_data.pop('mahasiswa')
-    #     skripsi = Essay.objects.create(
-    #         judul=validated_data['judul'],
-    #         intisari=validated_data['intisari'],
-    #         # naskah=validated_data['naskah'],
-    #         pembimbing1=validated_data['pembimbing1'],
-    #         pembimbing2=validated_data['pembimbing2'],
-    #         is_capstone=validated_data['is_capstone']
-    #     )
-
-    #     for data in mahasiswa_data:
-    #         mahasiswa = Student.objects.create(skripsi=skripsi, **data)
-
-    #     return skripsi
+    class Meta:
+        model = Essay
+        fields = ('judul', 'intisari', 'naskah', 'pembimbing_satu', 'pembimbing_dua', 'is_capstone', 'mahasiswa')

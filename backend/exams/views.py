@@ -5,32 +5,42 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 
-from .serializers import UjianSerializer, CreateUjianSerializer, SimpleUjianSerializer, ListRoomSerializer, ListSessionSerializer, PengujiSerializer, FullPengujiSerializer, ChangePengujiSerializer
+from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer
 from .models import Exam, Penguji, Room, Session
+from backend.pagination import CustomPagination
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
     parser_classes = (JSONParser, FormParser, MultiPartParser)
+    pagination_class = CustomPagination
 
     def get_serializer_class(self, *args, **kwargs):
         if self.action == 'create':
-            return CreateUjianSerializer
-        elif self.action == 'retrieve':
-            return UjianSerializer
-        return SimpleUjianSerializer
+            return CreateExamSerializer
+        else:
+            return ExamSerializer
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         if 'start_date' in request.GET and 'end_date' in request.GET:
             start_date = request.GET.get('start_date')
             end_date = request.GET.get('end_date')
             exams = self.get_queryset().filter(tanggal__range=(start_date, end_date))
-            serializer = self.get_serializer(exams, many=True)
-            return Response(serializer.data)
+            page = self.paginate_queryset(exams)
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
         exams = self.get_queryset()
-        serializer = self.get_serializer(exams, many=True)
-        return Response(serializer.data)
+        page = self.paginate_queryset(exams)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            new_ujian = serializer.save()
+            return Response(ExamSerializer(new_ujian).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True)
     def penguji(self, request):
@@ -39,26 +49,16 @@ class ExamViewSet(viewsets.ModelViewSet):
         serializer = PengujiSerializer(list_penguji, many=True)
         return Response(serializer.data)
 
-class PengujiViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.UpdateModelMixin):
-    queryset = Penguji.objects.all()
-    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
-
-    def get_serializer_class(self, *args, **kwargs):
-        if self.action == 'retrieve':
-            return FullPengujiSerializer
-        elif self.action == 'update':
-            return ChangePengujiSerializer
-        else:
-            return PengujiSerializer
-
-    def update(self, request, *args, **kwargs):
-        penguji = self.get_object()
-        serializer = self.get_serializer(penguji, data=request.data)
+    @penguji.mapping.post
+    def create_penguji(self, request):
+        exam = self.get_object()
+        serializer = CreatePengujiSerializer(data=request.data)
         if serializer.is_valid():
-            new_penguji = serializer.save()
-            return Response(FullPengujiSerializer(new_penguji).data)
-
-        return Response(serializer.errors)
+            serializer.save(ujian=exam)
+            return Response({
+                "msg": "penguji berhasil ditambahkan"
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RoomSessionAPI(views.APIView):
@@ -68,7 +68,7 @@ class RoomSessionAPI(views.APIView):
         list_room = Room.objects.all()
         list_session = Session.objects.all()
         return Response({
-            "Sesi": ListSessionSerializer(list_session, many=True).data,
-            "Ruang": ListRoomSerializer(list_room, many=True).data
+            "Sesi": SessionSerializer(list_session, many=True).data,
+            "Ruang": RoomSerializer(list_room, many=True).data
         })
 

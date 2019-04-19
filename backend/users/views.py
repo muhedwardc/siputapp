@@ -1,81 +1,65 @@
 from rest_framework import views, viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter, OrderingFilter
 from knox.models import AuthToken
 from django.db.models import Q
 
-from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer, RoleSerializer
-from .models import User, Role
+from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer
+from .models import User
+from backend.pagination import CustomPagination
 
-class RoleAPI(views.APIView):
-    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
-
-    def post(self, request):
-        serializer = RoleSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
-        roles = Role.objects.all()
-        serializer = RoleSerializer(roles, many=True)
-        return Response(serializer.data)
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = FullUserSerializer
     queryset = User.objects.all()
-    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+    # permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+    filter_backends = (SearchFilter, OrderingFilter)
+    ordering_fields = ('email', 'nama')
+    search_fields = ('nama',)
+    pagination_class = CustomPagination
 
     def create(self, request, *args, **kwargs):
         # Menghilangkan metode 'create' diganti dengan register dosen/akademik dibawah.
         pass
 
-    @action(methods=['GET'], detail=False)
+    @action(detail=False)
     def dosen(self, request, *args, **kwargs):
-        if 'q' in request.GET:
-            query = request.GET.get('q')
-            list_dosen = self.get_queryset().filter(Q(role__pk=2, nama__contains=query))
-        else:
-            list_dosen = self.get_queryset().filter(role__pk=2)
+        # if 'q' in request.GET:
+        #     query = request.GET.get('q')
+        #     list_dosen = self.get_queryset().filter(Q(role__pk=2, nama__icontains=query))
+        # else:
+        #     list_dosen = self.get_queryset().filter(role__pk=2)
+        list_dosen = self.get_queryset().filter(is_admin=False)
         serializer = self.get_serializer(list_dosen, many=True)
         return Response(serializer.data)
 
-    @action(methods=['GET'], detail=False)
+    @action(detail=False)
     def akademik(self, request, *args, **kwargs):
-        list_akademik = self.get_queryset().filter(role__pk=1)
+        list_akademik = self.get_queryset().filter(is_admin=True)
         serializer = self.get_serializer(list_akademik, many=True)
         return Response(serializer.data)
 
     @dosen.mapping.post
     def register_dosen(self, request, *args, **kwargs):
         serializer = RegisterUserSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            new_dosen = User.objects.create_user(
-                email=serializer.validated_data['email'],
-                role=2,
-                password=serializer.validated_data['password']
-            )
-            new_dosen.save()  # bisa dihapus karena dalam metode 'create_user' sudah di save
+        if serializer.is_valid():
+            serializer.save(is_admin=False)
             return Response({
                 "message": "Pengguna berhasil didaftarkan.",
-                "users": self.get_serializer(new_dosen).data
-            })
+                "users": serializer.data
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @akademik.mapping.post
     def register_akademik(self, request, *args, **kwargs):
         serializer = RegisterUserSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            new_akademik = User.objects.create_superuser(
-                email=serializer.validated_data['email'],
-                password=serializer.validated_data['password']
-            )
-            new_akademik.save()  # bisa dihapus karena dalam metode 'create_superuser' sudah di save
+        if serializer.is_valid():
+            serializer.save(is_admin=True)
             return Response({
                 "message": "Pengguna berhasil didaftarkan.",
-                "users": self.get_serializer(new_akademik).data
-            })
+                "users": serializer.data
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

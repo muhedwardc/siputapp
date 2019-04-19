@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .serializers import SimpleSiputSerializer, SiputSerializer, SiputProfileSerializer
-from backend.essays.serializers import EssaySerializer, SimpleStudentSerializer
+from backend.essays.serializers import EssaySerializer, StudentSerializer
 from backend.comments.serializers import CommentSerializer, CreateCommentSerializer
 from backend.grades.serializers import GradeSerializer, CreateGradeSerializer
 from backend.exams.models import Penguji, Exam
@@ -73,7 +73,7 @@ class ExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Retriev
     @action(detail=True)
     def students(self, request, *args, **kwargs):
         students = self.get_object().ujian.skripsi.students
-        serializer = SimpleStudentSerializer(students, many=True)
+        serializer = StudentSerializer(students, many=True)
         return Response(serializer.data)
 
     @action(detail=True)
