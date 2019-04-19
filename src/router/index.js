@@ -44,9 +44,9 @@ router.beforeEach((to, from, next) => {
     else if (isAkademik) return next('/akademik')
     else return next('/login')
   } else {
-    if (dosenRoute && isLoggedIn && !isDosen) {
+    if (dosenRoute && !akademikRoute && isLoggedIn && !isDosen) {
       return next(from.fullPath)
-    } else if (akademikRoute && isLoggedIn && !isAkademik) {
+    } else if (akademikRoute && !dosenRoute && isLoggedIn && !isAkademik) {
       return next(from.fullPath)
     }
   }

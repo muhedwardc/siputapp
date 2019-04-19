@@ -3,6 +3,7 @@
         <p class="font-weight-bold pb-2 mb-0" style="color: #365075">Daftar Ujian Anda</p>
         <div>
             <v-data-table
+                class="no-barrier"
                 :headers="headers"
                 :items="exams"
                 :rows-per-page-items="perPage"
@@ -133,7 +134,7 @@ export default {
 </script>
 
 <style lang="sass">
-    .v-datatable 
+    .no-barrier .v-datatable 
         tbody 
             tr 
                 td:first-of-type
