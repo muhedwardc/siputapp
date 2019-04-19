@@ -103,7 +103,6 @@ export default {
                 })
                 .then(r => {
                     this.exams.push.apply(this.exams, r.data)
-                    console.log(this.exams)
                 })
                 .catch(err => {
                     this.exams = []

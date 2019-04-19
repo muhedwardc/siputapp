@@ -288,7 +288,6 @@ export default {
 
     watch: {
         is_capstone(val) {
-            console.log(val)
             let mhs = {
                 nama: "",
                 nim: "",
@@ -312,8 +311,6 @@ export default {
     computed: {
         dosenList() {
             let list = this.dosen
-            console.log('computed!')
-            console.log(list)
             return list
         }
     },
@@ -340,7 +337,6 @@ export default {
             this.dosen[index].nama = 'updating'
             this.dosen[index].email = email
             this.dosen[index].nama = nama
-            console.log(this.exam.penguji)
         },
         resetSelected() {
 

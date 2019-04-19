@@ -55,7 +55,6 @@ export default {
 
     created() {
         moment.locale('id')
-        console.log
     }
 }
 </script>
