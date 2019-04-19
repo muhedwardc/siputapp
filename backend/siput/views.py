@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins, views, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .serializers import SimpleSiputSerializer, SiputSerializer, SiputProfileSerializer
+from .serializers import SimpleSiputSerializer, SiputSerializer
 from backend.essays.serializers import EssaySerializer, StudentSerializer
 from backend.comments.serializers import CommentSerializer, CreateCommentSerializer
 from backend.grades.serializers import GradeSerializer, CreateGradeSerializer
@@ -109,19 +109,19 @@ class ExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Retriev
         return Response({"grades": grades}, status=status.HTTP_201_CREATED)
 
 
-class UserProfileAPI(views.APIView):
-    permission_classes = (permissions.IsAuthenticated, )
+# class UserProfileAPI(views.APIView):
+#     permission_classes = (permissions.IsAuthenticated, )
 
-    def get(self, request, format=None):
-        serializer = SiputProfileSerializer(request.user)
-        return Response(serializer.data)
+#     def get(self, request, format=None):
+#         serializer = SiputProfileSerializer(request.user)
+#         return Response(serializer.data)
 
-    def put(self, request, format=None):
-        serializer = SiputProfileSerializer(request.user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                "msg": "Profile updated.",
-                "user": serializer.data
-            })
-        return Response(serializer.errors)
+#     def put(self, request, format=None):
+#         serializer = SiputProfileSerializer(request.user, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({
+#                 "msg": "Profile updated.",
+#                 "user": serializer.data
+#             })
+#         return Response(serializer.errors)

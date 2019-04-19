@@ -18,7 +18,7 @@ class SiputSerializer(serializers.ModelSerializer):
         model = Penguji
         fields = ('id', 'ujian', 'is_leader', 'is_attending')
 
-class SiputProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('nama', 'email', 'nip', 'foto')
+# class SiputProfileSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ('nama', 'email', 'nip', 'foto')
