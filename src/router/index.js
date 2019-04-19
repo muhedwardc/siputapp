@@ -25,39 +25,31 @@ const router = new Router({
 Vue.use(Meta)
 
 router.beforeEach((to, from, next) => {
-  const userData = Cookie.getJSON('_usr')
+  const user = Cookie.getJSON('_usr')
+  console.log('getters ' + store.getters.isLoggedIn)
 
-  const dosenPages = ['/dosen']
-  const akademikPages = ['/akademik']
-  const publicPages = ['/login']
-  const authRequired = !publicPages.includes(to.path)
-  const authDosenRequired = dosenPages.includes(to.path)
-  const authAkademikRequired = akademikPages.includes(to.path)
-  const isLoggedIn = userData && userData.token
-  const isDosen = userData && userData.user.role == 2
-  const isAkademik = userData && userData.user.role == 1
-  // const isOnExam = store.state.onExam.id
+  const authRequired = to.matched.some(record => record.meta.requiresAuth)
+  const dosenRoute = to.matched.some(record => record.meta.dosenRoute)
+  const akademikRoute = to.matched.some(record => record.meta.akademikRoute)
+  const publicRoute = to.matched.some(record => record.meta.publicRoute)
+  const isLoggedIn = store.getters.isLoggedIn
+  const isDosen = isLoggedIn && !!user && user.role == 2
+  const isAkademik = isLoggedIn && !!user && user.role == 1
+  console.log(isLoggedIn, isDosen)
 
   if (authRequired && !isLoggedIn) {
     return next('/login')
-  } else if (!authRequired && isLoggedIn) {
+  } else if (publicRoute && isLoggedIn) {
     return next(from.fullPath)
   } else if (to.fullPath === '/') {
     if (isDosen) return next('/dosen')
     else if (isAkademik) return next('/akademik')
   } else {
-    if (authDosenRequired && isLoggedIn && !isDosen) {
+    if (dosenRoute && isLoggedIn && !isDosen) {
       return next(from.fullPath)
-    } else if (authAkademikRequired && isLoggedIn && !isAkademik) {
+    } else if (akademikRoute && isLoggedIn && !isAkademik) {
       return next(from.fullPath)
     }
-    // else {
-    //   if (!isOnExam || isOnExam == to.params.id) {
-    //     return next('/ujian/' + to.params.id + '/mulai')
-    //   } else if (to.params.id !== store.state.onExam.id){
-    //     return next('/ujian/' + store.state.onExam.id + '/mulai')
-    //   }
-    // }
   }
   next()
 })
