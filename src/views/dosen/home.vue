@@ -4,7 +4,7 @@
             <h3 class="mb-1">UJIAN HARI INI</h3>
             <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
             <v-layout row wrap v-else>
-                <v-flex xs12 sm4 md4 v-for="e in nextExams.slice(0, 3)" :key="e.id">
+                <v-flex xs12 sm4 md4 v-for="e in todayExams.slice(0, 3)" :key="e.id">
                     <app-exam-card :item="e" />
                 </v-flex>
             </v-layout>
