@@ -31,14 +31,16 @@ class UserViewSet(viewsets.ModelViewSet):
         # else:
         #     list_dosen = self.get_queryset().filter(role__pk=2)
         list_dosen = self.get_queryset().filter(is_admin=False)
-        serializer = self.get_serializer(list_dosen, many=True)
-        return Response(serializer.data)
+        page = self.paginate_queryset(list_dosen)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=False)
     def akademik(self, request, *args, **kwargs):
         list_akademik = self.get_queryset().filter(is_admin=True)
-        serializer = self.get_serializer(list_akademik, many=True)
-        return Response(serializer.data)
+        page = self.paginate_queryset(list_akademik)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @dosen.mapping.post
     def register_dosen(self, request, *args, **kwargs):
