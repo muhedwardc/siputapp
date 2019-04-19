@@ -124,42 +124,37 @@ This allows for an extremely simple setup without the need for a separate static
 ## API Endpoints
 Endpoint untuk umum:
 1. **POST** /api/auth/login/
-1. **POST** /api/auth/logout/
-1. **POST** /api/auth/change_password/
-
-1. **GET** /api/users/ atau /api/users/dosen/ atau /api/users/akademik/ : list all users / list dosen users / list akademik users
-1. **POST** /api/users/dosen/ atau /api/users/akademik/ : create dosen users / create akademik users
-1. **GET** /api/exams/ : list all exams
-1. **GET** /api/exams/get_room_session/ : list room and session
-1. **POST** /api/exams/ : create exams
-1. **GET** /api/exams/\<id>\/ : retrive an exam
-1. **GET** /api/exams/penguji/\<id>\/ : retrieve single penguji
-1. **PUT** /api/exams/penguji/\<id>\/ : Mengubah penguji terpilih --> akan mengubah status *is_attending* menjadi *null* kembali
-
-
-1. **GET** /api/me/exams/
-1. **GET** /api/me/exams/\<id>\/
-1. **POST** /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
-1. **GET** /api/me/exams/\<id>\/essays/ : retrieve essays detail for selected exam
-1. **GET** /api/me/exams/\<id>\/comments/ : list all comments
-1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
-1. **GET** /api/me/exams/\<id>\/students/ : List all students for selected exam
-1. **GET** /api/me/exams/\<id>\/grades/ : list all grades
-1. **POST** /api/me/exams/\<id>\/grades/ : create grades for students
-1. **GET** /api/me/profile/ 
-1. **PUT** /api/me/profile/
-1. **GET** /api/me/exams/history/
-
-## API Data Structures
-#### Data Structure for Creating User (/api/exams/)
 ```JSON
 {
 	"email": "ridi.ferdiana@mail.ugm.ac.id",
 	"password": "Passw0rd"
 }
+'''
+1. **POST** /api/auth/logout/
+1. **POST** /api/auth/change_password/
+```JSON
+{
+	"password1": "Passw0rd",
+	"password2": "Passw0rd"
+}
 ```
 
-#### Data Structure for Creating Exam (/api/exams/)
+1. **GET** /api/users/ atau /api/users/dosen/ atau /api/users/akademik/ : list all users / list dosen users / list akademik users
+1. **POST** /api/users/dosen/ atau /api/users/akademik/ : create dosen users / create akademik users
+```JSON
+{
+	"nama": "Ridi Ferdiana",
+	"email": "ridi.ferdiana@mail.ugm.ac.id",
+	"prodi": "TI",
+	"konsentrasi": "RPL",
+	"nip": "1998274172469128111",
+	"password": "Passw0rd"
+}
+```
+
+1. **GET** /api/exams/ : list all exams
+1. **GET** /api/exams/get_room_session/ : list room and session
+1. **POST** /api/exams/ : create exams
 ```JSON
 {
 	"tanggal": "2019-06-12",
@@ -168,8 +163,9 @@ Endpoint untuk umum:
 	"skripsi": {
 		"judul": "Pengembangan Aplikasi Disabilitas",
 		"intisari": "Ini adalah intisari dari aplikasi ini...",
-		"pembimbing1": 3,
-		"pembimbing2": 4,
+		"naskah": "http://localhost:8000/api/exams/skripsi/Thesis_Exam_Dev_Based_On_OBA.pdf",
+		"pembimbing_satu": 3,
+		"pembimbing_dua": 4,
 		"is_capstone": true,
 		"mahasiswa": [
 			{
@@ -212,55 +208,36 @@ Endpoint untuk umum:
 }
 ```
 
-### Data Structure for Changing Penguji
+1. **GET** /api/exams/\<id>\/ : retrive an exam
+1. **POST** /api/exams/\<id>\/penguji/ : create penguji for selected exam
 ```JSON
 {
-	"dosen" : <id> "id dosen yang ingin dijadikan penguji"
+	"dosen": 4
 }
 ```
 
-#### Data Structure for Creating Comment
+
+1. **GET** /api/me/exams/
+1. **GET** /api/me/exams/\<id>\/
+1. **POST** /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
+1. **GET** /api/me/exams/\<id>\/essays/ : retrieve essays detail for selected exam
+1. **GET** /api/me/exams/\<id>\/comments/ : list all comments
+1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
 ```JSON
 {
-	"bab": "Bab 1",
-	"halaman": 78,
-	"komentar": "Penjelasan pada diagram proses bisnis kurang detail"
+	....
 }
 ```
 
-#### Data Structure for Creating Grades
+1. **GET** /api/me/exams/\<id>\/students/ : List all students for selected exam
+1. **GET** /api/me/exams/\<id>\/grades/ : list all grades
+1. **POST** /api/me/exams/\<id>\/grades/ : create grades for students
 ```JSON
-{
-	"grades": [
-		{
-			"mahasiswa": 3,
-			"so1": 87,
-			"so2": 90,
-			"so3": 83,
-			"so4": 95,
-			"so5": 90,
-			"so6": 90
-		},
-		{
-			"mahasiswa": 4,
-			"so1": 85,
-			"so2": 81,
-			"so3": 87,
-			"so4": 92,
-			"so5": 96,
-			"so6": 93
-		},
-		{
-			"mahasiswa": 5,
-			"so1": 87,
-			"so2": 83,
-			"so3": 84,
-			"so4": 90,
-			"so5": 91,
-			"so6": 89
-		}
-	]
-}
+	...
 ```
+
+1. **GET** /api/me/profile/ 
+1. **PUT** /api/me/profile/
+1. **GET** /api/me/exams/history/
 
 
