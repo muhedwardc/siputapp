@@ -77,7 +77,7 @@ export default {
             try {
                 const exams = await axios.get('/exams/', {
                     headers: {
-                        'Authorization': 'Token ' + this.$store.state.auth.token
+                        'Authorization': this.$store.getters.authToken
                     }
                 }).then(r => r.data)
 

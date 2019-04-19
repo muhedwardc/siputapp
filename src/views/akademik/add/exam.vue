@@ -385,7 +385,7 @@ export default {
         fetchDosen() {
             axios.get('/users/dosen/', {
                 headers: {
-                    'Authorization': 'Token ' + this.$store.state.auth.token
+                    'Authorization': this.$store.getters.authToken
                 }
             })
             .then(r => {

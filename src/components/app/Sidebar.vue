@@ -111,7 +111,7 @@ export default {
 		logout() {
 			axios.post('/auth/logout/', {}, {
 				headers: {
-					'Authorization': 'Token ' + this.$store.state.auth.token
+					'Authorization': this.$store.getters.authToken
 				}
 			})
 			.then(() => {

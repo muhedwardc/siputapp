@@ -51,7 +51,7 @@ export default {
         getExams() {
             axios.get('/me/exams/', {
                 headers: {
-                    'Authorization': 'Token ' + this.$store.state.auth.token
+                    'Authorization': this.$store.getters.authToken
                 }
             })
                 .then(r => {

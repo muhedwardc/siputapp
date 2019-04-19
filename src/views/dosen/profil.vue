@@ -7,7 +7,7 @@ export default {
     created() {
         axios.get('/me/profile/', {
             headers: {
-                'Authorization': 'Token ' + this.$store.state.auth.token
+                'Authorization': this.$store.getters.authToken
             }
         })
         .then(r => console.log(r.data))

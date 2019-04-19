@@ -129,7 +129,7 @@ export default {
             const startOfWeek = moment().startOf('isoWeek').toDate()
             const startDate = moment(startOfWeek).format('YYYY-MM-DD')
             const endDate = moment(startOfWeek).add(2, 'week').format('YYYY-MM-DD')
-            axios.get(`/exams/?start_date=${startDate}&end_date=${endDate}`, { headers: { 'Authorization': 'Token ' + this.$store.state.auth.token }})
+            axios.get(`/exams/?start_date=${startDate}&end_date=${endDate}`, { headers: { 'Authorization': this.$store.getters.authToken }})
                 .then(r => {
                     this.classifyExamsByDate(r.data)
                 })

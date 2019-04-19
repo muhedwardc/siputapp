@@ -143,7 +143,7 @@ export default {
             this.loading = true
             axios.get('/users/', {
                 headers: {
-                    'Authorization': 'Token ' + this.$store.state.auth.token
+                    'Authorization': this.$store.getters.authToken
                 }
             })
             .then(r => {
@@ -192,7 +192,7 @@ export default {
                     password
                 }, {
                     headers: {
-                        'Authorization': 'Token ' + this.$store.state.auth.token
+                        'Authorization': this.$store.getters.authToken
                     }
                 })
                 .then(r => {
