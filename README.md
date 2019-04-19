@@ -129,7 +129,8 @@ Endpoint untuk umum:
 	"email": "ridi.ferdiana@mail.ugm.ac.id",
 	"password": "Passw0rd"
 }
-'''
+```
+
 1. **POST** /api/auth/logout/
 1. **POST** /api/auth/change_password/
 ```JSON
