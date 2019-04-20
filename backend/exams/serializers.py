@@ -120,24 +120,6 @@ class CreateExamSerializer(serializers.ModelSerializer):
         
         return new_ujian
 
-# class UjianOnlySerializer(serializers.ModelSerializer):
-#     sesi = serializers.StringRelatedField()
-#     ruang = serializers.StringRelatedField()
-#     skripsi = SimpleEssaySerializer()
-
-#     class Meta:
-#         model = Exam
-#         fields = ('tanggal', 'sesi', 'ruang', 'skripsi')
-
-
-# class FullPengujiSerializer(serializers.ModelSerializer):
-#     ujian = UjianOnlySerializer()
-#     dosen = SimpleUserSerializer()
-
-#     class Meta:
-#         model = Penguji
-#         fields = ('ujian', 'dosen', 'is_leader')
-
 
 
 

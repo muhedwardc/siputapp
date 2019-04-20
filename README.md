@@ -234,7 +234,7 @@ Endpoint untuk umum:
 1. **GET** /api/me/exams/\<id>\/grades/ : list all grades
 1. **POST** /api/me/exams/\<id>\/grades/ : create grades for students
 ```JSON
-	...
+	....
 ```
 
 1. **GET** /api/me/profile/ 
