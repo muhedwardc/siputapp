@@ -139,7 +139,7 @@ export default {
 
         startUjian(id) {
             this.$store.state.onExam.id = id
-            this.$router.push(`/ujian/${id}/mulai`)
+            this.$router.push(`/ujian/${id}/tunggu`)
         }
     },
 
