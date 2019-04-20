@@ -20,7 +20,7 @@
                 </v-layout>
             </template>
             <template v-slot:items="props">
-                <td @click="$router.push(`/ujian/${props.item.ujian.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
+                <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
                 <td>{{ readableData(props.item.ujian.tanggal) }}</td>
                 <td>{{ props.item.ujian.sesi.start_time.slice(0, 5) + ' WIB' }}</td>
                 <td>{{ props.item.ujian.ruang.nama }}</td>
