@@ -3,16 +3,15 @@ from .models import Essay, Student
 from backend.users.serializers import SimpleUserSerializer
 from backend.users.models import User
 
-class ListStudentSerializer(serializers.ListSerializer):
+class ListStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ('id', 'nama', 'nim', 'prodi', 'konsentrasi')
+        fields = ('nama', 'nim', 'prodi', 'konsentrasi')
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ('nama', 'nim', 'prodi', 'konsentrasi', 'tempat_lahir', 'tanggal_lahir', 'telepon')
-        list_serializer_class = ListStudentSerializer
 
 class CreateStudentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,7 +20,7 @@ class CreateStudentSerializer(serializers.ModelSerializer):
 
 
 class SimpleEssaySerializer(serializers.ModelSerializer):
-    mahasiswa = StudentSerializer(many=True, source='students')
+    mahasiswa = ListStudentSerializer(many=True, source='students')
 
     class Meta:
         model = Essay
@@ -30,7 +29,7 @@ class SimpleEssaySerializer(serializers.ModelSerializer):
 class EssaySerializer(serializers.ModelSerializer):
     pembimbing_satu = serializers.StringRelatedField()
     pembimbing_dua = serializers.StringRelatedField()
-    mahasiswa = StudentSerializer(many=True, source='students')
+    mahasiswa = ListStudentSerializer(many=True, source='students')
 
     class Meta:
         model = Essay

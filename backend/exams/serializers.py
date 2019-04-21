@@ -4,8 +4,9 @@ from .models import Room, Session, Exam, Penguji
 from backend.essays.serializers import SimpleEssaySerializer, EssaySerializer, CreateEssaySerializer
 from backend.essays.models import Essay, Student
 from backend.users.serializers import SimpleUserSerializer
+from backend.users.models import User
 
-class ListRoomSerializer(serializers.ListSerializer):
+class ListRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = '__all__'
@@ -13,8 +14,7 @@ class ListRoomSerializer(serializers.ListSerializer):
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
-        fields = ('nama',)
-        list_serializer_class = ListRoomSerializer
+        fields = ('id', 'nama')
 
 class ListSessionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,11 +24,10 @@ class ListSessionSerializer(serializers.ModelSerializer):
 class SessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Session
-        fields = ('nama', 'start_time', 'end_time')
-        list_serializer_class = ListSessionSerializer
+        fields = ('id', 'nama', 'mulai', 'selesai')
 
 
-class ListPengujiSerializer(serializers.ListSerializer):
+class ListPengujiSerializer(serializers.ModelSerializer):
     dosen = serializers.StringRelatedField()
 
     class Meta:
@@ -41,7 +40,6 @@ class PengujiSerializer(serializers.ModelSerializer):
     class Meta:
         model = Penguji
         fields = ('dosen', 'is_leader', 'is_present')
-        list_serializer_class = ListPengujiSerializer
 
 class CreatePengujiSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,7 +55,7 @@ class CreatePengujiSerializer(serializers.ModelSerializer):
 
             return penguji
 
-class ListExamSerializer(serializers.ListSerializer):
+class ListExamSerializer(serializers.ModelSerializer):
     sesi = serializers.StringRelatedField()
     ruang = serializers.StringRelatedField()
     skripsi = SimpleEssaySerializer()
@@ -76,7 +74,6 @@ class ExamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exam
         fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
-        list_serializer_class = ListExamSerializer
 
 class CreateExamSerializer(serializers.ModelSerializer):
     skripsi = CreateEssaySerializer()

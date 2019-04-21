@@ -27,7 +27,7 @@ class SiputExamSerializer(serializers.ModelSerializer):
         fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
 
 
-class ListSiputPengujiSerializer(serializers.ListSerializer):
+class ListSiputPengujiSerializer(serializers.ModelSerializer):
     ujian = SimpleSiputExamSerializer()
 
     class Meta:
@@ -41,4 +41,3 @@ class SiputPengujiSerializer(serializers.ModelSerializer):
     class Meta:
         model = Penguji
         fields = ('ujian', )
-        list_serializer_class = ListSiputPengujiSerializer

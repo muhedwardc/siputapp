@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .serializers import SiputPengujiSerializer
+from .serializers import SiputPengujiSerializer, ListSiputPengujiSerializer
 from backend.essays.serializers import EssaySerializer, StudentSerializer
 from backend.comments.serializers import CommentSerializer, CreateCommentSerializer
 from backend.grades.serializers import GradeSerializer, CreateGradeSerializer
@@ -19,13 +19,57 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
     def get_queryset(self):
         return self.request.user.exams.all()
 
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ListSiputPengujiSerializer
+        else:
+            return SiputPengujiSerializer
+
 
     def list(self, request):
         list_exam = self.get_queryset().exclude(ujian__status=3)
         page = self.paginate_queryset(list_exam)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+    @action(methods=['POST'], detail=True)
+    def present(self, request, *args, **kwargs):
+        penguji = self.get_object()
+        penguji.is_present = True
+        penguji.save()
+        return Response({
+            'msg': 'status kehadiran berhasil diubah.'
+        })
     
+    @action(methods=['POST'], detail=True)
+    def start_exam(self, request, *args, **kwargs):
+        penguji = self.get_object()
+        if penguji.is_leader != True:
+            return Response({
+                'msg': 'Anda tidak memiliki otorisasi untuk memulai ujian.'
+            })
+
+        ujian = penguji.ujian
+        ujian.status = 2
+        ujian.save()
+        return Response({
+            'msg': 'status ujian berhasil diubah.'
+        })
+    
+    @action(methods=['POST'], detail=True)
+    def finish_exam(self, request, *args, **kwargs):
+        penguji = self.get_object()
+        if penguji.is_leader != True:
+            return Response({
+                'msg': 'Anda tidak memiliki otorisasi untuk mengakhiri ujian.'
+            })
+
+        ujian = penguji.ujian
+        ujian.status = 3
+        ujian.save()
+        return Response({
+            'msg': 'status ujian berhasil diubah.'
+        })
 
     @action(detail=False)
     def history(self, request, *args, **kwargs):

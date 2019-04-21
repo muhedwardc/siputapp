@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 
-from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer
+from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer
 from .models import Exam, Penguji, Room, Session
 from backend.pagination import CustomPagination
 
@@ -18,6 +18,8 @@ class ExamViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self, *args, **kwargs):
         if self.action == 'create':
             return CreateExamSerializer
+        elif self.action == 'list':
+            return ListExamSerializer
         else:
             return ExamSerializer
 
@@ -43,7 +45,7 @@ class ExamViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True)
-    def penguji(self, request):
+    def penguji(self, request, *args, **kwargs):
         exam = self.get_object()
         list_penguji = exam.penguji.all()
         serializer = PengujiSerializer(list_penguji, many=True)
