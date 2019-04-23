@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
 from .models import Grade
-from backend.essays.serializers import SimpleStudentSerializer
+from backend.essays.serializers import StudentSerializer
 
 
 class GradeSerializer(serializers.ModelSerializer):
-    mahasiswa = SimpleStudentSerializer()
+    mahasiswa = StudentSerializer()
 
     class Meta:
         model = Grade

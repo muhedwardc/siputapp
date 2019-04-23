@@ -1,68 +1,82 @@
-from rest_framework import viewsets, mixins, views, status, permissions
+from rest_framework import viewsets, mixins, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .serializers import SimpleSiputSerializer, SiputSerializer, SiputProfileSerializer
-from backend.essays.serializers import EssaySerializer, SimpleStudentSerializer
+from .serializers import SiputPengujiSerializer, ListSiputPengujiSerializer
+from backend.essays.serializers import EssaySerializer, StudentSerializer
 from backend.comments.serializers import CommentSerializer, CreateCommentSerializer
 from backend.grades.serializers import GradeSerializer, CreateGradeSerializer
 from backend.exams.models import Penguji, Exam
 from backend.comments.models import Comment
+from backend.pagination import CustomPagination
 
-# class SiputAPI(views.APIView):
-#     def get(self, request, format=None):
-#         unconfirmed_ujian = request.user.exams.filter(ujian__is_finish=False, is_attending=None).order_by('created_date')
-#         next_ujian = request.user.exams.filter(ujian__is_finish=False, is_attending=True).first()
-#         if next_ujian:
-#             return Response({
-#                 "next_ujian": SimpleSiputSerializer(next_ujian).data,
-#                 "unconfirmed_ujian": SimpleSiputSerializer(unconfirmed_ujian, many=True).data
-#             })
-#         return Response({
-#             "next_ujian": "Tidak ada ujian yang akan datang.",
-#             "unconfirmed_ujian": SimpleSiputSerializer(unconfirmed_ujian, many=True).data
-#         })
 
-class ExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     permission_classes = (permissions.IsAuthenticated, )
+    serializer_class = SiputPengujiSerializer
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         return self.request.user.exams.all()
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return SiputSerializer
-        return SimpleSiputSerializer
+        if self.action == 'list':
+            return ListSiputPengujiSerializer
+        else:
+            return SiputPengujiSerializer
+
 
     def list(self, request):
-        ujian = self.get_queryset().filter(ujian__is_finish=False).order_by('ujian__tanggal')
-        serializer = self.get_serializer(ujian, many=True)
-        return Response(serializer.data)
-    
-    @action(methods=['POST'], detail=True)
-    def terima(self, request, *args, **kwargs):
-        penguji = self.get_object()
-        penguji.is_attending = True
-        penguji.save()
-        return Response({
-            "msg": "Status kehadiran berhasil diubah."
-        })
+        list_exam = self.get_queryset().exclude(ujian__status=3)
+        page = self.paginate_queryset(list_exam)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(methods=['POST'], detail=True)
-    def tolak(self, request, *args, **kwargs):
+    def present(self, request, *args, **kwargs):
         penguji = self.get_object()
-        penguji.is_attending = False
+        penguji.is_present = True
         penguji.save()
         return Response({
-            "msg": "Status kehadiran berhasil diubah."
+            'msg': 'status kehadiran berhasil diubah.'
+        })
+    
+    @action(methods=['POST'], detail=True)
+    def start_exam(self, request, *args, **kwargs):
+        penguji = self.get_object()
+        if penguji.is_leader != True:
+            return Response({
+                'msg': 'Anda tidak memiliki otorisasi untuk memulai ujian.'
+            })
+
+        ujian = penguji.ujian
+        ujian.status = 2
+        ujian.save()
+        return Response({
+            'msg': 'status ujian berhasil diubah.'
+        })
+    
+    @action(methods=['POST'], detail=True)
+    def finish_exam(self, request, *args, **kwargs):
+        penguji = self.get_object()
+        if penguji.is_leader != True:
+            return Response({
+                'msg': 'Anda tidak memiliki otorisasi untuk mengakhiri ujian.'
+            })
+
+        ujian = penguji.ujian
+        ujian.status = 3
+        ujian.save()
+        return Response({
+            'msg': 'status ujian berhasil diubah.'
         })
 
     @action(detail=False)
     def history(self, request, *args, **kwargs):
-        ujian = self.get_queryset().filter(
-            ujian__is_finish=True).order_by('-ujian__tanggal')
-        serializer = self.get_serializer(ujian, many=True)
-        return Response(serializer.data)
+        list_finished_exam = self.get_queryset().filter(ujian__status=3)
+        page = self.paginate_queryset(list_finished_exam)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=True)
     def essays(self, request, *args, **kwargs):
@@ -73,7 +87,7 @@ class ExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Retriev
     @action(detail=True)
     def students(self, request, *args, **kwargs):
         students = self.get_object().ujian.skripsi.students
-        serializer = SimpleStudentSerializer(students, many=True)
+        serializer = StudentSerializer(students, many=True)
         return Response(serializer.data)
 
     @action(detail=True)
@@ -107,21 +121,3 @@ class ExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Retriev
             grades.append(serializer.data)
         
         return Response({"grades": grades}, status=status.HTTP_201_CREATED)
-
-
-class UserProfileAPI(views.APIView):
-    permission_classes = (permissions.IsAuthenticated, )
-
-    def get(self, request, format=None):
-        serializer = SiputProfileSerializer(request.user)
-        return Response(serializer.data)
-
-    def put(self, request, format=None):
-        serializer = SiputProfileSerializer(request.user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                "msg": "Profile updated.",
-                "user": serializer.data
-            })
-        return Response(serializer.errors)
