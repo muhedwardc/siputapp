@@ -94,7 +94,7 @@ export default {
 
 	computed: {
 		routes() {
-			return this.$store.state.auth.user.role  == 1 ? this.akademikRoutes : this.dosenRoutes
+			return this.$store.state.auth.user.is_admin ? this.akademikRoutes : this.dosenRoutes
 		},
 
 		thispath() {
@@ -116,7 +116,6 @@ export default {
 			})
 			.then(() => {
 				this.removeCookies()
-				this.$store.state.snackbar.show = false
 				this.$router.replace('/login')
 			})
 			.catch(err => this.showSnackbar({

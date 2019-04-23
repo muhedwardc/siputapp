@@ -59,11 +59,11 @@ export default new Vuex.Store({
 				action: payload.action ? payload.action : false
 			}
 		},
-		removeCookies(state) {
+		async removeCookies(state) {
 			state.auth.token = ''
 			state.auth.user = {}
-			Object.keys(Cookies.get()).forEach(function(cookieName) {
-				Cookies.remove(cookieName)
+			Object.keys(Cookies.get()).forEach(async function(cookieName) {
+				await Cookies.remove(cookieName)
 			})
 		}
 	},

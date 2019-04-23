@@ -22,10 +22,10 @@
                 </v-layout>
             </template>
             <template v-slot:items="props">
-                <td class="text-xs-left">{{ props.item.skripsi.judul }}</td>
+                <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;" class="text-xs-left">{{ props.item.skripsi.judul }}</td>
                 <td class="text-xs-left">{{ readableDate(props.item.tanggal) }}</td>
-                <td class="text-xs-left">{{ props.item.sesi.start_time.slice(0, 5) + ' WIB' }}</td>
-                <td class="text-xs-left">{{ props.item.ruang.nama }}</td>
+                <td class="text-xs-left">{{ props.item.sesi }}</td>
+                <td class="text-xs-left">{{ props.item.ruang }}</td>
                 <td class="text-xs-left">{{ props.item.status ? status[props.item.status] : status[0] }}</td>
             </template>
         </v-data-table>
@@ -81,7 +81,7 @@ export default {
                     }
                 }).then(r => r.data)
 
-                this.exams = exams
+                this.exams = exams.results
                 this.loading = false
                 this.loaded = true
             } catch (e) {

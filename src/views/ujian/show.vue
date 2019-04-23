@@ -13,7 +13,7 @@
                         </v-layout>
                         <hr class="mt-3 mb-3">
                         <v-layout row justify-start align-center wrap>
-                            <v-chip v-if="exam.is_leader" color="warning" class="white--text ml-0">
+                            <v-chip v-if="isLeader" color="warning" class="white--text ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon>verified_user</v-icon>
                                 </v-avatar>
@@ -29,13 +29,13 @@
                                 <v-avatar class="mr-0">
                                     <v-icon class="subheading">access_time</v-icon>
                                 </v-avatar>
-                                {{ exam.ujian.sesi.start_time }}
+                                {{ exam.ujian.sesi }}
                             </v-chip>
                             <v-chip class="ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon class="subheading">place</v-icon>
                                 </v-avatar>
-                                {{ exam.ujian.ruang.nama }}
+                                {{ exam.ujian.ruang }}
                             </v-chip>
                         </v-layout>
                         <v-layout column class="mt-4">
@@ -101,6 +101,10 @@ export default {
     computed: {
         date() {
             return moment(this.exam.ujian.tanggal, 'DD/MM/YYYY').format('LL')
+        },
+
+        isLeader() {
+            return this.exam.ujian.penguji[0].dosen == this.$store.state.auth.user.nama
         },
 
         isToday() {

@@ -32,19 +32,18 @@ router.beforeEach((to, from, next) => {
   const akademikRoute = to.matched.some(record => record.meta.akademikRoute)
   const publicRoute = to.matched.some(record => record.meta.publicRoute)
   const isLoggedIn = store.getters.isLoggedIn
-  const isDosen = isLoggedIn && !!user && user.role == 2
-  const isAkademik = isLoggedIn && !!user && user.role == 1
+  const isAkademik = isLoggedIn && !!user && user.is_admin
 
   if (authRequired && !isLoggedIn) {
     return next('/login')
   } else if (publicRoute && isLoggedIn) {
     return next(from.fullPath)
   } else if (to.fullPath === '/') {
-    if (isDosen) return next('/dosen')
-    else if (isAkademik) return next('/akademik')
+    if (isAkademik) return next('/akademik')
+    else if (!isAkademik) return next('/dosen')
     else return next('/login')
   } else {
-    if (dosenRoute && !akademikRoute && isLoggedIn && !isDosen) {
+    if (dosenRoute && !akademikRoute && isLoggedIn && isAkademik) {
       return next(from.fullPath)
     } else if (akademikRoute && !dosenRoute && isLoggedIn && !isAkademik) {
       return next(from.fullPath)

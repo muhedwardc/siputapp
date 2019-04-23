@@ -8,7 +8,7 @@
                             <span class="warning--text" v-if="item.ujian.skripsi.is_capstone">Capstone: </span>{{ item.ujian.skripsi.judul }}
                         </p>
                         <v-spacer></v-spacer>
-                        <v-tooltip v-if="item.is_leader" top>
+                        <v-tooltip v-if="item.ujian.penguji[0].dosen == $store.state.auth.user.nama" top>
                             <template v-slot:activator="{ on }">
                                 <v-avatar color="warning" style="flex-shrink: 0" size=24 v-on="on">
                                     <i class="fas fa-crown fa-sm" style="color: white;"></i>
@@ -19,7 +19,7 @@
                     </v-layout>
                 </v-card-title>
                 <v-card-text class="pt-0">
-                    <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi.start_time + ' WIB' }} - {{ item.ujian.ruang.nama }}</span>
+                    <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi }} - {{ item.ujian.ruang }}</span>
                 </v-card-text>
             </v-layout>
         </v-card>

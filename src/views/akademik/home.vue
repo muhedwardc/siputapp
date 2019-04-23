@@ -30,9 +30,9 @@
                                     <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
                                     <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
                                 </v-layout>
-                                <p class="mb-0"><span :class="isToday(exam.tanggal) ? 'purple--text font-weight-bold' : ''">{{ isToday(exam.tanggal) ? 'Hari ini' : readableDate(exam.tanggal) }}</span> - {{ exam.sesi.start_time.slice(0, 5) + ' WIB'}} - {{ exam.ruang.nama }}</p>
-                                <p class="mb-0">Mahasiswa: <span v-for="(mahasiswa, i) in exam.skripsi.mahasiswa" :key="i">{{ mahasiswa.nama + (i == exam.skripsi.mahasiswa.length-1 ? '' : ', ') }}</span></p>
-                                <p class="mb-0">Penguji: <span v-for="(penguji, i) in exam.penguji" :key="i">{{ penguji.dosen.nama + (i == exam.penguji.length-1 ? '' : ', ') }}</span></p>
+                                <p class="mb-0"><span :class="isToday(exam.tanggal) ? 'purple--text font-weight-bold' : ''">{{ isToday(exam.tanggal) ? 'Hari ini' : readableDate(exam.tanggal) }}</span> - {{ exam.sesi }} - {{ exam.ruang }}</p>
+                                <p class="mb-0">Mahasiswa: {{ readableString(exam.skripsi.mahasiswa, 'nama') }}</p>
+                                <p class="mb-0">Penguji: {{ readableString(exam.penguji, 'dosen') }}</p>
                             </v-layout>
                         </v-card>
                         <p v-else>Tidak ada ujian.</p>
@@ -103,8 +103,16 @@ export default {
                 let theDay = moment(startOfWeek).add('day', i)
                 day.date = moment(theDay, 'DD/MM/YYYY').format('DD/MM/YYYY')
                 if (day.date === this.today) this.activeTab = 'tab-' + i
-                else this.activeTab = 'tab-' + (this.days.length + 1)
+                else this.activeTab = 'tab-' + (this.days.length - 1)
             })
+        },
+
+        readableString(arr, par) {
+            let res = ''
+            for (let i = 0; i < arr.length; i ++ ){
+                res += arr[i][par] + (i == arr.length-1 ? '' : ', ')
+            }
+            return res
         },
 
         readableDate(date) {
@@ -113,10 +121,19 @@ export default {
         },
 
         classifyExamsByDate(exams){
-            this.days.map(day => {
-                exams.map(exam => {
-                    if (exam.tanggal == day.date) day.exams.push(exam)
+            exams.map(exam => {
+                let assigned = false
+                this.days.map(day => {
+                    if (exam.tanggal == day.date) {
+                        day.exams.push(exam)
+                        assigned = true
+                    }
                 })
+
+                if (!assigned) {
+                    this.days[this.days.length-1].exams.push(exam)
+                    assigned = false
+                }
             })
         },
 
@@ -129,9 +146,9 @@ export default {
             const startOfWeek = moment().startOf('isoWeek').toDate()
             const startDate = moment(startOfWeek).format('YYYY-MM-DD')
             const endDate = moment(startOfWeek).add(2, 'week').format('YYYY-MM-DD')
-            axios.get(`/exams/?start_date=${startDate}&end_date=${endDate}`, { headers: { 'Authorization': this.$store.getters.authToken }})
+            axios.get(`/exams/?mulai=${startDate}&selesai=${endDate}`, { headers: { 'Authorization': this.$store.getters.authToken }})
                 .then(r => {
-                    this.classifyExamsByDate(r.data)
+                    this.classifyExamsByDate(r.data.results)
                 })
                 .catch(err => {
                     this.showSnackbar({

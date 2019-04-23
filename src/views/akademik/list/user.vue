@@ -23,6 +23,9 @@
                                 <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
+                                <v-text-field v-model="editedItem.nip" label="NIP"></v-text-field>
+                            </v-flex>
+                            <v-flex xs12>
                                 <v-select
                                     v-model="editedItem.role"
                                     :items="roles"
@@ -31,6 +34,27 @@
                                     required
                                     ></v-select>
                             </v-flex>
+                            <template v-if="editedItem.role == roles[0]">
+                                <v-flex xs12>
+                                    <v-select
+                                        v-model="editedItem.prodi"
+                                        :items="prodiOptions"
+                                        :rules="[v => !!v || 'Item is required']"
+                                        label="Prodi"
+                                        required
+                                        ></v-select>
+                                </v-flex>
+                                <v-flex xs12>
+                                    <v-select
+                                        v-model="editedItem.konsentrasi"
+                                        :items="konsentrasi"
+                                        :rules="[v => !!v || 'Item is required']"
+                                        label="Konsentrasi"
+                                        :disabled="!editedItem.prodi"
+                                        required
+                                        ></v-select>
+                                </v-flex>
+                            </template>
                             <v-flex xs12>
                                 <v-text-field v-model="editedItem.password" label="Password" type="password"></v-text-field>
                             </v-flex>
@@ -61,15 +85,15 @@
                 </span>
             </template>
             <template v-slot:no-data>
-                <v-layout :value="!users" class="pa-2" justify-center>
-                    Tidak ada pengguna untuk ditampilkan.<br>
+                <v-layout :value="!users" class="pa-2" column align-center>
+                    Tidak ada pengguna untuk ditampilkan.
                     <v-btn color="primary" @click="initialize">Muat ulang</v-btn>
                 </v-layout>
             </template>
             <template v-slot:items="props">
                 <td class="text-xs-left">{{ props.item.nama }}</td>
                 <td class="text-xs-left">{{ props.item.email }}</td>
-                <td class="text-xs-left">{{ props.item.role == 1 ? 'Akademik' : 'Dosen' }}</td>
+                <td class="text-xs-left">{{ props.item.is_admin ? 'Akademik' : 'Dosen' }}</td>
                 <td class="text-xs-left">{{ props.item.nip }}</td>
                 <td class="justify-center layout px-0">
                     <v-icon small class="mr-2" @click="editItem(props.item)">edit</v-icon>
@@ -96,10 +120,18 @@ export default {
                 { text: 'Actions', value: 'nama', sortable: false },
             ],
             roles: ['Dosen', 'Akademik'],
+            prodiOptions: ['TE', 'TI'],
+            prodi: ['Teknologi Elektro', 'Teknologi Informasi'],
+            konsentrasiOptions: [
+                ['TTL', 'SIE'],
+                ['RSI', 'RPL', 'RSK']
+            ],
             users: [],
             editedIndex: -1,
             editedItem: {
                 name: '',
+                prodi: '',
+                konsentrasi: '',
                 email: '',
                 role: '',
                 nip: '',
@@ -109,6 +141,8 @@ export default {
             defaultItem: {
                 name: '',
                 email: '',
+                prodi: '',
+                konsentrasi: '',
                 role: '',
                 nip: '',
                 password: '',
@@ -121,6 +155,9 @@ export default {
     computed: {
         formTitle () {
             return this.editedIndex === -1 ? 'Tambah Pengguna' : 'Ubah Pengguna'
+        },
+        konsentrasi () {
+            return this.editedItem.prodi == this.prodiOptions[0] ? this.konsentrasiOptions[0] : this.konsentrasiOptions[1]
         }
     },
 
@@ -147,7 +184,7 @@ export default {
                 }
             })
             .then(r => {
-                this.users = r.data
+                this.users = r.data.results
                 this.loading = false
             })
             .catch(err => {
@@ -185,12 +222,18 @@ export default {
         save () {
             const valid = this.$refs.form.validate()
             if (valid) {
-                const { name, email, role, password } = this.editedItem
-                axios.post(`/users/${role.toLowerCase()}/`, {
+                const { name, email, role, prodi, nip, konsentrasi, password } = this.editedItem
+                let user = {
                     nama: name,
                     email,
-                    password
-                }, {
+                    password,
+                    nip,
+                }
+                if (role == this.roles[0]) {
+                    user['konsentrasi'] = konsentrasi
+                    user['prodi'] = prodi
+                }
+                axios.post(`/users/${role.toLowerCase()}/`, user, {
                     headers: {
                         'Authorization': this.$store.getters.authToken
                     }

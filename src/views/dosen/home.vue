@@ -55,7 +55,7 @@ export default {
                 }
             })
                 .then(r => {
-                    this.exams = r.data
+                    this.exams = r.data.results
                     this.exams.length > 0 ? this.filterUjian() : null
                     let message = this.todayExams.length > 0 ? 'Hari ini ada ' + this.todayExams.length + ' ujian' : 'Hari ini tidak ada ujian'
                     if (!Cookie.get('visit_home')) {

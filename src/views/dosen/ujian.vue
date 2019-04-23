@@ -22,8 +22,8 @@
             <template v-slot:items="props">
                 <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
                 <td>{{ readableData(props.item.ujian.tanggal) }}</td>
-                <td>{{ props.item.ujian.sesi.start_time.slice(0, 5) + ' WIB' }}</td>
-                <td>{{ props.item.ujian.ruang.nama }}</td>
+                <td>{{ props.item.ujian.sesi }}</td>
+                <td>{{ props.item.ujian.ruang }}</td>
                 <td>{{ props.item.is_leader ? 'Ketua' : 'Anggota' }}</td>
             </template>
             </v-data-table>
@@ -95,16 +95,14 @@ export default {
                     'Authorization': this.$store.getters.authToken
                 }
             })
-            .then(r => this.exams.push.apply(this.exams, r.data))
+            .then(r => this.exams.push.apply(this.exams, r.data.results))
             .then(() => {
                 axios.get('/me/exams/history/', {
                     headers: {
                         'Authorization': this.$store.getters.authToken
                     }
                 })
-                .then(r => {
-                    this.exams.push.apply(this.exams, r.data)
-                })
+                .then(r => this.exams.push.apply(this.exams, r.data.results))
                 .catch(err => {
                     this.exams = []
                     this.showSnackbar({
