@@ -3,16 +3,13 @@
         <v-card flat class="pa-2 pl-3 pr-3">
             <form-wizard
                 @on-complete="onComplete"
-                shape="tab"
                 color="blue">
-                <tab-content title="Informasi Ujian" icon="fas fa-info-circle" :before-change="validateInfo">
+                <tab-content title="Informasi Ujian" :before-change="validateInfo">
                     <v-form
                         ref="form"
                         v-model="valid">
-                        <v-radio-group v-model="is_capstone">
-                            <template v-slot:label>
-                                <div>Tipe Ujian</div>
-                            </template>
+                        <label>Tipe Ujian</label>
+                        <v-radio-group v-model="exam.skripsi.is_capstone">
                             <v-radio :value="false" color="primary">
                                 <template v-slot:label>
                                 <div>Individu</div>
@@ -24,120 +21,113 @@
                                 </template>
                             </v-radio>
                         </v-radio-group>
-
+                        
+                        <label>Judul Ujian</label>
                         <v-text-field
                             v-model="exam.skripsi.judul"
-                            label="Judul Ujian"
-                            prepend-icon="bookmark"
                             required
+                            solo
+                            label="Judul Ujian"
                             ></v-text-field>
-
-                        <v-container grid-list-xl pa-0>
-                            <v-layout row wrap>
-                                <v-flex xs12 sm4>
-                                    <v-text-field
-                                        v-model="exam.ruang"
-                                        label="Ruangan"
-                                        prepend-icon="room"
-                                        required
-                                        ></v-text-field>
-                                </v-flex>
-                                <v-flex xs12 sm4>
-                                    <v-menu
-                                        v-model="dateMenu"
-                                        :close-on-content-click="false"
-                                        :nudge-right="40"
-                                        lazy
-                                        transition="scale-transition"
-                                        offset-y
-                                        full-width
-                                        min-width="290px">
-                                        <template v-slot:activator="{ on }">
-                                        <v-text-field
-                                            v-model="exam.tanggal"
-                                            label="tanggal"
-                                            readonly
-                                            prepend-icon="event"
-                                            v-on="on"
-                                        ></v-text-field>
-                                        </template>
-                                        <v-date-picker v-model="tanggal" @input="dateMenu = false"></v-date-picker>
-                                    </v-menu>
-                                </v-flex>
-                                <v-flex xs12 sm4>
-                                    <v-menu
-                                        v-model="timeMenu"
-                                        :close-on-content-click="false"
-                                        :nudge-right="40"
-                                        lazy
-                                        transition="scale-transition"
-                                        offset-y
-                                        full-width
-                                        min-width="290px">
-                                        <template v-slot:activator="{ on }">
-                                        <v-text-field
-                                            v-model="exam.sesi"
-                                            label="jam"
-                                            prepend-icon="schedule"
-                                            readonly
-                                            v-on="on"
-                                        ></v-text-field>
-                                        </template>
-                                        <v-time-picker format="24hr" @input="timeMenu = false" v-model="jam" color="green lighten-1" header-color="primary"></v-time-picker>
-                                    </v-menu>
-                                </v-flex>
-                            </v-layout>
-                        </v-container>
+                        
+                        <label>Intisari</label>
                         <v-textarea
                             :value="exam.skripsi.intisari"
-                            label="Intisari"
-                            prepend-icon="subject"
                             required
+                            solo
+                            label="Intisari"
                             ></v-textarea>
+                        
+                        <label>Tambahkan Naskah</label>
+                        <v-text-field placeholder="pilih naskah" @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
+                        <input
+                            type="file"
+                            style="display: none"
+                            ref="pdf"
+                            solo
+                            accept="application/pdf,application/vnd.ms-excel"
+                            @change="onFilePicked"
+                        >
                     </v-form>
                 </tab-content>
-                <tab-content title="Data Mahasiswa" icon="fas fa-graduation-cap">
+                <tab-content title="Pilih Ruangan">
+                    <v-menu
+                        v-model="dateMenu"
+                        :close-on-content-click="false"
+                        :nudge-right="40"
+                        lazy
+                        transition="scale-transition"
+                        offset-y
+                        full-width
+                        solo
+                        min-width="290px">
+                        <template v-slot:activator="{ on }">
+                            <v-text-field
+                                v-model="exam.tanggal"
+                                readonly
+                                placeholder="Pilih Tanggal Ujian"
+                                prepend-icon="event "
+                                v-on="on"
+                            ></v-text-field>
+                        </template>
+                        <v-date-picker @change="getRoom()" v-model="exam.tanggal" @input="dateMenu = false"></v-date-picker>
+                    </v-menu>
+                </tab-content>
+                <tab-content title="Data Mahasiswa">
                     <v-layout column>
                         <v-form refs="formMahasiswa">
                             <v-form ref="mhsInfo" v-model="mhsValid" lazy-validation>
                                 <div v-for="(mahasiswa, index) in exam.skripsi.mahasiswa" :key="index" class="mb-4">
-                                    <v-layout row wrap align-center>
+                                    <v-layout row wrap align-center class="mb-2">
                                         <h3>Mahasiswa {{ index + 1 }}</h3>
-                                        <v-btn color="error" v-if="index > 1" @click="deleteMahasiswa(index)">Hapus mahasiswa</v-btn>                                            
+                                        <v-btn color="error" v-if="index > 0" @click="openDialog(mahasiswa['nama'].trim().length > 0 ? mahasiswa['nama'] : 'Mahasiswa ' + (index + 1), index)">Hapus mahasiswa</v-btn>                                            
                                     </v-layout>
+                                    <label>Nama</label>
                                     <v-text-field
                                         v-model="mahasiswa['nama']"
                                         :label="'Nama Mahasiswa ' + (index + 1)" 
-                                        prepend-icon="person"
                                         required
+                                        solo
                                     ></v-text-field>
                                     <v-container grid-list-xl class="pa-0">
                                         <v-layout row wrap>
                                             <v-flex xs12 sm3>
+                                                <label>NIM</label>
                                                 <v-text-field
                                                     v-model="mahasiswa['nim']"
                                                     label="NIM"
                                                     required
-                                                    prepend-icon="picture_in_picture"
+                                                    solo
                                                 ></v-text-field>
                                             </v-flex>
                                             <v-flex xs12 sm3>
+                                                <label>Prodi</label>
                                                 <v-text-field
-                                                    v-model="mahasiswa['ipk']"
-                                                    label="IPK"
-                                                    prepend-icon="grade"
+                                                    v-model="mahasiswa['prodi']"
                                                     required
+                                                    solo
                                                     ></v-text-field>
                                             </v-flex>
                                             <v-flex xs12 sm3>
+                                                <label>Prodi</label>
+                                                <v-text-field
+                                                    v-model="mahasiswa['konsentrasi']"
+                                                    required
+                                                    solo
+                                                    ></v-text-field>
+                                            </v-flex>
+                                        </v-layout>
+                                        <v-layout row wrap>
+                                            <v-flex xs12 sm3>
+                                                <label>Tempat Lahir</label>
                                                 <v-text-field
                                                     v-model="mahasiswa['tempat_lahir']"
-                                                    label="Tempat Lahir"
                                                     required
-                                                    prepend-icon="home"
+                                                    solo
                                                 ></v-text-field>
                                             </v-flex>
                                             <v-flex xs12 sm3>
+                                                <label>Tanggal Lahir</label>
                                                 <v-menu
                                                     v-model="mahasiswa['tanggal_dialog']"
                                                     :close-on-content-click="false"
@@ -150,9 +140,8 @@
                                                     <template v-slot:activator="{ on }">
                                                         <v-text-field
                                                             v-model="mahasiswa['tanggal_lahir']"
-                                                            label="Tanggal Lahir"
                                                             readonly
-                                                            prepend-icon="event"
+                                                            solo
                                                             v-on="on"
                                                         ></v-text-field>
                                                     </template>
@@ -165,20 +154,25 @@
                             </v-form>
                         </v-form>
                     </v-layout>
-                    <v-btn color="primary" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa <= 4" @click="addMahasiswa()">Tambah mahasiswa</v-btn>
+                    <v-btn color="primary" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa.length < 4" @click="addMahasiswa()">Tambah mahasiswa</v-btn>
                 </tab-content>
-                <tab-content title="Dosen Penguji" icon="fas fa-chalkboard-teacher">
-                    <v-text-field
-                        v-model="search"
-                        append-icon="search"
-                        label="Search"
-                        single-line
-                        hide-details
-                    ></v-text-field>
+                <tab-content title="Dosen Penguji">
+                    <v-layout row>
+                        <v-text-field
+                            v-model="search"
+                            append-icon="search"
+                            label="Cari Dosen"
+                            single-line
+                            hide-details
+                        ></v-text-field>
+                        <v-spacer></v-spacer>
+                        <v-spacer></v-spacer>
+                    </v-layout>
                     <v-data-table
                         :headers="dosenHeaders"
                         :items="dosen"
-                        :search="search">
+                        :search="search"
+                        :loading="loadingDosen">
                         <template v-slot:items="props">
                             <td>{{ props.item.nama || props.item.email }}</td>
                             <td>
@@ -209,10 +203,39 @@
                                 </v-menu>
                             </td>
                         </template>
+                        <template v-slot:no-data>
+                            <v-layout align-center pa-2 justify-center>
+                                Tidak ada data yang ditampilkan
+                            </v-layout>
+                        </template>
                     </v-data-table>
                 </tab-content>
             </form-wizard>
         </v-card>
+        <v-dialog
+            v-model="dialog.show"
+            max-width="300">
+        <v-card>
+            <v-card-text>
+                Anda ingin menghapus data mahasiswa <b>{{ dialog.name }}</b>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                    color="green darken-1"
+                    flat="flat"
+                    @click="closeDialog()">
+                    Tidak
+                </v-btn>
+                <v-btn
+                    color="green darken-1"
+                    flat="flat"
+                    @click="deleteMahasiswa(dialog.index)">
+                    Ya
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+        </v-dialog>
     </v-layout>
 </template>
 
@@ -220,12 +243,13 @@
 import { mapActions } from 'vuex'
 import { FormWizard, TabContent } from 'vue-form-wizard'
 import 'vue-form-wizard/dist/vue-form-wizard.min.css'
+import { loadavg } from 'os';
 
 export default {
     data() {
         return {
             exam: {
-                tanggal: '',
+                tanggal: null,
                 sesi: null,
                 ruang: null,
                 skripsi: {
@@ -236,12 +260,12 @@ export default {
                     is_capstone: false,
                     mahasiswa: [
                         {
-                            nama: "Muhammad Edward Chakin",
+                            nama: "Muhammad Edward Chakim",
                             nim: "15/385407/TK/44069",
                             prodi: "Teknologi Informasi",
                             konsentrasi: "Rekayasa Perangkat Lunak",
                             tempat_lahir: "Solo",
-                            tanggal_lahir: "1997-05-21",
+                            tanggal_lahir: "1998-06-04",
                             telepon: "08234785324"
                         }
                     ],
@@ -249,15 +273,15 @@ export default {
                 },
                 penguji: []
             },
-            is_capstone: false,
             search: '',
+            loadingDosen: false,
             dosen: [],
             dosenHeaders: [
                 { text: 'Nama', align: 'left', value: 'nama' },
-                { text: 'Aksi', align: 'left', sortable: false, value: 'selectedType' }
+                { text: 'Aksi', align: 'left', sortable: false, value: 'selectedType', width: '200px' }
             ],
             dosenTypes: [
-                'Pembimbing 1 (Ketua)',
+                'Pembimbing 1',
                 'Pembimbing 2',
                 'Penguji 1',
                 'Penguji 2',
@@ -266,40 +290,17 @@ export default {
             ],
             valid: true,
             mhsValid: true,
-            judul: 'Judul',
-            tipe: "0",
-            intisari: '',
-            ruang: '',
-            tanggal: '',
-            jam: '',
-            name: '',
             dateMenu: false,
             timeMenu: false,
-            select: null,
-            items: [
-                'Item 1',
-                'Item 2',
-                'Item 3',
-                'Item 4'
-            ],
-            checkbox: false
-        }
-    },
-
-    watch: {
-        is_capstone(val) {
-            let mhs = {
-                nama: "",
-                nim: "",
-                prodi: "",
-                konsentrasi: "",
-                tempat_lahir: "",
-                tanggal_lahir: "",
-                telepon: ""
-            }
-            if (val) this.exam.skripsi.mahasiswa = [mhs, mhs]
-            else this.exam.skripsi.mahasiswa = [mhs]
-            this.exam.skripsi.is_capstone = val
+            checkbox: false,
+            pdfName: '',
+            pdfUrl: '',
+            pdfFile: '',
+            dialog: {
+                show: false,
+                name: '',
+                index: null
+            },
         }
     },
 
@@ -344,8 +345,8 @@ export default {
         isSelected(i) {
             return !!this.exam.penguji[i]
         },
-        onComplete: function(){
-            alert('Selesai');
+        onComplete() {
+            this.createExam()
         },
         validateInfo () {
             return this.$refs.form.validate()
@@ -359,40 +360,92 @@ export default {
         addMahasiswa() {
             const valid = this.$refs.mhsInfo.validate()
             if (!valid) return
-            if (this.mahasiswaCapstone.length === 4) {
-                this.$store.dispatch('showSnackbar', {
-                    type: 'error',
-                    message: 'Melebihi batas mahasiswa'
-                })
-            } else {
-                this.mahasiswaCapstone.push({
-                    nama: '',
-                    nim: '',
-                    ipk: '',
-                    tempat_lahir: '',
-                    tanggal_lahir: '',
-                    tanggal_dialog: false
-                })
+            if (this.exam.skripsi.is_capstone) {
+                if (this.exam.skripsi.mahasiswa.length >= 4) {
+                    this.$store.dispatch('showSnackbar', {
+                        type: 'error',
+                        message: 'Melebihi batas mahasiswa'
+                    })
+                } else {
+                    this.exam.skripsi.mahasiswa.push({
+                        nama: '',
+                        nim: '',
+                        ipk: '',
+                        tempat_lahir: '',
+                        tanggal_lahir: '',
+                        tanggal_dialog: false
+                    })
+                }
+            }
+        },
+        openDialog(name, index) {
+            this.dialog = {
+                show: true,
+                name,
+                index
+            }
+        },
+        closeDialog() {
+            this.dialog = {
+                show: false, 
+                name: '',
+                index: null
             }
         },
         deleteMahasiswa(index) {
-            this.mahasiswaCapstone.splice(index, 1)
+            this.exam.skripsi.mahasiswa.splice(index, 1)
+            this.closeDialog()
         },
         fetchDosen() {
+            this.loadingDosen = true
             axios.get('/users/dosen/', {
                 headers: {
                     'Authorization': this.$store.getters.authToken
                 }
             })
             .then(r => {
-                this.dosen = r.data
+                this.dosen = r.data.results
+                this.loadingDosen = false
             })
             .catch(err => {
                 this.showSnackbar({
                     message: err.message,
                     type: 'error'
                 })
+                this.loadingDosen = false
             })
+        },
+        pickFile () {
+            this.$refs.pdf.click()
+        },
+		onFilePicked (e) {
+			const files = e.target.files
+			if(files[0] !== undefined) {
+				this.pdfName = files[0].name
+				if(this.pdfName.lastIndexOf('.') <= 0) {
+					return
+				}
+				const fr = new FileReader()
+				fr.readAsDataURL(files[0])
+				fr.addEventListener('load', () => {
+					this.pdfUrl = fr.result
+					this.exam.skripsi.berkas = files[0]
+				})
+			} else {
+				this.pdfName = ''
+				this.pdfFile = ''
+				this.pdfUrl = ''
+			}
+        },
+        getRoom() {
+            console.log('fetching room...')
+        },
+        async createExam() {
+            const formData = new FormData()
+            Object.keys(this.exam).forEach(key => {
+                console.log(key, this.exam[key])
+                formData.append(key, this.exam[key])
+            });
         }
     },
 
@@ -403,10 +456,30 @@ export default {
 </script>
 
 <style lang="sass">
-    .v-input--selection-controls:not(.v-input--hide-details) 
-        .v-input__slot
-            margin-bottom: 0 !important
+    .container.grid-list-xl 
+        .layout 
+            .flex
+                padding: 4px 12px
+
+    .v-input--selection-controls
+        margin-top: 0 !important
+        padding-top: 0 !important
+
+    .v-input__slot
+        margin-bottom: 0 !important
+
+    label:not(.v-label)
+        margin-bottom: 8px
+        font-size: 16px
+        display: block
 
     .wizard-header
         display: none
+    
+    .wizard-icon
+        font-style: normal
+    
+    .v-text-field.v-text-field--solo:not(.v-text-field--solo-flat) > .v-input__control > .v-input__slot
+        box-shadow: none
+        border: 1px solid #aaa
 </style>
