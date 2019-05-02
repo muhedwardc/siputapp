@@ -193,7 +193,7 @@ export default {
     created() {
         moment.locale('id')
         this.todayDate = moment().format('DD/MM/YYYY')
-        this.fetchUjian()
+        this.$store.state.auth.token ? this.fetchUjian() : this.$router.push('/login')
         this.assignDates()
     }
 }

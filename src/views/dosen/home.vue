@@ -89,7 +89,7 @@ export default {
     },
 
     created() {
-        this.getExams()
+        this.$store.state.auth.token ? this.getExams() : null
     }
 }
 </script>

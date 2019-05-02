@@ -126,7 +126,7 @@ export default {
     },
 
     mounted() {
-        this.fetchExams()
+        this.$store.state.auth.token ? this.fetchExams() : null
     }
 }
 </script>

@@ -550,7 +550,7 @@ export default {
     },
 
     created() {
-        this.fetchDosen()
+        this.$store.state.auth.token ? this.fetchDosen() : null
     }
 }
 </script>

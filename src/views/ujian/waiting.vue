@@ -42,7 +42,7 @@ export default {
     },
 
     created() {
-        this.getExam()
+        this.$store.state.auth.token ? this.getExam() : null
     }
 }
 </script>

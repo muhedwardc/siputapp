@@ -90,7 +90,7 @@ export default {
                 }, {})
                 .then(r => {
                     this.logUserIn(r.data)
-                    this.$router.push('/')
+                        .then(() => this.$router.push('/'))
                 })
                 .catch(err => {
                     this.isSubmitting = false

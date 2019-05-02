@@ -55,7 +55,7 @@ export default {
 
     created () {
         this.loaded = false
-        this.initialize()
+        this.$store.state.auth.token ? this.initialize() : null
     },
 
     methods: {

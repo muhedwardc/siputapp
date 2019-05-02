@@ -10,8 +10,8 @@ const userToken = Cookies.getJSON('_tkn')
 export default new Vuex.Store({
 	state: {
 		auth: {
-			token: userToken || '',
-			user: userData || {},
+			token: userToken || null,
+			user: userData || null,
 			loggedIn: false
 		},
 		snackbar: {
@@ -59,11 +59,11 @@ export default new Vuex.Store({
 				action: payload.action ? payload.action : false
 			}
 		},
-		async removeCookies(state) {
-			state.auth.token = ''
-			state.auth.user = {}
-			Object.keys(Cookies.get()).forEach(async function(cookieName) {
-				await Cookies.remove(cookieName)
+		removeCookies(state) {
+			state.auth.token = null
+			state.auth.user = null
+			Object.keys(Cookies.get()).forEach(function(cookieName) {
+				Cookies.remove(cookieName)
 			})
 		}
 	},

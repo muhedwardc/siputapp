@@ -106,12 +106,14 @@ export default {
     },
 
     created() {
-        this.$store.state.onExam.id = this.$router.currentRoute.params.id
-        this.fetchExam()
-        this.generateCommentsTemplate()
-        this.getDrawerWidth()
-        this.windowWidth <= 991 ? this.drawer = false : true
-        window.addEventListener('resize', this.getDrawerWidth)
+        if (this.$store.state.auth.token) {
+            this.$store.state.onExam.id = this.$router.currentRoute.params.id
+            this.fetchExam()
+            this.generateCommentsTemplate()
+            this.getDrawerWidth()
+            this.windowWidth <= 991 ? this.drawer = false : true
+            window.addEventListener('resize', this.getDrawerWidth)
+        }
     },
 
     methods: {

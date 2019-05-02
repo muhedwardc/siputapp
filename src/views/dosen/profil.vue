@@ -10,13 +10,19 @@ export default {
         }
     },
 
+    methods: {
+        fetchUserProfile() {
+            axios.get('/me/profile/', {
+                headers: {
+                    'Authorization': this.$store.getters.authToken
+                }
+            })
+            .then(r => this.user = r.data)
+        }
+    },
+
     created() {
-        axios.get('/me/profile/', {
-            headers: {
-                'Authorization': this.$store.getters.authToken
-            }
-        })
-        .then(r => this.user = r.data)
+        this.$store.state.auth.token ? this.fetchUserProfile() : null
     }
 }
 </script>

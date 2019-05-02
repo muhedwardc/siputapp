@@ -168,7 +168,7 @@ export default {
     },
 
     created () {
-        this.initialize()
+        this.$store.state.auth.token ? this.initialize() : null
     },
 
     methods: {
