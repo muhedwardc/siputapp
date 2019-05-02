@@ -90,6 +90,7 @@
                                             <td>
                                                 <v-text-field
                                                     v-model="mahasiswa['nama']"
+                                                    placeholder="Nama Mahasiswa"
                                                     required
                                                 ></v-text-field>
                                             </td>
@@ -100,6 +101,7 @@
                                             <td>
                                                 <v-text-field
                                                     v-model="mahasiswa['nim']"
+                                                    placeholder="NIM"
                                                     required
                                                 ></v-text-field>
                                             </td>
@@ -114,6 +116,7 @@
                                                         @change="navigateKonsentrasi(index)"
                                                         :items="options[index].prodiOptions"
                                                         :rules="[v => !!v || 'Item is required']"
+                                                        placeholder="Prodi"
                                                         required
                                                         ></v-select>
                                                     <span class="title ml-2 mr-2">/</span>
@@ -121,6 +124,7 @@
                                                         v-model="mahasiswa['konsentrasi']"
                                                         :items="options[index].konsentrasiOptions[options[index].prodiSelected]"
                                                         :rules="[v => !!v || 'Item is required']"
+                                                        placeholder="Konsentrasi"
                                                         :disabled="!mahasiswa['prodi']"
                                                         ></v-select>
                                                 </v-layout>
