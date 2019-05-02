@@ -39,11 +39,12 @@
                             ></v-textarea>
                         
                         <label>Tambahkan Naskah</label>
-                        <v-text-field placeholder="pilih naskah" @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
+                        <v-text-field placeholder="pilih naskah" readonly @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
                         <input
                             type="file"
                             style="display: none"
                             ref="pdf"
+                            readonly
                             solo
                             accept="application/pdf,application/vnd.ms-excel"
                             @change="onFilePicked"
@@ -82,74 +83,86 @@
                                         <h3>Mahasiswa {{ index + 1 }}</h3>
                                         <v-btn color="error" v-if="index > 0" @click="openDialog(mahasiswa['nama'].trim().length > 0 ? mahasiswa['nama'] : 'Mahasiswa ' + (index + 1), index)">Hapus mahasiswa</v-btn>                                            
                                     </v-layout>
-                                    <label>Nama</label>
-                                    <v-text-field
-                                        v-model="mahasiswa['nama']"
-                                        :label="'Nama Mahasiswa ' + (index + 1)" 
-                                        required
-                                        solo
-                                    ></v-text-field>
-                                    <v-container grid-list-xl class="pa-0">
-                                        <v-layout row wrap>
-                                            <v-flex xs12 sm3>
-                                                <label>NIM</label>
+                                    <table class="mahasiswa-table">
+                                        <tr>
+                                            <td><label>Nama</label></td>
+                                            <td>:</td>
+                                            <td>
+                                                <v-text-field
+                                                    v-model="mahasiswa['nama']"
+                                                    required
+                                                ></v-text-field>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label>NIM</label></td>
+                                            <td>:</td>
+                                            <td>
                                                 <v-text-field
                                                     v-model="mahasiswa['nim']"
-                                                    label="NIM"
                                                     required
-                                                    solo
                                                 ></v-text-field>
-                                            </v-flex>
-                                            <v-flex xs12 sm3>
-                                                <label>Prodi</label>
-                                                <v-text-field
-                                                    v-model="mahasiswa['prodi']"
-                                                    required
-                                                    solo
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label>Prodi/Konsentrasi</label></td>
+                                            <td>:</td>
+                                            <td>
+                                                <v-layout row wrap align-center>
+                                                    <v-select
+                                                        v-model="mahasiswa['prodi']"
+                                                        @change="navigateKonsentrasi(index)"
+                                                        :items="options[index].prodiOptions"
+                                                        :rules="[v => !!v || 'Item is required']"
+                                                        required
+                                                        ></v-select>
+                                                    <span class="title ml-2 mr-2">/</span>
+                                                    <v-select
+                                                        v-model="mahasiswa['konsentrasi']"
+                                                        :items="options[index].konsentrasiOptions[options[index].prodiSelected]"
+                                                        :rules="[v => !!v || 'Item is required']"
+                                                        :disabled="!mahasiswa['prodi']"
+                                                        ></v-select>
+                                                </v-layout>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>Tempat/Tanggal Lahir</label>
+                                            </td>
+                                            <td>:</td>
+                                            <td>
+                                                <v-layout align-center row wrap>
+                                                    <v-text-field
+                                                        v-model="mahasiswa['tempat_lahir']"
+                                                        placeholder="Tempat lahir"
+                                                        required
                                                     ></v-text-field>
-                                            </v-flex>
-                                            <v-flex xs12 sm3>
-                                                <label>Prodi</label>
-                                                <v-text-field
-                                                    v-model="mahasiswa['konsentrasi']"
-                                                    required
-                                                    solo
-                                                    ></v-text-field>
-                                            </v-flex>
-                                        </v-layout>
-                                        <v-layout row wrap>
-                                            <v-flex xs12 sm3>
-                                                <label>Tempat Lahir</label>
-                                                <v-text-field
-                                                    v-model="mahasiswa['tempat_lahir']"
-                                                    required
-                                                    solo
-                                                ></v-text-field>
-                                            </v-flex>
-                                            <v-flex xs12 sm3>
-                                                <label>Tanggal Lahir</label>
-                                                <v-menu
-                                                    v-model="mahasiswa['tanggal_dialog']"
-                                                    :close-on-content-click="false"
-                                                    :nudge-right="40"
-                                                    lazy
-                                                    transition="scale-transition"
-                                                    offset-y
-                                                    full-width
-                                                    min-width="290px">
-                                                    <template v-slot:activator="{ on }">
-                                                        <v-text-field
-                                                            v-model="mahasiswa['tanggal_lahir']"
-                                                            readonly
-                                                            solo
-                                                            v-on="on"
-                                                        ></v-text-field>
-                                                    </template>
-                                                    <v-date-picker v-model="mahasiswa['tanggal_lahir']" @input="mahasiswa['tanggal_dialog'] = false"></v-date-picker>
-                                                </v-menu>
-                                            </v-flex>
-                                        </v-layout>
-                                    </v-container>
+                                                    <span class="title ml-2 mr-2">/</span>
+                                                    <v-menu
+                                                        v-model="options[index].dateDialog"
+                                                        :close-on-content-click="true"
+                                                        :nudge-right="40"
+                                                        lazy
+                                                        transition="scale-transition"
+                                                        offset-y
+                                                        full-width
+                                                        min-width="290px">
+                                                        <template v-slot:activator="{ on }">
+                                                            <v-text-field
+                                                                v-model="mahasiswa['tanggal_lahir']"
+                                                                placeholder="YYYY-MM-DD"
+                                                                prepend-icon="event"
+                                                                readonly
+                                                                v-on="on"
+                                                            ></v-text-field>
+                                                        </template>
+                                                        <v-date-picker v-model="mahasiswa['tanggal_lahir']" @input="mahasiswa['tanggal_dialog'] = false"></v-date-picker>
+                                                    </v-menu>
+                                                </v-layout>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
                             </v-form>
                         </v-form>
@@ -258,21 +271,23 @@ export default {
                     pembimbing1: null,
                     pembimbing2: null,
                     is_capstone: false,
-                    mahasiswa: [
-                        {
-                            nama: "Muhammad Edward Chakim",
-                            nim: "15/385407/TK/44069",
-                            prodi: "Teknologi Informasi",
-                            konsentrasi: "Rekayasa Perangkat Lunak",
-                            tempat_lahir: "Solo",
-                            tanggal_lahir: "1998-06-04",
-                            telepon: "08234785324"
-                        }
-                    ],
+                    mahasiswa: [{}],
                     berkas: null
                 },
                 penguji: []
             },
+            options: [
+                {
+                    prodiOptions: ['TE', 'TI'],
+                    prodiSelected: 0,
+                    konsentrasiOptions: [
+                        ['TTL', 'SIE'],
+                        ['RSI', 'RPL', 'RSK']
+                    ],
+                    dateDialog: false
+                }
+            ],
+            indexItem: null,
             search: '',
             loadingDosen: false,
             dosen: [],
@@ -320,6 +335,10 @@ export default {
         ...mapActions([
             'showSnackbar'
         ]),
+        navigateKonsentrasi(index) {
+            const i = this.options[index].prodiOptions.findIndex(el => el == this.exam.skripsi.mahasiswa[index].prodi)
+            this.options[index].prodiSelected = i
+        },
         setType(i, dosenId){
             if (this.exam.penguji.includes(dosenId)) {
                 this.exam.penguji[this.exam.penguji.findIndex(e => e == dosenId)] = null
@@ -373,7 +392,14 @@ export default {
                         ipk: '',
                         tempat_lahir: '',
                         tanggal_lahir: '',
-                        tanggal_dialog: false
+                    })
+                    this.options.push({
+                        prodiOptions: ['TE', 'TI'],
+                        konsentrasiOptions: [
+                            ['TTL', 'SIE'],
+                            ['RSI', 'RPL', 'RSK']
+                        ],
+                        dateDialog: false
                     })
                 }
             }
@@ -394,6 +420,7 @@ export default {
         },
         deleteMahasiswa(index) {
             this.exam.skripsi.mahasiswa.splice(index, 1)
+            this.options.splice(index, 1)
             this.closeDialog()
         },
         fetchDosen() {
@@ -456,6 +483,16 @@ export default {
 </script>
 
 <style lang="sass">
+    .mahasiswa-table
+        width: 100%
+        tr
+            td:nth-of-type(2)
+                width: 20px
+
+        .v-text-field
+            padding-top: 0
+            margin-top: 0
+
     .container.grid-list-xl 
         .layout 
             .flex
@@ -469,7 +506,6 @@ export default {
         margin-bottom: 0 !important
 
     label:not(.v-label)
-        margin-bottom: 8px
         font-size: 16px
         display: block
 
