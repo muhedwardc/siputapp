@@ -194,7 +194,7 @@
                                     origin="center center"
                                     transition="scale-transition"
                                     >
-                                    <template v-if="!props.item.selectedType" v-slot:activator="{ on }">
+                                    <template v-if="props.item.selectedType == null" v-slot:activator="{ on }">
                                         <v-btn small fab class="primary" v-on="on">
                                             <v-icon>add</v-icon>
                                         </v-btn>
@@ -210,7 +210,14 @@
                                             :key="i"
                                             @click="setType(i, props.item.id)"
                                             >
-                                            <v-list-tile-title>{{ type }} <v-icon v-if="isSelected(i)" color="success">check</v-icon></v-list-tile-title>
+                                            <v-list-tile-title v-if="i === 3"><v-icon color="error">delete</v-icon><span class="error--text">{{ type }}</span></v-list-tile-title>
+                                            <v-list-tile-title v-else-if="i === 2">
+                                                <v-layout align-center>
+                                                    {{ type }}
+                                                    <span class="ml-2 success white--text" style="display: flex; justify-content: center; align-items: center; width: 22px; height: 22px; border-radius: 50%;">{{ selectedPenguji.length - 2 }}</span>
+                                                </v-layout>
+                                            </v-list-tile-title>
+                                            <v-list-tile-title v-else>{{ type }} <v-icon v-if="isSelected(i)" color="success">check</v-icon></v-list-tile-title>
                                         </v-list-tile>
                                     </v-list>
                                 </v-menu>
@@ -291,6 +298,7 @@ export default {
             search: '',
             loadingDosen: false,
             dosen: [],
+            selectedPenguji: [null, null],
             dosenHeaders: [
                 { text: 'Nama', align: 'left', value: 'nama' },
                 { text: 'Aksi', align: 'left', sortable: false, value: 'selectedType', width: '200px' }
@@ -298,10 +306,8 @@ export default {
             dosenTypes: [
                 'Pembimbing 1',
                 'Pembimbing 2',
-                'Penguji 1',
-                'Penguji 2',
-                'Penguji 3',
-                'Penguji 4',
+                'Penguji',
+                'Hapus'
             ],
             valid: true,
             mhsValid: true,
@@ -339,30 +345,92 @@ export default {
             const i = this.options[index].prodiOptions.findIndex(el => el == this.exam.skripsi.mahasiswa[index].prodi)
             this.options[index].prodiSelected = i
         },
-        setType(i, dosenId){
-            if (this.exam.penguji.includes(dosenId)) {
-                this.exam.penguji[this.exam.penguji.findIndex(e => e == dosenId)] = null
-                const index = this.dosen.findIndex(dosen => this.exam.penguji[i] == dosen.id)
-                delete this.dosen[index].selectedType
+        cleanArr() {
+            const cleanedArr = this.selectedPenguji
+            const penguji = []
+            this.exam.skripsi.pembimbing1 = cleanedArr[0]
+            this.exam.skripsi.pembimbing2 = cleanedArr[1]
+            for (var i = 2; i < cleanedArr.length; i++) {
+                if (cleanedArr[i] == null) {         
+                    cleanedArr.splice(i, 1);
+                    i--;
+                } else {
+                    penguji.push({
+                        dosen: cleanedArr[i]
+                    })
+                }
             }
-            if (this.exam.penguji[i]) {
-                const index = this.dosen.findIndex(dosen => this.exam.penguji[i] == dosen.id)
-                delete this.dosen[index].selectedType
-            }
-            const index = this.dosen.findIndex(dosen => dosen.id == dosenId)
+            this.exam.penguji = penguji
+            return this.selectedPenguji = cleanedArr
+        },
+        deleteRole(id) {
+            this.selectedPenguji[this.selectedPenguji.indexOf(id)] = null
+            const index = this.dosen.findIndex(dosen => id == dosen.id)
             const { email, nama } = this.dosen[index]
-            this.exam.penguji[i] = dosenId
-            this.dosen[index].selectedType = this.dosenTypes[i]
-            this.dosen[index].email = 'updating'
-            this.dosen[index].nama = 'updating'
-            this.dosen[index].email = email
-            this.dosen[index].nama = nama
+            delete this.dosen[index].selectedType
+            this.dosen[index].selectedType = null
+            this.dosen[index]['email'] = 'updating' 
+            this.dosen[index]['nama'] = 'updating'
+            this.dosen[index]['email'] = email
+            this.dosen[index]['nama'] = nama
+        },
+        setType(i, dosenId){
+            if (i == 3) {
+                this.deleteRole(dosenId)
+            }
+            else if (i == 2) {
+                const foundIndex = this.selectedPenguji.indexOf(dosenId)
+                const selectedIndex = this.dosen.findIndex(dosen => dosenId == dosen.id)
+                if (foundIndex !== -1) {
+                    console.log(foundIndex)
+                    const foundId = this.selectedPenguji[foundIndex]
+                    const index = this.dosen.findIndex(dosen => foundId == dosen.id)
+                    this.selectedPenguji[foundIndex] = null
+                    const { email, nama } = this.dosen[index]
+                    delete this.dosen[index].selectedType
+                    this.selectedPenguji.push(dosenId)
+                    this.dosen[index].selectedType = this.dosenTypes[i]
+                    this.dosen[index]['email'] = 'updating' 
+                    this.dosen[index]['nama'] = 'updating'
+                    this.dosen[index]['email'] = email
+                    this.dosen[index]['nama'] = nama
+                } else {
+                    this.selectedPenguji.push(dosenId)
+                    const index = this.dosen.findIndex(dosen => dosenId == dosen.id)
+                    const { email, nama } = this.dosen[index]
+                    if (index !== -1) {
+                        this.dosen[index]['selectedType'] = this.dosenTypes[i]
+                        this.dosen[index]['email'] = 'updating'
+                        this.dosen[index]['nama'] = 'updating'
+                        this.dosen[index]['email'] = email
+                        this.dosen[index]['nama'] = nama
+                    }
+                }
+            } else {
+                const index = this.dosen.findIndex(dosen => this.selectedPenguji[i] == dosen.id)
+                this.selectedPenguji[this.selectedPenguji.indexOf(dosenId)] = null
+                if (index !== -1) {
+                    this.selectedPenguji[i] = null
+                    delete this.dosen[index].selectedType
+                }
+                const id = this.dosen.findIndex(dosen => dosen.id == dosenId)
+                const { email, nama } = this.dosen[id]
+                this.selectedPenguji[i] = dosenId
+                this.dosen[id].selectedType = this.dosenTypes[i]
+                this.dosen[id]['email'] = 'updating'
+                this.dosen[id]['nama'] = 'updating'
+                this.dosen[id]['email'] = email
+                this.dosen[id]['nama'] = nama
+                this.selectedPenguji[i] = dosenId
+            }
+            this.cleanArr()
         },
         resetSelected() {
 
         },
         isSelected(i) {
-            return !!this.exam.penguji[i]
+            if (i < 2) return !!this.selectedPenguji[i]
+            else return this.selectedPenguji.length > 2
         },
         onComplete() {
             this.createExam()
