@@ -116,7 +116,7 @@ export default {
 			})
 			.then(() => {
 				this.removeCookies()
-				this.$router.replace('/login')
+					.then(() => this.$router.replace('/login'))
 			})
 			.catch(err => this.showSnackbar({
 				message: err.message,

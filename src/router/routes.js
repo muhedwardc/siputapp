@@ -111,5 +111,10 @@ export default [
             akademikRoute: true
         },
         component: () => import('@/views/playground/index.vue')
+    },
+    {
+        path: '*',
+        name: 'Home',
+        component: () => import('@/views/404.vue')
     }
 ]
