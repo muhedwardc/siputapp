@@ -11,7 +11,7 @@ export default [
     },
     {
         path: '/akademik',
-        name: 'Akademik Home',
+        name: 'Beranda',
         meta: {
             requiresAuth: true,
             akademikRoute: true,
@@ -29,7 +29,7 @@ export default [
     },
     {
         path: '/dosen',
-        name: 'Dosen Home',
+        name: 'Beranda',
         meta: {
             requiresAuth: true,
             dosenRoute: true,
@@ -38,7 +38,7 @@ export default [
     },
     {
         path: '/dosen/profil',
-        name: 'Dosen Profil',
+        name: 'Profil Dosen',
         meta: {
             requiresAuth: true,
             dosenRoute: true,
@@ -47,7 +47,7 @@ export default [
     },
     {
         path: '/dosen/ujian',
-        name: 'Dosen Ujian',
+        name: 'Daftar Ujian Dosen',
         meta: {
             requiresAuth: true,
             dosenRoute: true,
@@ -56,7 +56,7 @@ export default [
     },
     {
         path: '/ujian',
-        name: 'Ujian Show',
+        name: 'Detail Ujian',
         meta: {
             requiresAuth: true,
             akademikRoute: true
@@ -65,7 +65,7 @@ export default [
     },
     {
         path: '/ujian/tambah',
-        name: 'Akademik Add Ujian',
+        name: 'Akademik Tambah Ujian',
         meta: {
             requiresAuth: true,
             akademikRoute: true,
@@ -74,7 +74,7 @@ export default [
     },
     {
         path: '/ujian/:id',
-        name: 'Ujian Detail',
+        name: 'Detail Ujian',
         meta: {
             requiresAuth: true,
             dosenRoute: true,
