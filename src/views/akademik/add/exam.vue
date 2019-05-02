@@ -174,16 +174,17 @@
                     <v-btn color="primary" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa.length < 4" @click="addMahasiswa()">Tambah mahasiswa</v-btn>
                 </tab-content>
                 <tab-content title="Dosen Penguji">
-                    <v-layout row>
+                    <v-layout row align-center>
+                        <h3>Pilih Dosen Pembimbing dan Penguji</h3>
+                        <v-spacer></v-spacer>
                         <v-text-field
                             v-model="search"
                             append-icon="search"
                             label="Cari Dosen"
                             single-line
                             hide-details
+                            class="pt-0"
                         ></v-text-field>
-                        <v-spacer></v-spacer>
-                        <v-spacer></v-spacer>
                     </v-layout>
                     <v-data-table
                         :headers="dosenHeaders"
