@@ -88,6 +88,7 @@ export default {
                     exams: []
                 }
             ],
+            todayDate: '',
             activeTab: 0,
         }
     },
@@ -102,9 +103,10 @@ export default {
             this.days.map((day, i) => {
                 let theDay = moment(startOfWeek).add('day', i)
                 day.date = moment(theDay, 'DD/MM/YYYY').format('DD/MM/YYYY')
-                if (day.date === this.today) this.activeTab = 'tab-' + i
-                else this.activeTab = 'tab-' + (this.days.length - 1)
             })
+            const index = this.days.findIndex(day => day.date == this.todayDate)
+            if (index !== -1) this.activeTab = 'tab-' + index
+            else this.activeTab = 'tab-' + (this.days.length - 1)
         },
 
         readableString(arr, par) {
@@ -160,6 +162,8 @@ export default {
     },
 
     created() {
+        moment.locale('id')
+        this.todayDate = moment().format('DD/MM/YYYY')
         this.fetchUjian()
         this.assignDates()
     }
