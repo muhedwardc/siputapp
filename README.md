@@ -40,7 +40,11 @@ Before getting started you should have the following installed and running:
 ```
 $ npm install
 $ pipenv install --dev && pipenv shell
+$ python manage.py makemigrations
 $ python manage.py migrate
+$ python manage.py loaddata dosen_data.json
+$ python manage.py loaddata session_data.json
+$ python manage.py loaddata room_data.json
 ```
 
 ## Running Development Servers
