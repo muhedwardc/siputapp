@@ -1,0 +1,47 @@
+[
+    {
+        "model": "exams.Session",
+        "pk": 1,
+        "fields": {
+            "nama": "Sesi 1",
+            "mulai": "08:00:00",
+            "selesai": "09:30:00"
+        }
+    },
+    {
+        "model": "exams.Session",
+        "pk": 2,
+        "fields": {
+            "nama": "Sesi 2",
+            "mulai": "09:30:00",
+            "selesai": "11:00:00"
+        }
+    },
+    {
+        "model": "exams.Session",
+        "pk": 3,
+        "fields": {
+            "nama": "Sesi 3",
+            "mulai": "11:00:00",
+            "selesai": "12:30:00"
+        }
+    },
+    {
+        "model": "exams.Session",
+        "pk": 4,
+        "fields": {
+            "nama": "Sesi 4",
+            "mulai": "13:00:00",
+            "selesai": "14:30:00"
+        }
+    },
+    {
+        "model": "exams.Session",
+        "pk": 5,
+        "fields": {
+            "nama": "Sesi 5",
+            "mulai": "14:30:00",
+            "selesai": "16:00:00"
+        }
+    }
+]
