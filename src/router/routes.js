@@ -11,7 +11,7 @@ export default [
     },
     {
         path: '/akademik',
-        name: 'Beranda',
+        name: 'Beranda Akademik',
         meta: {
             requiresAuth: true,
             akademikRoute: true,
@@ -29,7 +29,7 @@ export default [
     },
     {
         path: '/dosen',
-        name: 'Beranda',
+        name: 'Beranda Dosen',
         meta: {
             requiresAuth: true,
             dosenRoute: true,
@@ -56,7 +56,7 @@ export default [
     },
     {
         path: '/ujian',
-        name: 'Detail Ujian',
+        name: 'Daftar Ujian',
         meta: {
             requiresAuth: true,
             akademikRoute: true
@@ -114,7 +114,7 @@ export default [
     },
     {
         path: '*',
-        name: 'Home',
+        name: '404 Page Not Found',
         component: () => import('@/views/404.vue')
     }
 ]
