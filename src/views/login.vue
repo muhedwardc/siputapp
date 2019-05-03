@@ -39,6 +39,7 @@
                                 ></v-text-field>
                             
                             <v-btn class="mt-4 font-weight-light" round color="primary" @click="login()" :loading="isSubmitting" :disabled="isSubmitting">Login</v-btn>
+                            <v-btn id="google-btn" class="mt-4 font-weight-light" round color="primary" @click="googleLogin()" :loading="isSubmitting" :disabled="isSubmitting">Masuk dengan Google</v-btn>
                         </v-form>
                     </v-layout>
                 </v-layout>
@@ -100,6 +101,19 @@ export default {
                         message: err.message
                     })
                 })
+            }
+        },
+
+        async googleLogin() {
+            this.isSubmitting = true
+            try {
+                const user = await this.$gAuth.signIn()
+                const token = user.getAuthResponse().id_token
+                this.isSubmitting = false
+                console.log(token)
+            } catch (e) {
+                this.isSubmitting = false
+                console.log(e)
             }
         }
     }
