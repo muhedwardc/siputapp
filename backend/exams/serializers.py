@@ -12,9 +12,11 @@ class ListRoomSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class RoomSerializer(serializers.ModelSerializer):
+    total_exam_in_room = serializers.IntegerField(required=False)
+
     class Meta:
         model = Room
-        fields = ('id', 'nama')
+        fields = ('id', 'nama', 'total_exam_in_room')
 
 class ListSessionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,9 +24,11 @@ class ListSessionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SessionSerializer(serializers.ModelSerializer):
+    total_exam_in_session = serializers.IntegerField(required=False)
+
     class Meta:
         model = Session
-        fields = ('id', 'nama', 'mulai', 'selesai')
+        fields = ('id', 'nama', 'mulai', 'selesai', 'total_exam_in_session')
 
 
 class ListPengujiSerializer(serializers.ModelSerializer):

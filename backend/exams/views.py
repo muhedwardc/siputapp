@@ -77,9 +77,9 @@ class RoomSessionAPI(views.APIView):
     def get(self, request, format=None):
         if 'date' in request.GET:
             date = request.GET.get('date', '')
-            exam_for_date = Count('exams', filter=Q(tanggal=date))
+            exam_for_date = Count('exams', filter=Q(exams__tanggal=date))
             list_room = Room.objects.all().annotate(total_exam_in_room=exam_for_date)
-            list_session = Room.objects.all().annotate(total_exam_in_session=exam_for_date)
+            list_session = Session.objects.all().annotate(total_exam_in_session=exam_for_date)
 
             return Response({
                 "Sesi": SessionSerializer(list_session, many=True).data,
