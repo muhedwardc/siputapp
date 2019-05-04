@@ -1,5 +1,6 @@
 import datetime
 from django.shortcuts import render
+from django.db.models import Count, Q
 from rest_framework import viewsets, views, permissions, status, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -28,6 +29,13 @@ class ExamViewSet(viewsets.ModelViewSet):
             start_date = request.GET.get('start_date')
             end_date = request.GET.get('end_date')
             exams = self.get_queryset().filter(tanggal__range=(start_date, end_date))
+            page = self.paginate_queryset(exams)
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        elif 'date' in request.GET:
+            date = request.GET.get('date')
+            exams = self.get_queryset().filter(tanggal=date)
             page = self.paginate_queryset(exams)
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
@@ -67,6 +75,17 @@ class RoomSessionAPI(views.APIView):
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
 
     def get(self, request, format=None):
+        if 'date' in request.GET:
+            date = request.GET.get('date', '')
+            exam_for_date = Count('exams', filter=Q(exams__tanggal=date))
+            list_room = Room.objects.all().annotate(total_exam_in_room=exam_for_date)
+            list_session = Session.objects.all().annotate(total_exam_in_session=exam_for_date)
+
+            return Response({
+                "Sesi": SessionSerializer(list_session, many=True).data,
+                "Ruang": RoomSerializer(list_room, many=True).data
+            })
+
         list_room = Room.objects.all()
         list_session = Session.objects.all()
         return Response({
