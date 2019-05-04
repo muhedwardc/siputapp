@@ -230,7 +230,18 @@ Endpoint untuk umum:
 1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
 ```JSON
 {
-	....
+	"bab": "hasil dan pembahasan",
+	"halaman": 105,
+	"komentar": "Grafik kurang detail dan belum ada penjelasan."
+}
+```
+1. **PUT** /api/me/exams/\<id>\/comments/ : update a comment
+```JSON
+{
+	"id": 5,
+	"bab": "hasil dan pembahasan",
+	"halaman": 105,
+	"komentar": "Grafik kurang detail dan penjelasannya ya mas.."
 }
 ```
 
