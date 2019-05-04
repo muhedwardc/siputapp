@@ -18,6 +18,11 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = ('id', 'nama', 'total_exam_in_room')
 
+class CreateRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ('nama', )
+
 class ListSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Session
@@ -30,6 +35,10 @@ class SessionSerializer(serializers.ModelSerializer):
         model = Session
         fields = ('id', 'nama', 'mulai', 'selesai', 'total_exam_in_session')
 
+class CreateSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Session
+        fields = ('nama', 'mulai', 'selesai')
 
 class ListPengujiSerializer(serializers.ModelSerializer):
     dosen = serializers.StringRelatedField()
@@ -95,8 +104,8 @@ class CreateExamSerializer(serializers.ModelSerializer):
             judul=skripsi_data['judul'],
             intisari=skripsi_data['intisari'],
             naskah=skripsi_data['naskah'],
-            pembimbing1=skripsi_data['pembimbing1'],
-            pembimbing2=skripsi_data['pembimbing2'],
+            pembimbing_satu=skripsi_data['pembimbing_satu'],
+            pembimbing_dua=skripsi_data['pembimbing_dua'],
             is_capstone=skripsi_data['is_capstone']
         )
 
@@ -110,8 +119,8 @@ class CreateExamSerializer(serializers.ModelSerializer):
             ruang=validated_data['ruang']
         )
         
-        Penguji.objects.create(ujian=new_ujian, dosen=new_skripsi.pembimbing1, is_leader=True)
-        Penguji.objects.create(ujian=new_ujian, dosen=new_skripsi.pembimbing2)
+        Penguji.objects.create(ujian=new_ujian, dosen=new_skripsi.pembimbing_satu, is_leader=True)
+        Penguji.objects.create(ujian=new_ujian, dosen=new_skripsi.pembimbing_dua)
 
         for data in penguji_data:
             Penguji.objects.create(

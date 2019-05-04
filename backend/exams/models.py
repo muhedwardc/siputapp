@@ -3,7 +3,7 @@ from backend.users.models import User
 from backend.essays.models import Essay
 
 class Room(models.Model):
-    nama = models.CharField(max_length=20)
+    nama = models.CharField(max_length=50)
 
     def __str__(self):
         return self.nama
@@ -27,7 +27,7 @@ class Exam(models.Model):
     tanggal = models.DateField()
     sesi = models.ForeignKey(Session, related_name='exams', on_delete=models.DO_NOTHING)
     ruang = models.ForeignKey(Room, related_name='exams', on_delete=models.DO_NOTHING)
-    status = models.IntegerField(choices=STATUS_CHOICES)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -47,7 +47,7 @@ class Penguji(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '{} : {}'.format(self.dosen.nama, self.ujian.tanggal)
+        return self.dosen.nama
 
     class Meta:
         ordering = ('created_at',)
