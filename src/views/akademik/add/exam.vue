@@ -32,7 +32,7 @@
                         
                         <label>Intisari</label>
                         <v-textarea
-                            :value="exam.skripsi.intisari"
+                            v-model="exam.skripsi.intisari"
                             required
                             solo
                             label="Intisari"
@@ -71,8 +71,42 @@
                                 v-on="on"
                             ></v-text-field>
                         </template>
-                        <v-date-picker @change="getRoom()" v-model="exam.tanggal" @input="dateMenu = false"></v-date-picker>
+                        <v-date-picker @input="getThisDayExams(exam.tanggal)" v-model="exam.tanggal"></v-date-picker>
                     </v-menu>
+                    <template v-if="exam.tanggal">
+                        <v-container class="no-h-padding" grid-list-md v-if="this.thisDayExams.length > 0">
+                            <v-layout row wrap>
+                                <p class="ml-1">Daftar ujian ditanggal {{exam.tanggal}}</p>
+                                <v-flex xs12 sm6 v-for="e in thisDayExams" :key="e.id">
+                                    <v-chip label>Label</v-chip>
+                                </v-flex>
+                            </v-layout>
+                        </v-container>
+                        <p v-else>Tidak ada ujian untuk tanggal {{exam.tanggal}}</p>
+                    </template>
+                    <v-container class="no-h-padding" grid-list-md>
+                        <p class="mb-0">Pilih ruangan dan sesi ujian</p>
+                        <v-layout row wrap>
+                            <v-flex xs12 sm4>
+                                <v-select
+                                    :items="rooms"
+                                    v-model="exam.ruang"
+                                    item-value="id"
+                                    placeholder="Ruangan"
+                                    item-text="nama"
+                                    ></v-select>
+                            </v-flex>
+                            <v-flex xs12 sm4>
+                                <v-select
+                                    :items="sessions"
+                                    v-model="exam.sesi"
+                                    item-value="id"
+                                    placeholder="Sesi"
+                                    item-text="mulai"
+                                    ></v-select>
+                            </v-flex>
+                        </v-layout>
+                    </v-container>
                 </tab-content>
                 <tab-content title="Data Mahasiswa">
                     <v-layout column>
@@ -161,9 +195,20 @@
                                                                 v-on="on"
                                                             ></v-text-field>
                                                         </template>
-                                                        <v-date-picker v-model="mahasiswa['tanggal_lahir']" @input="mahasiswa['tanggal_dialog'] = false"></v-date-picker>
+                                                        <v-date-picker v-model="mahasiswa['tanggal_lahir']" @input="tanggal_dialog = false"></v-date-picker>
                                                     </v-menu>
                                                 </v-layout>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label>No. Telepon</label></td>
+                                            <td>:</td>
+                                            <td>
+                                                <v-text-field
+                                                    v-model="mahasiswa['telepon']"
+                                                    placeholder="Nomor Telepon"
+                                                    required
+                                                ></v-text-field>
                                             </td>
                                         </tr>
                                     </table>
@@ -268,7 +313,9 @@
 import { mapActions } from 'vuex'
 import { FormWizard, TabContent } from 'vue-form-wizard'
 import 'vue-form-wizard/dist/vue-form-wizard.min.css'
-import { loadavg } from 'os';
+import moment from 'moment'
+import objectToFormData from 'object-to-formdata'
+import jsonToFormData from 'json-form-data'
 
 export default {
     data() {
@@ -277,17 +324,23 @@ export default {
                 tanggal: null,
                 sesi: null,
                 ruang: null,
+                penguji: [],
                 skripsi: {
                     judul: '',
                     intisari: '',
-                    pembimbing1: null,
-                    pembimbing2: null,
+                    pembimbing_satu: null,
+                    pembimbing_dua: null,
                     is_capstone: false,
                     mahasiswa: [{}],
-                    berkas: null
+                    naskah: null
                 },
-                penguji: []
             },
+            tanggal_dialog: false,
+            loadingRoomSessions: true,
+            loadingThisDayExams: true,
+            thisDayExams: [],
+            rooms: [],
+            sessions: [],
             options: [
                 {
                     prodiOptions: ['TE', 'TI'],
@@ -339,7 +392,7 @@ export default {
         dosenList() {
             let list = this.dosen
             return list
-        }
+        },
     },
 
     methods: {
@@ -353,8 +406,8 @@ export default {
         cleanArr() {
             const cleanedArr = this.selectedPenguji
             const penguji = []
-            this.exam.skripsi.pembimbing1 = cleanedArr[0]
-            this.exam.skripsi.pembimbing2 = cleanedArr[1]
+            this.exam.skripsi.pembimbing_satu = cleanedArr[0]
+            this.exam.skripsi.pembimbing_dua = cleanedArr[1]
             for (var i = 2; i < cleanedArr.length; i++) {
                 if (cleanedArr[i] == null) {         
                     cleanedArr.splice(i, 1);
@@ -515,6 +568,36 @@ export default {
                 this.loadingDosen = false
             })
         },
+        fetchRoomSessions() {
+            this.loadingRoomSessions = true
+            axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
+                .then(r => r.data)
+                .then(r => {
+                    this.rooms = r.Ruang
+                    this.sessions = r.Sesi
+                    this.loadingRoomSessions = false
+                })
+                .catch(e => {
+                    this.showSnackbar({
+                        message: e.message,
+                        type: 'error'
+                    })
+                    this.fetchRoomSessions()
+                }) 
+        },
+        getThisDayExams(date) {
+            this.dateMenu = false
+            this.loadingThisDayExams = true
+            axios.get('/exams/?date=' + date, {headers: {'Authorization': this.$store.getters.authToken}})
+                .then(r => console.log(r.data.results))
+                .catch(err => {
+                    this.showSnackbar({
+                        message: err.message,
+                        type: 'error'
+                    })
+                    this.loadingThisDayExams = false
+                })
+        },
         pickFile () {
             this.$refs.pdf.click()
         },
@@ -529,7 +612,7 @@ export default {
 				fr.readAsDataURL(files[0])
 				fr.addEventListener('load', () => {
 					this.pdfUrl = fr.result
-					this.exam.skripsi.berkas = files[0]
+					this.exam.skripsi.naskah = files[0]
 				})
 			} else {
 				this.pdfName = ''
@@ -541,21 +624,40 @@ export default {
             console.log('fetching room...')
         },
         async createExam() {
-            const formData = new FormData()
-            Object.keys(this.exam).forEach(key => {
-                console.log(key, this.exam[key])
-                formData.append(key, this.exam[key])
-            });
+            this.exam.skripsi.naskah = null
+            axios.post('/exams/', this.exam, {
+                    headers: {
+                        'Authorization': this.$store.getters.authToken
+                    }
+                })
+                .then(() => this.$router.push('/ujian'))
+                .catch(err => {
+                    this.showSnackbar({
+                        message: err.message,
+                        type: 'error'
+                    })
+                    console.log(err)
+                })
         }
     },
 
     created() {
-        this.$store.state.auth.token ? this.fetchDosen() : null
+        if(this.$store.state.auth.token) {
+            this.fetchDosen()  
+            this.fetchRoomSessions()
+        } 
     }
 }
 </script>
 
 <style lang="sass">
+    .container.no-h-padding
+        padding-left: 0 !important
+        padding-right: 0 !important
+
+        .v-text-field
+            padding-top: 0 !important
+
     .mahasiswa-table
         width: 100%
         tr
