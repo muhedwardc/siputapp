@@ -6,9 +6,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 
-from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer
+from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer
 from .models import Exam, Penguji, Room, Session
 from backend.pagination import CustomPagination
+
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
@@ -25,16 +26,16 @@ class ExamViewSet(viewsets.ModelViewSet):
             return ExamSerializer
 
     def list(self, request, *args, **kwargs):
-        if 'start_date' in request.GET and 'end_date' in request.GET:
-            start_date = request.GET.get('start_date')
-            end_date = request.GET.get('end_date')
-            exams = self.get_queryset().filter(tanggal__range=(start_date, end_date))
+        if 'mulai' in request.GET and 'selesai' in request.GET:
+            mulai = request.GET.get('mulai')
+            selesai = request.GET.get('selesai')
+            exams = self.get_queryset().filter(tanggal__range=(mulai, selesai))
             page = self.paginate_queryset(exams)
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        elif 'date' in request.GET:
-            date = request.GET.get('date')
+        elif 'tanggal' in request.GET:
+            date = request.GET.get('tanggal')
             exams = self.get_queryset().filter(tanggal=date)
             page = self.paginate_queryset(exams)
             serializer = self.get_serializer(page, many=True)
@@ -79,7 +80,8 @@ class RoomSessionAPI(views.APIView):
             date = request.GET.get('date', '')
             exam_for_date = Count('exams', filter=Q(exams__tanggal=date))
             list_room = Room.objects.all().annotate(total_exam_in_room=exam_for_date)
-            list_session = Session.objects.all().annotate(total_exam_in_session=exam_for_date)
+            list_session = Session.objects.all().annotate(
+                total_exam_in_session=exam_for_date)
 
             return Response({
                 "Sesi": SessionSerializer(list_session, many=True).data,
@@ -93,3 +95,41 @@ class RoomSessionAPI(views.APIView):
             "Ruang": RoomSerializer(list_room, many=True).data
         })
 
+
+class RoomViewSet(viewsets.GenericViewSet):
+    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+    def list(self, request):
+        rooms = self.get_queryset()
+        serializer = self.get_serializer(rooms, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create_room(self, request):
+        serializer = CreateRoomSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            rooms = self.get_queryset()
+            serializer = self.get_serializer(rooms, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SessionViewSet(viewsets.GenericViewSet):
+    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+    queryset = Session.objects.all()
+    serializer_class = SessionSerializer
+
+    def list(self, request):
+        sessions = self.get_queryset()
+        serializer = self.get_serializer(sessions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create_session(self, request):
+        serializer = CreateSessionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            sessions = self.get_queryset()
+            serializer = SessionSerializer(sessions, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

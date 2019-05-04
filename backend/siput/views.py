@@ -103,7 +103,21 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         serializer = CreateCommentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(skripsi=skripsi, penguji=self.get_object())
+
+        comments = self.get_object().comments
+        serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @comments.mapping.put
+    def edit_comment(self, request, *args, **kwargs):
+        comment = self.get_object().comments.get(pk=request.data['id'])
+        serializer = CommentSerializer(comment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            comments = self.get_object().comments
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True)
     def grades(self, request, *args, **kwargs):
