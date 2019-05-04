@@ -4,8 +4,6 @@ from .models import Comment
 from backend.exams.serializers import PengujiSerializer
 
 class CommentSerializer(serializers.ModelSerializer):
-    # penguji = serializers.StringRelatedField()
-    
     class Meta:
         model = Comment
         fields = ('id', 'bab', 'halaman', 'komentar')
