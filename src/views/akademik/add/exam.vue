@@ -9,17 +9,9 @@
                         ref="form"
                         v-model="valid">
                         <label>Tipe Ujian</label>
-                        <v-radio-group v-model="exam.skripsi.is_capstone">
-                            <v-radio :value="false" color="primary">
-                                <template v-slot:label>
-                                <div>Individu</div>
-                                </template>
-                            </v-radio>
-                            <v-radio :value="true" color="primary">
-                                <template v-slot:label>
-                                <div>Capstone</div>
-                                </template>
-                            </v-radio>
+                        <v-radio-group :disabled="submitting" v-model="exam.skripsi.is_capstone">
+                            <v-radio :value="false" label="Individu" color="primary"></v-radio>
+                            <v-radio :value="true" label="Capstone" color="primary"></v-radio>
                         </v-radio-group>
                         
                         <label>Judul Ujian</label>
@@ -27,6 +19,7 @@
                             v-model="exam.skripsi.judul"
                             required
                             solo
+                            :disabled="submitting"
                             label="Judul Ujian"
                             ></v-text-field>
                         
@@ -35,16 +28,18 @@
                             v-model="exam.skripsi.intisari"
                             required
                             solo
+                            :disabled="submitting"
                             label="Intisari"
                             ></v-textarea>
                         
                         <label>Tambahkan Naskah</label>
-                        <v-text-field placeholder="pilih naskah" readonly @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
+                        <v-text-field :disabled="submitting" placeholder="pilih naskah" readonly @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
                         <input
                             type="file"
                             style="display: none"
                             ref="pdf"
                             readonly
+                            :disabled="submitting"
                             solo
                             accept="application/pdf,application/vnd.ms-excel"
                             @change="onFilePicked"
@@ -61,6 +56,7 @@
                         offset-y
                         full-width
                         solo
+                        :disabled="submitting"
                         min-width="290px">
                         <template v-slot:activator="{ on }">
                             <v-text-field
@@ -68,18 +64,17 @@
                                 readonly
                                 placeholder="Pilih Tanggal Ujian"
                                 prepend-icon="event "
+                                :disabled="submitting"
                                 v-on="on"
                             ></v-text-field>
                         </template>
-                        <v-date-picker @input="getThisDayExams(exam.tanggal)" v-model="exam.tanggal"></v-date-picker>
+                        <v-date-picker :disabled="submitting" @input="getThisDayExams(exam.tanggal)" v-model="exam.tanggal"></v-date-picker>
                     </v-menu>
                     <template v-if="exam.tanggal">
-                        <v-container class="no-h-padding" grid-list-md v-if="this.thisDayExams.length > 0">
+                        <v-container class="pa-0" grid-list-md v-if="this.thisDayExams.length > 0">
+                            <p class="mb-1">Daftar ujian ditanggal {{exam.tanggal}}</p>
                             <v-layout row wrap>
-                                <p class="ml-1">Daftar ujian ditanggal {{exam.tanggal}}</p>
-                                <v-flex xs12 sm6 v-for="e in thisDayExams" :key="e.id">
-                                    <v-chip label>Label</v-chip>
-                                </v-flex>
+                                <v-chip v-for="e in thisDayExams" :key="e.id" label class="ml-2 mr-2">{{ e.ruang + ', ' + e.sesi }}</v-chip>
                             </v-layout>
                         </v-container>
                         <p v-else>Tidak ada ujian untuk tanggal {{exam.tanggal}}</p>
@@ -94,6 +89,7 @@
                                     item-value="id"
                                     placeholder="Ruangan"
                                     item-text="nama"
+                                    :disabled="submitting || !exam.tanggal"
                                     ></v-select>
                             </v-flex>
                             <v-flex xs12 sm4>
@@ -103,6 +99,7 @@
                                     item-value="id"
                                     placeholder="Sesi"
                                     item-text="mulai"
+                                    :disabled="submitting || !exam.tanggal"
                                     ></v-select>
                             </v-flex>
                         </v-layout>
@@ -126,6 +123,7 @@
                                                     v-model="mahasiswa['nama']"
                                                     placeholder="Nama Mahasiswa"
                                                     required
+                                                    :disabled="submitting"
                                                 ></v-text-field>
                                             </td>
                                         </tr>
@@ -137,6 +135,7 @@
                                                     v-model="mahasiswa['nim']"
                                                     placeholder="NIM"
                                                     required
+                                                    :disabled="submitting"
                                                 ></v-text-field>
                                             </td>
                                         </tr>
@@ -152,6 +151,7 @@
                                                         :rules="[v => !!v || 'Item is required']"
                                                         placeholder="Prodi"
                                                         required
+                                                        :disabled="submitting"
                                                         ></v-select>
                                                     <span class="title ml-2 mr-2">/</span>
                                                     <v-select
@@ -159,7 +159,7 @@
                                                         :items="options[index].konsentrasiOptions[options[index].prodiSelected]"
                                                         :rules="[v => !!v || 'Item is required']"
                                                         placeholder="Konsentrasi"
-                                                        :disabled="!mahasiswa['prodi']"
+                                                        :disabled="!mahasiswa['prodi'] || submitting"
                                                         ></v-select>
                                                 </v-layout>
                                             </td>
@@ -175,6 +175,7 @@
                                                         v-model="mahasiswa['tempat_lahir']"
                                                         placeholder="Tempat lahir"
                                                         required
+                                                        :disabled="submitting"
                                                     ></v-text-field>
                                                     <span class="title ml-2 mr-2">/</span>
                                                     <v-menu
@@ -185,17 +186,18 @@
                                                         transition="scale-transition"
                                                         offset-y
                                                         full-width
+                                                        :disabled="submitting"
                                                         min-width="290px">
                                                         <template v-slot:activator="{ on }">
                                                             <v-text-field
                                                                 v-model="mahasiswa['tanggal_lahir']"
                                                                 placeholder="YYYY-MM-DD"
                                                                 prepend-icon="event"
-                                                                readonly
                                                                 v-on="on"
+                                                                :disabled="submitting"
                                                             ></v-text-field>
                                                         </template>
-                                                        <v-date-picker v-model="mahasiswa['tanggal_lahir']" @input="tanggal_dialog = false"></v-date-picker>
+                                                        <v-date-picker :disabled="submitting" v-model="mahasiswa['tanggal_lahir']" @input="tanggal_dialog = false"></v-date-picker>
                                                     </v-menu>
                                                 </v-layout>
                                             </td>
@@ -208,6 +210,7 @@
                                                     v-model="mahasiswa['telepon']"
                                                     placeholder="Nomor Telepon"
                                                     required
+                                                    :disabled="submitting"
                                                 ></v-text-field>
                                             </td>
                                         </tr>
@@ -226,6 +229,7 @@
                             v-model="search"
                             append-icon="search"
                             label="Cari Dosen"
+                            :disabled="submitting"
                             single-line
                             hide-details
                             class="pt-0"
@@ -243,6 +247,7 @@
                                     bottom
                                     origin="center center"
                                     transition="scale-transition"
+                                    v-if="!submitting"
                                     >
                                     <template v-if="props.item.selectedType == null" v-slot:activator="{ on }">
                                         <v-btn small fab class="primary" v-on="on">
@@ -280,6 +285,26 @@
                         </template>
                     </v-data-table>
                 </tab-content>
+                <template slot="footer" slot-scope="props">
+                    <div class="wizard-footer-left">
+                        <wizard-button :disabled="submitting" v-if="props.activeTabIndex > 0" @click.native="props.prevTab()" :style="props.fillButtonStyle">Kembali</wizard-button>
+                    </div>
+                    <div class="wizard-footer-right">
+                        <wizard-button :disabled="submitting" v-if="!props.isLastStep" @click.native="props.nextTab()" class="wizard-footer-right" :style="props.fillButtonStyle">Lanjut</wizard-button>
+                        <v-layout column align-end v-else>
+                            <wizard-button v-if="!submitting" :disabled="submitting" @click.native="createExam()" class="wizard-footer-right finish-button" :style="props.fillButtonStyle">  {{props.isLastStep ? 'Simpan' : 'Lanjut'}}</wizard-button>
+                            <v-layout row align-center v-else>
+                                <span>sedang menyimpan</span>
+                                <v-progress-circular
+                                    class="ml-2"
+                                    indeterminate
+                                    color="primary"
+                                    size="20"
+                                    ></v-progress-circular>
+                            </v-layout>
+                        </v-layout>
+                    </div>
+                </template>
             </form-wizard>
         </v-card>
         <v-dialog
@@ -311,11 +336,9 @@
 
 <script>
 import { mapActions } from 'vuex'
-import { FormWizard, TabContent } from 'vue-form-wizard'
+import { FormWizard, TabContent, WizardButton } from 'vue-form-wizard'
 import 'vue-form-wizard/dist/vue-form-wizard.min.css'
 import moment from 'moment'
-import objectToFormData from 'object-to-formdata'
-import jsonToFormData from 'json-form-data'
 
 export default {
     data() {
@@ -380,12 +403,14 @@ export default {
                 name: '',
                 index: null
             },
+            submitting: false
         }
     },
 
     components: {
         FormWizard,
         TabContent,
+        WizardButton
     },
 
     computed: {
@@ -589,7 +614,7 @@ export default {
             this.dateMenu = false
             this.loadingThisDayExams = true
             axios.get('/exams/?date=' + date, {headers: {'Authorization': this.$store.getters.authToken}})
-                .then(r => console.log(r.data.results))
+                .then(r => this.thisDayExams = r.data.results)
                 .catch(err => {
                     this.showSnackbar({
                         message: err.message,
@@ -624,19 +649,26 @@ export default {
             console.log('fetching room...')
         },
         async createExam() {
+            this.submitting = true
             this.exam.skripsi.naskah = null
             axios.post('/exams/', this.exam, {
                     headers: {
                         'Authorization': this.$store.getters.authToken
                     }
                 })
-                .then(() => this.$router.push('/ujian'))
+                .then(() => {
+                    this.showSnackbar({
+                        message: 'Ujian Telah berhasi dibuat',
+                        type: 'success'
+                    })
+                    this.$router.push('/ujian')
+                })
                 .catch(err => {
                     this.showSnackbar({
-                        message: err.message,
+                        message: err,
                         type: 'error'
                     })
-                    console.log(err)
+                    this.submitting = false
                 })
         }
     },

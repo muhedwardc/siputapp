@@ -84,6 +84,11 @@ export default {
 					path: '/daftar-pengguna'
 				},
 				{
+					title: 'Daftar Ruangan',
+					icon: 'list',
+					path: '/daftar-ruangan'
+				},
+				{
 					title: 'Profil',
 					icon: 'person',
 					path: '/akademik/profil'
