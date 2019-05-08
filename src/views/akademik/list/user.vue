@@ -96,11 +96,36 @@
                 <td class="text-xs-left">{{ props.item.is_admin ? 'Akademik' : 'Dosen' }}</td>
                 <td class="text-xs-left">{{ props.item.nip }}</td>
                 <td class="justify-center layout px-0">
-                    <v-icon small class="mr-2" @click="editItem(props.item)">edit</v-icon>
-                    <v-icon small @click="deleteItem(props.item)">delete</v-icon>
+                    <v-icon small class="mr-2" @click="editItem(props)">edit</v-icon>
+                    <v-icon small @click="showDeleteDialog(props.item)">delete</v-icon>
                 </td>
             </template>
         </v-data-table>
+        <v-dialog
+            v-model="deleteItem.show"
+            max-width="290">
+            <v-card>
+                <v-card-text>
+                Anda ingin menghapus {{ deleteItem.name }}
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        color="green darken-1"
+                        flat="flat"
+                        @click="deleteItem.show = false">
+                        Batal
+                    </v-btn>
+
+                    <v-btn
+                        color="green darken-1"
+                        flat="flat"
+                        @click="deleteUser">
+                        Hapus
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -117,7 +142,7 @@ export default {
                 { text: 'Email', value: 'email', sortable: true },
                 { text: 'Status', value: 'status', sortable: true },
                 { text: 'NIP', value: 'nip', sortable: false },
-                { text: 'Actions', value: 'nama', sortable: false },
+                { text: 'Aksi', value: 'nama', sortable: false },
             ],
             roles: ['Dosen', 'Akademik'],
             prodiOptions: ['TE', 'TI'],
@@ -126,6 +151,11 @@ export default {
                 ['TTL', 'SIE'],
                 ['RSI', 'RPL', 'RSK']
             ],
+            deleteItem: {
+                show: false,
+                name: '',
+                id: ''
+            },
             users: [],
             editedIndex: -1,
             editedItem: {
@@ -200,15 +230,49 @@ export default {
             return (this.editedItem.password == this.editedItem.confirmPassword) ? '' : 'Password doesn\'t match'
         },
 
-        editItem (item) {
-            // this.editedIndex = this.desserts.indexOf(item)
-            // this.editedItem = Object.assign({}, item)
-            // this.dialog = true
+        showDeleteDialog(item) {
+            this.deleteItem = {
+                show: true,
+                name: item.nama,
+                id: item.id
+            }
         },
 
-        deleteItem (item) {
-            // const index = this.desserts.indexOf(item)
-            // confirm('Apakah anda yakin untuk menghapus pengguna ini?') && this.desserts.splice(index, 1)
+        editItem (props) {
+            this.dialog = true
+            const { nama, prodi, konsentrasi, email, is_admin, nip, password, confirmPassword } = props.item
+            this.editedItem = {
+                name: nama,
+                email,
+                role: is_admin ? 'Akademik' : 'Dosen',
+                nip,
+                password,
+                confirmPassword
+            }
+
+            if (!is_admin) {
+                this.editedItem.prodi = prodi
+                this.editedItem.konsentrasi = konsentrasi
+            }
+        },
+
+        deleteUser () {
+            if (this.deleteItem.id) {
+                axios.delete(`/users/${this.deleteItem.id}/`, {headers: {'Authorization': this.$store.getters.authToken}})
+                    .then(() => {
+                        this.deleteItem.show = false
+                        this.showSnackbar({
+                            message: 'Berhasil menghapus dosen',
+                            type: 'success'
+                        })
+                    })
+                    .catch(err => {
+                        this.showSnackbar({
+                            message: err.message,
+                            type: 'error'
+                        })
+                    }) 
+            }
         },
 
         close () {
@@ -254,11 +318,6 @@ export default {
                     this.close()
                 })
             }
-            // if (this.editedIndex > -1) {
-            //     Object.assign(this.desserts[this.editedIndex], this.editedItem)
-            // } else {
-            //     this.desserts.push(this.editedItem)
-            // }
         }
     }
 }
