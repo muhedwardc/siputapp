@@ -100,6 +100,10 @@
                         <template v-slot:items="props">
                             <td v-text="props.item.id"></td>
                             <td v-text="props.item.nama"></td>
+                            <td class="justify-center layout pa-0 ma-0">
+                                <v-icon small class="mr-2">edit</v-icon>
+                                <v-icon small>delete</v-icon>
+                            </td>
                         </template>
                     </v-data-table>
                 </v-flex>
@@ -114,6 +118,10 @@
                             <td v-text="props.item.nama"></td>
                             <td v-text="props.item.mulai"></td>
                             <td v-text="props.item.selesai"></td>
+                            <td class="justify-center layout pa-0 ma-0">
+                                <v-icon small class="mr-2">edit</v-icon>
+                                <v-icon small>delete</v-icon>
+                            </td>
                         </template>
                     </v-data-table>
                 </v-flex>
@@ -139,12 +147,14 @@ export default {
             input: true,
             rooms: [],
             sessions: [],
-            roomsHeader: [{text: 'ID', value: 'id', sortable: true, align: 'left', width: '10px'}, {text: 'Nama Ruangan', value: 'nama', sortable: true, align: 'left'}],
+            roomsHeader: [{text: 'ID', value: 'id', sortable: true, align: 'left', width: '10px'}, {text: 'Nama Ruangan', value: 'nama', sortable: true, align: 'left'}, 
+                { text: 'Aksi', value: 'nama', sortable: false, align: 'center', width: '10px' }],
             sessionsHeader: [
                 {text: 'ID', value: 'id', sortable: true, align: 'left', width: '10px'},
                 {text: 'Nama', value: 'nama', sortable: true, align: 'left'},
                 {text: 'Mulai', value: 'mulai', sortable: true, align: 'left'},
-                {text: 'Selesai', value: 'selesai', sortable: true, align: 'left'}
+                {text: 'Selesai', value: 'selesai', sortable: true, align: 'left'},
+                { text: 'Aksi', value: 'nama', sortable: false, align: 'center', width: '10px' }
             ]
         }
     },
