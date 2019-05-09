@@ -1,7 +1,7 @@
 <template>
     <transition name="fade">
         <v-card class="exam-card" :to="`/ujian/${item.id}`">
-            <v-layout style="height: 100%;" column justify-space-between>
+            <v-layout style="height: 100%;" column justify-start>
                 <v-card-title class="pb-0">
                     <v-layout row align-start class="ma-0">
                         <p v-line-clamp:20="2" class="font-weight-bold mb-1 exam-title">
@@ -19,8 +19,9 @@
                     </v-layout>
                 </v-card-title>
                 <v-card-text class="pt-0">
-                    <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi }} - {{ item.ujian.ruang }}</span>
+                    <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi }} - Ruang {{ item.ujian.ruang }}</span>
                 </v-card-text>
+                <v-spacer></v-spacer>
             </v-layout>
         </v-card>
     </transition>
