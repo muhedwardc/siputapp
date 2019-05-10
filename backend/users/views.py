@@ -1,9 +1,12 @@
+import jwt
+import traceback
 from rest_framework import views, viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from knox.models import AuthToken
 from django.db.models import Q
+from django.conf import settings
 
 from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer
 from .models import User
@@ -89,3 +92,26 @@ class ChangePasswordAPI(views.APIView):
         return Response({
             "msg": "User password has been changed."
         })
+class LoginGoogle(views.APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, format=None):
+        token = request.data['token']
+        try:    
+            user_data = jwt.decode(token, algorithms='RS256', verify=False)
+        except Exception:
+            traceback.print_exc()
+        
+        email = user_data.get('email', None)
+        if email:
+            try:
+                user = User.objects.get(email=email)
+                instance, token = AuthToken.objects.create(user)
+                return Response({
+                    "user": FullUserSerializer(user).data,
+                    "token": token
+                }, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({
+                    "message": "Pengguna dengan email {} tidak terdaftar".format(email)
+                }, status=status.HTTP_200_OK)
