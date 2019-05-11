@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <v-card class="exam-card" :to="`/ujian/${item.id}`">
+        <v-card class="exam-card mb-3" :to="`/ujian/${item.id}`">
             <v-layout style="height: 100%;" column justify-start>
                 <v-card-title class="pb-0">
                     <v-layout row align-start class="ma-0">
@@ -104,12 +104,13 @@ export default {
     
     .exam-card 
         height: 100%
+        min-height: 100px
         border-radius: 8px
-        box-shadow: 0 0 10px 5px rgba(0, 0, 0, .03)
+        box-shadow: 0 0 10px 2px rgba(0, 0, 0, .1)
         cursor: pointer
 
         &:hover
-            transform: scale(1.025)
+            transform: scale(1.01)
 
 </style>
 
