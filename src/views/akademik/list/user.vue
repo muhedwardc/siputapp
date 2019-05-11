@@ -75,6 +75,7 @@
             </v-dialog>
         </v-layout>
         <v-data-table
+            class="user-table"
             :headers="headers"
             :items="users"
             :rows-per-page-items="perPage"
@@ -111,6 +112,7 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
+                        v-show="!deleting"
                         color="green darken-1"
                         flat="flat"
                         @click="deleteItem.show = false">
@@ -118,6 +120,7 @@
                     </v-btn>
 
                     <v-btn
+                        :loading="deleting"
                         color="green darken-1"
                         flat="flat"
                         @click="deleteUser">
@@ -178,7 +181,8 @@ export default {
                 password: '',
                 confirmPassword: ''
             },
-            perPage: [ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]
+            perPage: [ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ],
+            deleting: false
         }
     },
 
@@ -206,24 +210,19 @@ export default {
 			'showSnackbar'
         ]),
         
-        initialize () {
+        async initialize () {
             this.loading = true
-            axios.get('/users/', {
-                headers: {
-                    'Authorization': this.$store.getters.authToken
-                }
-            })
-            .then(r => {
-                this.users = r.data.results
+            try {
+                const response = await axios.get('/users/', this.$store.getters.authHeaders)
+                this.users = response.data.results
                 this.loading = false
-            })
-            .catch(err => {
+            } catch (error) {
                 this.showSnackbar({
                     message: err.message,
                     type: 'error'
                 })
                 this.loading = false
-            })
+            }
         },
 
         matchPassword () {
@@ -256,22 +255,22 @@ export default {
             }
         },
 
-        deleteUser () {
+        async deleteUser () {
             if (this.deleteItem.id) {
-                axios.delete(`/users/${this.deleteItem.id}/`, {headers: {'Authorization': this.$store.getters.authToken}})
-                    .then(() => {
-                        this.deleteItem.show = false
-                        this.showSnackbar({
-                            message: 'Berhasil menghapus dosen',
-                            type: 'success'
-                        })
+                try {
+                    await axios.delete(`/users/${this.deleteItem.id}/`, this.$store.getters.authHeaders)
+                    this.deleteItem.show = false
+                    this.showSnackbar({
+                        message: 'Berhasil menghapus dosen',
+                        type: 'success'
                     })
-                    .catch(err => {
-                        this.showSnackbar({
-                            message: err.message,
-                            type: 'error'
-                        })
-                    }) 
+                    this.users.splice(this.users.findIndex(user => user.id === this.deleteItem.id), 1)
+                } catch(err) {
+                    this.showSnackbar({
+                        message: err.message,
+                        type: 'error'
+                    })
+                }
             }
         },
 
@@ -297,26 +296,26 @@ export default {
                     user['konsentrasi'] = konsentrasi
                     user['prodi'] = prodi
                 }
-                axios.post(`/users/${role.toLowerCase()}/`, user, {
-                    headers: {
-                        'Authorization': this.$store.getters.authToken
-                    }
+
+                this.postUserData(role, user)
+            }
+        },
+
+        async postUserData(role, user) {
+            try {
+                const response = await axios.post(`/users/${role.toLowerCase()}/`, user, this.$store.getters.authHeaders)
+                this.users.push(response.data.users)
+                this.showSnackbar({
+                    message: response.data.message,
+                    type: 'success'
                 })
-                .then(r => {
-                    this.users.push(r.data.users)
-                    this.showSnackbar({
-                        message: r.data.message,
-                        type: 'success'
-                    })
-                    this.close()
+                this.close()
+            } catch (error) {
+                this.showSnackbar({
+                    message: error.message,
+                    type: 'error'
                 })
-                .catch(err => {
-                    this.showSnackbar({
-                        message: err.message,
-                        type: 'error'
-                    })
-                    this.close()
-                })
+                this.close()
             }
         }
     }
@@ -324,19 +323,20 @@ export default {
 </script>
 
 <style lang="sass">
-    .v-datatable 
-        tbody 
-            tr 
-                td:first-of-type
-                    padding-left: 0
-                td:last-of-type
-                    padding-right: 0
-        thead 
-            tr 
-                th:first-of-type
-                    padding-left: 0
-                th:last-of-type
-                    padding-right: 0
+    .user-table
+        .v-datatable 
+            tbody 
+                tr 
+                    td:first-of-type
+                        padding-left: 0
+                    td:last-of-type
+                        padding-right: 0
+            thead 
+                tr 
+                    th:first-of-type
+                        padding-left: 0
+                    th:last-of-type
+                        padding-right: 0
 </style>
 
 

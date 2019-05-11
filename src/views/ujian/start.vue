@@ -129,7 +129,6 @@ export default {
                     message: err.message,
                     type: 'error'
                 })
-
                 this.$router.go(-1)
             })
 

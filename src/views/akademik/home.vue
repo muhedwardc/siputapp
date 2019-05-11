@@ -24,18 +24,21 @@
                         :transition="false" 
                         :reverse-transition="false">
                         <h3 class="mb-2">{{ i == days.length-1 ? day.name : readableDate(day.date) }}</h3>
-                        <v-card flat v-if="day.exams.length > 0" class="mt-3">
-                            <v-layout class="exam-item" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
-                                <v-layout class="ml-0 mr-0" row justify-space-between>
-                                    <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
-                                    <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
+                        <app-loading></app-loading>
+                        <template v-if="!$store.state.loadViewContent">
+                            <v-card flat v-if="day.exams.length > 0" class="mt-3">
+                                <v-layout class="exam-item" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
+                                    <v-layout class="ml-0 mr-0" row justify-space-between align-start>
+                                        <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
+                                        <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
+                                    </v-layout>
+                                    <p class="mb-0"><span :class="isToday(exam.tanggal) ? 'purple--text font-weight-bold' : ''">{{ isToday(exam.tanggal) ? 'Hari ini' : readableDate(exam.tanggal) }}</span> - {{ exam.sesi }} - {{ exam.ruang }}</p>
+                                    <p class="mb-0">Mahasiswa: {{ readableString(exam.skripsi.mahasiswa, 'nama') }}</p>
+                                    <p class="mb-0">Penguji: {{ readableString(exam.penguji, 'dosen') }}</p>
                                 </v-layout>
-                                <p class="mb-0"><span :class="isToday(exam.tanggal) ? 'purple--text font-weight-bold' : ''">{{ isToday(exam.tanggal) ? 'Hari ini' : readableDate(exam.tanggal) }}</span> - {{ exam.sesi }} - {{ exam.ruang }}</p>
-                                <p class="mb-0">Mahasiswa: {{ readableString(exam.skripsi.mahasiswa, 'nama') }}</p>
-                                <p class="mb-0">Penguji: {{ readableString(exam.penguji, 'dosen') }}</p>
-                            </v-layout>
-                        </v-card>
-                        <p v-else>Tidak ada ujian.</p>
+                            </v-card>
+                            <p v-else>Tidak ada ujian.</p>
+                        </template>
                     </v-tab-item>
                 </v-tabs>
             </v-layout>
@@ -173,20 +176,22 @@ export default {
             return moment().format('DD/MM/YYYY') === date
         },
 
-        fetchUjian() {
+        async fetchUjian() {
+            this.$store.state.loadViewContent = true
             const startOfWeek = moment().startOf('isoWeek').toDate()
             const startDate = moment(startOfWeek).format('YYYY-MM-DD')
             const endDate = moment(startOfWeek).add(2, 'week').format('YYYY-MM-DD')
-            axios.get(`/exams/?mulai=${startDate}&selesai=${endDate}`, { headers: { 'Authorization': this.$store.getters.authToken }})
-                .then(r => {
-                    this.classifyExamsByDate(r.data.results)
+            try {
+                const response = await axios.get(`/exams/?mulai=${startDate}&selesai=${endDate}`, this.$store.getters.authHeaders)
+                this.classifyExamsByDate(response.data.results)
+                this.$store.state.loadViewContent = false
+            } catch (error) {
+                this.showSnackbar({
+                    message: error.message,
+                    type: 'error'
                 })
-                .catch(err => {
-                    this.showSnackbar({
-                        message: err.message,
-                        type: 'error'
-                    })
-                })
+                this.$store.state.loadViewContent = false   
+            }
         }
     },
 

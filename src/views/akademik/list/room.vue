@@ -173,7 +173,6 @@ export default {
                 const res = await axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
                 this.rooms = res.data.Ruang
                 this.sessions = res.data.Sesi
-                console.log(this.rooms, this.sessions)
             } catch (err) {
                 this.showSnackbar({
                     message: e.message,

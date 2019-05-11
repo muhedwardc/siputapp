@@ -511,7 +511,6 @@ export default {
                 const foundIndex = this.selectedPenguji.indexOf(dosenId)
                 const selectedIndex = this.dosen.findIndex(dosen => dosenId == dosen.id)
                 if (foundIndex !== -1) {
-                    console.log(foundIndex)
                     const foundId = this.selectedPenguji[foundIndex]
                     const index = this.dosen.findIndex(dosen => foundId == dosen.id)
                     this.selectedPenguji[foundIndex] = null
@@ -620,54 +619,48 @@ export default {
             this.options.splice(index, 1)
             this.closeDialog()
         },
-        fetchDosen() {
+        async fetchDosen() {
             this.loadingDosen = true
-            axios.get('/users/dosen/', {
-                headers: {
-                    'Authorization': this.$store.getters.authToken
-                }
-            })
-            .then(r => {
-                this.dosen = r.data.results
+            try {
+                const response = await axios.get('/users/dosen/', this.$store.getters.authHeaders)
+                this.dosen = response.data.results
                 this.loadingDosen = false
-            })
-            .catch(err => {
+            } catch (error) {
                 this.showSnackbar({
                     message: err.message,
                     type: 'error'
                 })
                 this.loadingDosen = false
-            })
+            }
         },
-        fetchRoomSessions() {
+        async fetchRoomSessions() {
             this.loadingRoomSessions = true
-            axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
-                .then(r => r.data)
-                .then(r => {
-                    this.rooms = r.Ruang
-                    this.sessions = r.Sesi
-                    this.loadingRoomSessions = false
+            try {
+                const response = await axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
+                this.rooms = r.data.Ruang
+                this.sessions = r.data.Sesi
+                this.loadingRoomSessions = false
+            } catch (error) {
+                this.showSnackbar({
+                    message: e.message,
+                    type: 'error'
                 })
-                .catch(e => {
-                    this.showSnackbar({
-                        message: e.message,
-                        type: 'error'
-                    })
-                    this.fetchRoomSessions()
-                }) 
+                this.fetchRoomSessions()
+            }
         },
-        getThisDayExams(date) {
+        async getThisDayExams(date) {
             this.dateMenu = false
             this.loadingThisDayExams = true
-            axios.get('/exams/?date=' + date, {headers: {'Authorization': this.$store.getters.authToken}})
-                .then(r => this.thisDayExams = r.data.results)
-                .catch(err => {
-                    this.showSnackbar({
-                        message: err.message,
-                        type: 'error'
-                    })
-                    this.loadingThisDayExams = false
+            try {
+                const response = axios.get('/exams/?date=' + date, this.$store.getters.authHeaders)
+                this.thisDayExams = response.data.results
+            } catch (error) {
+                this.showSnackbar({
+                    message: err.message,
+                    type: 'error'
                 })
+                this.loadingThisDayExams = false
+            }
         },
         pickFile () {
             this.$refs.pdf.click()
@@ -691,31 +684,23 @@ export default {
 				this.pdfUrl = ''
 			}
         },
-        getRoom() {
-            console.log('fetching room...')
-        },
         async createExam() {
             this.submitting = true
             this.exam.skripsi.naskah = null
-            axios.post('/exams/', this.exam, {
-                    headers: {
-                        'Authorization': this.$store.getters.authToken
-                    }
+            try {
+                await axios.post('/exams/', this.exam, this.$store.getters.authHeaders)
+                this.showSnackbar({
+                    message: 'Ujian Telah berhasi dibuat',
+                    type: 'success'
                 })
-                .then(() => {
-                    this.showSnackbar({
-                        message: 'Ujian Telah berhasi dibuat',
-                        type: 'success'
-                    })
-                    this.$router.push('/ujian')
+                this.$router.push('/ujian')
+            } catch (error) {
+                this.showSnackbar({
+                    message: err,
+                    type: 'error'
                 })
-                .catch(err => {
-                    this.showSnackbar({
-                        message: err,
-                        type: 'error'
-                    })
-                    this.submitting = false
-                })
+                this.submitting = false
+            }
         }
     },
 
