@@ -102,16 +102,6 @@ export default [
         component: () => import('@/views/ujian/start.vue')
     },
     {
-        path: '/ujian/:id/tunggu',
-        name: 'Ruang Ujian',
-        meta: { 
-            exam: true,
-            requiresAuth: true,
-            dosenRoute: true
-        },
-        component: () => import('@/views/ujian/waiting.vue')
-    },
-    {
         path: '/playground',
         name: 'Playground',
         meta: {
