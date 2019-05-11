@@ -113,20 +113,17 @@ export default {
 			'showSnackbar'
 		]),
 
-		logout() {
-			axios.post('/auth/logout/', {}, {
-				headers: {
-					'Authorization': this.$store.getters.authToken
-				}
-			})
-			.then(() => {
-				this.removeCookies()
-					.then(() => this.$router.replace('/login'))
-			})
-			.catch(err => this.showSnackbar({
-				message: err.message,
-				type: 'error'
-			}))
+		async logout() {
+			try {
+				await axios.post('/auth/logout/', {}, this.$store.getters.authHeaders)
+				await this.removeCookies()
+				await this.$router.replace('/login')
+			} catch (error) {
+				this.showSnackbar({
+					message: error.message,
+					type: 'error'
+				})
+			}
 		}
 	}
 }
