@@ -666,7 +666,7 @@ export default {
 				fr.addEventListener('load', () => {
 					this.pdfUrl = fr.result
 					this.exam.skripsi.naskah = files[0]
-                    this.uploadScript()
+                    this.uploadFile()
 				})
 			} else {
 				this.pdfName = ''
@@ -689,7 +689,7 @@ export default {
                 this.submitting = false
             }
         },
-        async uploadScript() {
+        async uploadFile() {
             this.uploadingScript = true
             const formData = new FormData()
             formData.append('file', this.exam.skripsi.naskah)
