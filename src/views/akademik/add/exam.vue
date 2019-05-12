@@ -626,10 +626,7 @@ export default {
                 this.dosen = response.data.results
                 this.loadingDosen = false
             } catch (error) {
-                this.showSnackbar({
-                    message: err.message,
-                    type: 'error'
-                })
+                this.showSnackbar(error)
                 this.loadingDosen = false
             }
         },
@@ -637,14 +634,11 @@ export default {
             this.loadingRoomSessions = true
             try {
                 const response = await axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
-                this.rooms = r.data.Ruang
-                this.sessions = r.data.Sesi
+                this.rooms = response.data.Ruang
+                this.sessions = response.data.Sesi
                 this.loadingRoomSessions = false
             } catch (error) {
-                this.showSnackbar({
-                    message: e.message,
-                    type: 'error'
-                })
+                this.showSnackbar(error)
                 this.fetchRoomSessions()
             }
         },
@@ -655,10 +649,7 @@ export default {
                 const response = axios.get('/exams/?date=' + date, this.$store.getters.authHeaders)
                 this.thisDayExams = response.data.results
             } catch (error) {
-                this.showSnackbar({
-                    message: err.message,
-                    type: 'error'
-                })
+                this.showSnackbar(error)
                 this.loadingThisDayExams = false
             }
         },
@@ -669,20 +660,19 @@ export default {
 			const files = e.target.files
 			if(files[0] !== undefined) {
 				this.pdfName = files[0].name
-				if(this.pdfName.lastIndexOf('.') <= 0) {
-					return
-				}
+				if(this.pdfName.lastIndexOf('.') <= 0) return
 				const fr = new FileReader()
 				fr.readAsDataURL(files[0])
 				fr.addEventListener('load', () => {
 					this.pdfUrl = fr.result
 					this.exam.skripsi.naskah = files[0]
+                    this.uploadScript()
 				})
 			} else {
 				this.pdfName = ''
 				this.pdfFile = ''
 				this.pdfUrl = ''
-			}
+            }
         },
         async createExam() {
             this.submitting = true
@@ -695,11 +685,21 @@ export default {
                 })
                 this.$router.push('/ujian')
             } catch (error) {
-                this.showSnackbar({
-                    message: err,
-                    type: 'error'
-                })
+                this.showSnackbar(error)
                 this.submitting = false
+            }
+        },
+        async uploadScript() {
+            this.uploadingScript = true
+            const formData = new FormData()
+            formData.append('file', this.exam.skripsi.naskah)
+            try {
+                console.log('uploading ....')
+                for (let key of formData.entries()) console.log(key)
+                this.uploadingScript = false
+            } catch (error) {
+                this.showSnackbar(error.message)
+                this.uploadingScript = false
             }
         }
     },
