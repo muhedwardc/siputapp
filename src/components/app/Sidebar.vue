@@ -8,7 +8,7 @@
 		class="sidebar">
 		<v-list class="profile pa-3">
 			<v-layout justify-center class="pa-1">
-				<img width="50px" height="50px" src="/static/images/ugm-logo.png" alt="ugm-logo">
+				<app-logo></app-logo>
 			</v-layout>
 		</v-list>
 		<v-list>
