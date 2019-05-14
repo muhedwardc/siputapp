@@ -47,7 +47,8 @@ export default function (data) {
                 ]
             ],
             pageBreak: 'before', 
-            pageOrientation: 'landscape'
+            pageOrientation: 'landscape',
+            pageSize: 'A4'
         },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 802, y2: 0, lineWidth: 1 } ], margin: [0, 5, 0, 0], pageOrientation: 'landscape' },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 802, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 0], pageOrientation: 'landscape' },

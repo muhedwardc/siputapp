@@ -112,6 +112,16 @@ export default [
         component: () => import('@/views/playground/index.vue')
     },
     {
+        path: '/ujian/:id/dokumen-pendadaran',
+        name: 'Dokumen Pendadaran',
+        meta: {
+            exam: true,
+            isDocument: true,
+            requiresAuth: true,
+        },
+        component: () => import('@/views/playground/document.vue')
+    },
+    {
         path: '*',
         name: '404 Page Not Found',
         component: () => import('@/views/404.vue')
