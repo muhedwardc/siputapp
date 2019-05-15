@@ -18,6 +18,7 @@ import doc4 from './documents/document-4.js'
 import doc5 from './documents/document-5.js'
 import doc6 from './documents/document-6.js'
 import doc7 from './documents/document-7.js'
+import doc8 from './documents/document-8.js'
 
 export default {
     data() {
@@ -64,7 +65,7 @@ export default {
         generatePDF(type) {
             const doc1 = beritaAcara(this.data)
             const doc2 = daftarHadir(this.data)
-            let content = [...doc1, ...doc2, ...doc3(this.data), ...doc4(this.data), ...doc5(this.data), ...doc6(this.data), ...doc7(this.data)]
+            let content = [...doc1, ...doc2, ...doc3(this.data), ...doc4(this.data), ...doc5(this.data), ...doc6(this.data), ...doc7(this.data), ...doc8(this.data)]
 
             if (pdfMake.vfs == undefined) {
                 pdfMake.vfs = pdfFonts.pdfMake.vfs
