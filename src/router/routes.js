@@ -61,7 +61,7 @@ export default [
             requiresAuth: true,
             dosenRoute: true,
         },
-        component: () => import('@/views/dosen/ujian.vue')
+        component: () => import('@/views/exam/list.vue')
     },
     {
         path: '/ujian',
@@ -89,7 +89,7 @@ export default [
             dosenRoute: true,
             akademikRoute: true
         },
-        component: () => import('@/views/ujian/show.vue')
+        component: () => import('@/views/exam/show.vue')
     },
     {
         path: '/ujian/:id/mulai',
@@ -99,7 +99,7 @@ export default [
             requiresAuth: true,
             dosenRoute: true
         },
-        component: () => import('@/views/ujian/start.vue')
+        component: () => import('@/views/exam/start.vue')
     },
     {
         path: '/playground',
