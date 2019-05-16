@@ -254,6 +254,7 @@
                         :headers="dosenHeaders"
                         :items="dosen"
                         :search="search"
+                        :rows-per-page-items='[ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]'
                         :loading="loadingDosen">
                         <template v-slot:items="props">
                             <td>{{ props.item.nama || props.item.email }}</td>
@@ -646,7 +647,7 @@ export default {
             this.dateMenu = false
             this.loadingThisDayExams = true
             try {
-                const response = axios.get('/exams/?date=' + date, this.$store.getters.authHeaders)
+                const response = await axios.get('/exams/?tanggal=' + date, this.$store.getters.authHeaders)
                 this.thisDayExams = response.data.results
             } catch (error) {
                 this.showSnackbar(error)

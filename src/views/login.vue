@@ -116,10 +116,7 @@ export default {
             } catch (error) {
                 this.isSubmitting = false
                 this.removeCookies()
-                this.showSnackbar({
-                    type: 'error',
-                    message: err.message
-                })
+                this.showSnackbar(error)
             }
         }
     }
