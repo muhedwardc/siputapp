@@ -57,6 +57,19 @@
                                 </template>
                             </v-data-table>
                         </v-layout>
+                        <v-layout class="mt-3" column>
+                            <h6 class="title font-weight-regular">Informasi Penguji</h6>
+                            <v-data-table
+                                :headers="dosenHeaders"
+                                :items="exam.penguji"
+                                hide-actions
+                                class="elevation-1 mt-2">
+                                <template v-slot:items="props">
+                                    <td>{{ props.item.dosen }}</td>
+                                    <td>{{ props.item.is_leader ? 'Ketua Penguji' : props.index == 1 ? 'Pembimbing 2' : 'Penguji' }}</td>
+                                </template>
+                            </v-data-table>
+                        </v-layout>
                     </v-card-text>
                 </v-card>   
             </v-flex>
@@ -94,6 +107,20 @@ export default {
                     sortable: false,
                     value: 'konsentrasi'
                 },
+            ],
+            dosenHeaders: [
+                {
+                    text: 'Nama',
+                    sortable: false,
+                    align: 'left',
+                    value: 'dosen',
+                },
+                {
+                    text: 'Status',
+                    sortable: false,
+                    align: 'left',
+                    value: 'is_leader',
+                },
             ]
         }
     },
@@ -120,11 +147,7 @@ export default {
 
         async getExam() {
             try {
-                const exam = await axios.get(`/${this.is_admin ? '' : 'me/'}exams/${this.$router.currentRoute.params.id}/`, {
-                    headers: {
-                        'Authorization': this.$store.getters.authToken
-                    }
-                })
+                const exam = await axios.get(`/${this.is_admin ? '' : 'me/'}exams/${this.$router.currentRoute.params.id}/`, this.$store.getters.authHeaders)
                 this.exam = this.is_admin ? exam.data : exam.data.ujian
             } catch (error) {
                 this.showSnackbar(error.message)
