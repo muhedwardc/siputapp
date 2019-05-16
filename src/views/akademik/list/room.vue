@@ -5,6 +5,24 @@
             <v-spacer></v-spacer>
             <v-btn color="primary" dark class="mb-2" @click="showDialog(0)">Tambah Ruangan</v-btn>
             <v-btn color="primary" dark class="mb-2" @click="showDialog(1)">Tambah Sesi</v-btn>
+            <v-dialog v-model="editDialog" persistent max-width="500px">
+                <v-card>
+                    <v-card-title class="headline pb-0">{{ edit.type == 0 ? 'Edit' : 'Hapus'}} Ruangan</v-card-title>
+                    <v-card-text>
+                        Ruangan terpilih: {{ edit.value }}
+                        <v-form ref="edit-form" v-if="edit.type == 0">
+                            <v-text-field v-model="edit.newValue" :disabled="editing" label="Nama Ruangan"></v-text-field>
+                        </v-form>
+                        <p v-else class="mb-0">Apakah anda ingin menghapus <b>{{ edit.value }}</b>?</p>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="error darken-1" :disabled="editing" @click="discardEdit">Batal</v-btn>
+                        <v-btn v-if="edit.type == 0" color="success darken-1" :loading="editing" @click="dialog = false">Ubah</v-btn>
+                        <v-btn v-else color="success darken-1" @click="deleteRoom" :loading="editing">Delete</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
             <v-dialog v-model="dialog" max-width="500px">
                 <v-card>
                     <v-card-title class="mb-0 pb-0 pl-4">
@@ -17,7 +35,7 @@
                                 <v-layout wrap v-if="type === 0">
                                     <v-flex xs12>
                                         <v-text-field v-model="roomName" :disabled="!input" label="Nama Ruangan"></v-text-field>
-                                        <span class="caption">Tanpa 'Ruang'. Contoh: Sidang</span>
+                                        <span class="caption">Contoh: Ruang Sidang</span>
                                     </v-flex>
                                 </v-layout>
                                 <v-layout v-else>
@@ -34,7 +52,7 @@
                                             <template v-slot:activator="{ on }">
                                                 <v-text-field
                                                     v-model="sessionStart"
-                                                    label="Jam Mulai"
+                                                    label="Jam Mulai. Contoh: 08:00"
                                                     readonly
                                                     v-on="on"
                                                 ></v-text-field>
@@ -60,7 +78,7 @@
                                             <template v-slot:activator="{ on }">
                                                 <v-text-field
                                                     v-model="sessionEnd"
-                                                    label="Jam Mulai"
+                                                    label="Jam Mulai. Contoh: 10:00"
                                                     readonly
                                                     v-on="on"
                                                 ></v-text-field>
@@ -101,8 +119,8 @@
                             <td v-text="props.item.id"></td>
                             <td v-text="props.item.nama"></td>
                             <td class="justify-center layout pa-0 ma-0">
-                                <v-icon small class="mr-2">edit</v-icon>
-                                <v-icon small>delete</v-icon>
+                                <v-icon small class="mr-2" @click="editRoom(0, props.item.id, props.item.nama)">edit</v-icon>
+                                <v-icon small @click="editRoom(1, props.item.id, props.item.nama)">delete</v-icon>
                             </td>
                         </template>
                     </v-data-table>
@@ -132,10 +150,19 @@
 
 <script>
 import {mapActions} from 'vuex'
+import { setTimeout, setInterval } from 'timers';
 export default {
     data() {
         return {
             dialog: false,
+            editDialog: false,
+            editing: false,
+            edit: {
+                type: 0,
+                id: '',
+                value: '',
+                newValue: ''
+            },
             roomName: '',
             sessionName: '',
             sessionStart: '',
@@ -147,8 +174,7 @@ export default {
             input: true,
             rooms: [],
             sessions: [],
-            roomsHeader: [{text: 'ID', value: 'id', sortable: true, align: 'left', width: '10px'}, {text: 'Nama Ruangan', value: 'nama', sortable: true, align: 'left'}, 
-                { text: 'Aksi', value: 'nama', sortable: false, align: 'center', width: '10px' }],
+            roomsHeader: [{text: 'ID', value: 'id', sortable: true, align: 'left', width: '10px'}, {text: 'Nama Ruangan', value: 'nama', sortable: true, align: 'left'}, { text: 'Aksi', value: 'nama', sortable: false, align: 'center', width: '10px' }],
             sessionsHeader: [
                 {text: 'ID', value: 'id', sortable: true, align: 'left', width: '10px'},
                 {text: 'Nama', value: 'nama', sortable: true, align: 'left'},
@@ -196,26 +222,37 @@ export default {
             this.dialog = false
         },
 
-        async createNew() {
-            // const valid = this.refs.room.validate()
-            // this.input = false
-            // if (valid) {
-            //     try {
-            //         await axios.post('/rooms/', )
-            //         this.dialog = false
-            //         this.showSnackbar ({
-            //             message: 'Berhasil membuat ruangan.',
-            //             type: 'success'
-            //         })
-            //         this.input = true
-            //     } catch (err) {
-            //         this.showSnackbar ({
-            //             message: err.message,
-            //             type: 'error'
-            //         })
-            //         this.input = true
-            //     }
-            // }
+        discardEdit() {
+            this.edit = {
+                value: '',
+                newValue: '',
+                id: '',
+                type: 0
+            }
+            this.editDialog = false
+        },
+
+        editRoom(type, id, nama) {
+            this.edit = {
+                value: nama,
+                newValue: nama,
+                id,
+                type
+            }
+            this.editDialog = true
+        },
+
+        async saveEditedRoom() {
+            try {
+                await axios.put('/', {nama: this.edit.newValue}, this.$store.getters.authHeaders)
+                this.rooms[this.rooms.indexOf(room => room.id == this.edit.id)] = { id: this.edit.id,  nama: this.edit.newValue}
+            } catch (error) {
+                this.showSnackbar(error)
+            }
+        },
+
+        async deleteRoom() {
+            this.editing = true
         }
     }
 }
