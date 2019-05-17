@@ -1,12 +1,13 @@
 import datetime
-from django.shortcuts import render
+from django.core.files.storage import FileSystemStorage
 from django.db.models import Count, Q
+from django.conf import settings
 from rest_framework import viewsets, views, permissions, status, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
+from rest_framework.parsers import JSONParser, FormParser, MultiPartParser, FileUploadParser
 
-from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer
+from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer, UploadEssaySerializer
 from .models import Exam, Penguji, Room, Session
 from backend.pagination import CustomPagination
 
@@ -14,7 +15,7 @@ from backend.pagination import CustomPagination
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
-    parser_classes = (JSONParser, FormParser, MultiPartParser)
+    parser_classes = (JSONParser, FormParser, MultiPartParser, FileUploadParser)
     pagination_class = CustomPagination
 
     def get_serializer_class(self, *args, **kwargs):
@@ -71,6 +72,15 @@ class ExamViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def upload_skripsi(self, request, filename, format=None):
+        upload_location = settings.ESSAY_FILE_LOCATION
+        essay_file = request.data['file']
+        fs = FileSystemStorage(location=upload_location)
+        filename = fs.save(essay_file.name, essay_file)
+        file_url = fs.url(filename)
+        return Response({
+            "file": file_url
+        }, status=status.HTTP_201_CREATED)
 
 class RoomSessionAPI(views.APIView):
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
