@@ -137,6 +137,7 @@ STATICFILES_DIRS = []
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'uploads')
+ESSAY_FILE_LOCATION = os.path.join(MEDIA_ROOT, 'skripsi')
 
 
 ##########
@@ -163,3 +164,5 @@ CORS_ORIGIN_WHITELIST = (
     'localhost:8080',
     '127.0.0.1:8080'
 )
+
+GOOGLE_CLIENT_ID = "163398113242-5v00mct894p9rmt75gu34hbod2c4o8id.apps.googleusercontent.com"
