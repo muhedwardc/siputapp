@@ -36,7 +36,7 @@
                             ></v-textarea>
                         
                         <label>Tambahkan Naskah</label>
-                        <v-text-field :disabled="submitting" placeholder="pilih naskah" readonly @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
+                        <v-text-field :disabled="submitting" placeholder="pilih naskah" :rules="rules.required" readonly @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
                         <input
                             type="file"
                             style="display: none"
@@ -372,12 +372,14 @@ export default {
                     pembimbing_dua: null,
                     is_capstone: false,
                     mahasiswa: [{}],
-                    naskah: null
+                    naskah: ''
                 },
             },
             tanggal_dialog: false,
             loadingRoomSessions: true,
             loadingThisDayExams: true,
+            uploadingScript: false,
+            uploadingScriptProgress: null,
             thisDayExams: [],
             rooms: [],
             sessions: [],
@@ -666,7 +668,7 @@ export default {
 				fr.readAsDataURL(files[0])
 				fr.addEventListener('load', () => {
 					this.pdfUrl = fr.result
-					this.exam.skripsi.naskah = files[0]
+					this.pdfFile = files[0]
                     this.uploadFile()
 				})
 			} else {
@@ -691,16 +693,30 @@ export default {
             }
         },
         async uploadFile() {
+            const config = {
+                onUploadProgress: (progressEvent) => {
+                    this.uploadingScriptProgress = Math.round( (progressEvent.loaded * 100) / progressEvent.total )
+                    console.log(this.uploadingScriptProgress)
+                }
+            }
+
             this.uploadingScript = true
             const formData = new FormData()
-            formData.append('file', this.exam.skripsi.naskah)
+            formData.append('file', this.pdfFile)
             try {
                 console.log('uploading ....')
-                for (let key of formData.entries()) console.log(key)
+                const res = await axios.post('/exams/upload-skripsi/' + this.pdfName, formData, this.$store.getters.authHeaders, config)
+                this.exam.skripsi.naskah = res.data.file
                 this.uploadingScript = false
+                this.uploadingScriptProgress = null
             } catch (error) {
                 this.showSnackbar(error.message)
+                this.exam.skripsi.naskah = ''
+                this.pdfName = ''
+                this.pdfFile = ''
+                this.pdfUrl = ''
                 this.uploadingScript = false
+                this.uploadingScriptProgress = null
             }
         }
     },
