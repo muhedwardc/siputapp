@@ -704,7 +704,6 @@ export default {
             const formData = new FormData()
             formData.append('file', this.pdfFile)
             try {
-                console.log('uploading ....')
                 const res = await axios.post('/exams/upload-skripsi/' + this.pdfName, formData, this.$store.getters.authHeaders, config)
                 this.exam.skripsi.naskah = res.data.file
                 this.uploadingScript = false
