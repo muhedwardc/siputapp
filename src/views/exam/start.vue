@@ -12,6 +12,7 @@
             <v-layout column>
                 <h2 class="mb-2">Lembar Koreksi <v-btn @click="toggleCorrectionSection" v-if="mobileAndShow">sembunyikan</v-btn></h2>
                 <v-btn class="primary ma-0 mb-2" @click="creating = true" v-if="!creating">Tambah Koreksi</v-btn>
+                <v-layout style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: black;"></v-layout>
                 <v-layout v-if="creating" column>
                     <v-form ref="add-correction-form" v-model="valid" lazy-validation></v-form>
                     <v-layout row justify-space-between>
