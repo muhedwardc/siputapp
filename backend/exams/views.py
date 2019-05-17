@@ -125,6 +125,28 @@ class RoomViewSet(viewsets.GenericViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def edit_room(self, request, pk=None):
+        room = Room.objects.get(pk=pk)
+        serializer = CreateRoomSerializer(room, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            rooms = self.get_queryset()
+            serializer = self.get_serializer(rooms, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete_room(self, request, pk=None):
+        try:
+            room = Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            return Response({
+                "message": "Room with id {} does not exist.".format(pk)
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        room.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        
+
 class SessionViewSet(viewsets.GenericViewSet):
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
     queryset = Session.objects.all()
@@ -143,3 +165,31 @@ class SessionViewSet(viewsets.GenericViewSet):
             serializer = SessionSerializer(sessions, many=True)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def edit_session(self, request, pk=None):
+        try:
+            session = Session.objects.get(pk=pk)
+        except Session.DoesNotExist:
+            return Response({
+                "message": "Session with id {} does not exist.".format(pk)
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CreateSessionSerializer(session, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            sessions = self.get_queryset()
+            serializer = SessionSerializer(sessions, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete_session(self, request, pk=None):
+        try:
+            session = Session.objects.get(pk=pk)
+        except Session.DoesNotExist:
+            return Response({
+                "message": "Session with id {} does not exist.".format(pk)
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        session.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
