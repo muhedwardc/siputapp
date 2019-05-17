@@ -4,12 +4,13 @@
             <form-wizard
                 @on-complete="onComplete"
                 color="blue">
-                <tab-content title="Informasi Ujian" :before-change="validateInfo">
+                <tab-content title="Informasi Ujian" :before-change="validateExamInfo">
                     <v-form
-                        ref="form"
-                        v-model="valid">
+                        lazy-validation
+                        ref="form1"
+                        v-model="valid[0]">
                         <label>Tipe Ujian</label>
-                        <v-radio-group :disabled="submitting" v-model="exam.skripsi.is_capstone">
+                        <v-radio-group :rules="rules.isBool" :disabled="submitting" v-model="exam.skripsi.is_capstone">
                             <v-radio :value="false" label="Individu" color="primary"></v-radio>
                             <v-radio :value="true" label="Capstone" color="primary"></v-radio>
                         </v-radio-group>
@@ -21,6 +22,7 @@
                             solo
                             :disabled="submitting"
                             label="Judul Ujian"
+                            :rules="rules.required"
                             ></v-text-field>
                         
                         <label>Intisari</label>
@@ -30,6 +32,7 @@
                             solo
                             :disabled="submitting"
                             label="Intisari"
+                            :rules="rules.required"
                             ></v-textarea>
                         
                         <label>Tambahkan Naskah</label>
@@ -46,7 +49,8 @@
                         >
                     </v-form>
                 </tab-content>
-                <tab-content title="Pilih Ruangan">
+                <tab-content title="Pilih Ruangan" :before-change="validateRoomSession">
+                    <v-form ref="form2" v-model="valid[1]" lazy-validation>
                     <v-menu
                         v-model="dateMenu"
                         :close-on-content-click="false"
@@ -61,6 +65,7 @@
                         <template v-slot:activator="{ on }">
                             <v-text-field
                                 v-model="exam.tanggal"
+                                :rules="[...rules.required, ...rules.date]"
                                 readonly
                                 placeholder="Pilih Tanggal Ujian"
                                 prepend-icon="event "
@@ -89,6 +94,7 @@
                                     item-value="id"
                                     placeholder="Ruangan"
                                     item-text="nama"
+                                    :rules="[v => !!v || 'Bidang isian harus diisi']"
                                     :disabled="submitting || !exam.tanggal"
                                     ></v-select>
                             </v-flex>
@@ -99,16 +105,18 @@
                                     item-value="id"
                                     placeholder="Sesi"
                                     item-text="mulai"
+                                    :rules="[v => !!v || 'Bidang isian harus diisi']"
                                     :disabled="submitting || !exam.tanggal"
                                     ></v-select>
                             </v-flex>
                         </v-layout>
                     </v-container>
+                    </v-form>
                 </tab-content>
-                <tab-content title="Data Mahasiswa">
+                <tab-content title="Data Mahasiswa" :before-change="validateMahasiswa">
                     <v-layout column>
                         <v-form refs="formMahasiswa">
-                            <v-form ref="mhsInfo" v-model="mhsValid" lazy-validation>
+                            <v-form ref="form3" v-model="valid[2]" lazy-validation>
                                 <div v-for="(mahasiswa, index) in exam.skripsi.mahasiswa" :key="index" class="mb-4">
                                     <v-layout row wrap align-center class="mb-2">
                                         <h3>Mahasiswa {{ index + 1 }}</h3>
@@ -124,6 +132,7 @@
                                                     placeholder="Nama Mahasiswa"
                                                     required
                                                     :disabled="submitting"
+                                                    :rules="rules.required"
                                                 ></v-text-field>
                                             </td>
                                         </tr>
@@ -136,6 +145,7 @@
                                                     placeholder="NIM"
                                                     required
                                                     :disabled="submitting"
+                                                    :rules="rules.required"
                                                 ></v-text-field>
                                             </td>
                                         </tr>
@@ -148,7 +158,7 @@
                                                         v-model="mahasiswa['prodi']"
                                                         @change="navigateKonsentrasi(index)"
                                                         :items="options[index].prodiOptions"
-                                                        :rules="[v => !!v || 'Item is required']"
+                                                        :rules="rules.required"
                                                         placeholder="Prodi"
                                                         required
                                                         :disabled="submitting"
@@ -157,7 +167,7 @@
                                                     <v-select
                                                         v-model="mahasiswa['konsentrasi']"
                                                         :items="options[index].konsentrasiOptions[options[index].prodiSelected]"
-                                                        :rules="[v => !!v || 'Item is required']"
+                                                        :rules="rules.required"
                                                         placeholder="Konsentrasi"
                                                         :disabled="!mahasiswa['prodi'] || submitting"
                                                         ></v-select>
@@ -175,12 +185,13 @@
                                                         v-model="mahasiswa['tempat_lahir']"
                                                         placeholder="Tempat lahir"
                                                         required
+                                                        :rules="rules.required"
                                                         :disabled="submitting"
                                                     ></v-text-field>
                                                     <span class="title ml-2 mr-2">/</span>
                                                     <v-menu
                                                         v-model="options[index].dateDialog"
-                                                        :close-on-content-click="true"
+                                                        :close-on-content-click="false"
                                                         :nudge-right="40"
                                                         lazy
                                                         transition="scale-transition"
@@ -193,6 +204,7 @@
                                                                 v-model="mahasiswa['tanggal_lahir']"
                                                                 placeholder="YYYY-MM-DD"
                                                                 prepend-icon="event"
+                                                                :rules="[...rules.required, ...rules.date]"
                                                                 v-on="on"
                                                                 :disabled="submitting"
                                                             ></v-text-field>
@@ -211,6 +223,7 @@
                                                     placeholder="Nomor Telepon"
                                                     required
                                                     :disabled="submitting"
+                                                    :rules="[...rules.required, ...rules.isNumber]"
                                                 ></v-text-field>
                                             </td>
                                         </tr>
@@ -221,7 +234,8 @@
                     </v-layout>
                     <v-btn color="primary" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa.length < 4" @click="addMahasiswa()">Tambah mahasiswa</v-btn>
                 </tab-content>
-                <tab-content title="Dosen Penguji">
+                <tab-content title="Dosen Penguji" :before-change="validateDosen">
+                    <v-form ref="form4" lazy-validation v-model="valid[3]">
                     <v-layout row align-center>
                         <h3>Pilih Dosen Pembimbing dan Penguji</h3>
                         <v-spacer></v-spacer>
@@ -235,10 +249,12 @@
                             class="pt-0"
                         ></v-text-field>
                     </v-layout>
+                    <p v-if="dosenValidation" class="mb-0 mt-2 error--text">{{ dosenValidation }}</p>
                     <v-data-table
                         :headers="dosenHeaders"
                         :items="dosen"
                         :search="search"
+                        :rows-per-page-items='[ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]'
                         :loading="loadingDosen">
                         <template v-slot:items="props">
                             <td>{{ props.item.nama || props.item.email }}</td>
@@ -284,6 +300,7 @@
                             </v-layout>
                         </template>
                     </v-data-table>
+                    </v-form>
                 </tab-content>
                 <template slot="footer" slot-scope="props">
                     <div class="wizard-footer-left">
@@ -403,7 +420,16 @@ export default {
                 name: '',
                 index: null
             },
-            submitting: false
+            submitting: false,
+            valid: [true, true, true, true],
+            rules: {
+                required: [v => (!!v && !!v.trim()) || 'Bidang isian harus diisi'],
+                requireSelect: [v => !!v || 'Bidang isian harus diisi'],
+                isBool: [v => (v == false || v == true) || 'Bidang isian ujian harus diisi'],
+                is_capstone: [v => (v == false || v == true) || 'Tipe ujian harus diisi'],
+                isNumber: [v => !isNaN(v) || 'Hanya dapat berisi angka'],
+                date: [v => /[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}/g.test(v) || 'Tanggal format YYYY-MM-DD']
+            }
         }
     },
 
@@ -418,12 +444,33 @@ export default {
             let list = this.dosen
             return list
         },
+
+        dosenValidation() {
+            let errors = []
+            if (this.exam.skripsi.pembimbing_satu == null) errors.push('Pembimbing satu belum dipilih')
+            if (this.exam.skripsi.pembimbing_dua == null) errors.push('Pembimbing dua belum dipilih')
+            if (this.exam.penguji.length < 2) errors.push('Penguji kurang ' + (2 - this.exam.penguji.length) + ' dosen')
+            if (errors.length > 0) return errors.join(', ')
+            return false
+        }
     },
 
     methods: {
         ...mapActions([
             'showSnackbar'
         ]),
+        validateExamInfo() {
+            return this.$refs.form1.validate()
+        },
+        validateRoomSession() {
+            return this.$refs.form2.validate()
+        },
+        validateMahasiswa() {
+            return this.$refs.form3.validate()
+        },
+        validateDosen() {
+            return this.$refs.form4.validate()
+        },
         navigateKonsentrasi(index) {
             const i = this.options[index].prodiOptions.findIndex(el => el == this.exam.skripsi.mahasiswa[index].prodi)
             this.options[index].prodiSelected = i
@@ -465,7 +512,6 @@ export default {
                 const foundIndex = this.selectedPenguji.indexOf(dosenId)
                 const selectedIndex = this.dosen.findIndex(dosen => dosenId == dosen.id)
                 if (foundIndex !== -1) {
-                    console.log(foundIndex)
                     const foundId = this.selectedPenguji[foundIndex]
                     const index = this.dosen.findIndex(dosen => foundId == dosen.id)
                     this.selectedPenguji[foundIndex] = null
@@ -574,54 +620,39 @@ export default {
             this.options.splice(index, 1)
             this.closeDialog()
         },
-        fetchDosen() {
+        async fetchDosen() {
             this.loadingDosen = true
-            axios.get('/users/dosen/', {
-                headers: {
-                    'Authorization': this.$store.getters.authToken
-                }
-            })
-            .then(r => {
-                this.dosen = r.data.results
+            try {
+                const response = await axios.get('/users/dosen/', this.$store.getters.authHeaders)
+                this.dosen = response.data.results
                 this.loadingDosen = false
-            })
-            .catch(err => {
-                this.showSnackbar({
-                    message: err.message,
-                    type: 'error'
-                })
+            } catch (error) {
+                this.showSnackbar(error)
                 this.loadingDosen = false
-            })
+            }
         },
-        fetchRoomSessions() {
+        async fetchRoomSessions() {
             this.loadingRoomSessions = true
-            axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
-                .then(r => r.data)
-                .then(r => {
-                    this.rooms = r.Ruang
-                    this.sessions = r.Sesi
-                    this.loadingRoomSessions = false
-                })
-                .catch(e => {
-                    this.showSnackbar({
-                        message: e.message,
-                        type: 'error'
-                    })
-                    this.fetchRoomSessions()
-                }) 
+            try {
+                const response = await axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
+                this.rooms = response.data.Ruang
+                this.sessions = response.data.Sesi
+                this.loadingRoomSessions = false
+            } catch (error) {
+                this.showSnackbar(error)
+                this.fetchRoomSessions()
+            }
         },
-        getThisDayExams(date) {
+        async getThisDayExams(date) {
             this.dateMenu = false
             this.loadingThisDayExams = true
-            axios.get('/exams/?date=' + date, {headers: {'Authorization': this.$store.getters.authToken}})
-                .then(r => this.thisDayExams = r.data.results)
-                .catch(err => {
-                    this.showSnackbar({
-                        message: err.message,
-                        type: 'error'
-                    })
-                    this.loadingThisDayExams = false
-                })
+            try {
+                const response = await axios.get('/exams/?tanggal=' + date, this.$store.getters.authHeaders)
+                this.thisDayExams = response.data.results
+            } catch (error) {
+                this.showSnackbar(error)
+                this.loadingThisDayExams = false
+            }
         },
         pickFile () {
             this.$refs.pdf.click()
@@ -630,46 +661,47 @@ export default {
 			const files = e.target.files
 			if(files[0] !== undefined) {
 				this.pdfName = files[0].name
-				if(this.pdfName.lastIndexOf('.') <= 0) {
-					return
-				}
+				if(this.pdfName.lastIndexOf('.') <= 0) return
 				const fr = new FileReader()
 				fr.readAsDataURL(files[0])
 				fr.addEventListener('load', () => {
 					this.pdfUrl = fr.result
 					this.exam.skripsi.naskah = files[0]
+                    this.uploadFile()
 				})
 			} else {
 				this.pdfName = ''
 				this.pdfFile = ''
 				this.pdfUrl = ''
-			}
-        },
-        getRoom() {
-            console.log('fetching room...')
+            }
         },
         async createExam() {
             this.submitting = true
             this.exam.skripsi.naskah = null
-            axios.post('/exams/', this.exam, {
-                    headers: {
-                        'Authorization': this.$store.getters.authToken
-                    }
+            try {
+                await axios.post('/exams/', this.exam, this.$store.getters.authHeaders)
+                this.showSnackbar({
+                    message: 'Ujian Telah berhasi dibuat',
+                    type: 'success'
                 })
-                .then(() => {
-                    this.showSnackbar({
-                        message: 'Ujian Telah berhasi dibuat',
-                        type: 'success'
-                    })
-                    this.$router.push('/ujian')
-                })
-                .catch(err => {
-                    this.showSnackbar({
-                        message: err,
-                        type: 'error'
-                    })
-                    this.submitting = false
-                })
+                this.$router.push('/ujian')
+            } catch (error) {
+                this.showSnackbar(error)
+                this.submitting = false
+            }
+        },
+        async uploadFile() {
+            this.uploadingScript = true
+            const formData = new FormData()
+            formData.append('file', this.exam.skripsi.naskah)
+            try {
+                console.log('uploading ....')
+                for (let key of formData.entries()) console.log(key)
+                this.uploadingScript = false
+            } catch (error) {
+                this.showSnackbar(error.message)
+                this.uploadingScript = false
+            }
         }
     },
 
@@ -705,9 +737,13 @@ export default {
             .flex
                 padding: 4px 12px
 
+    .v-text-field__details
+        padding: 0 !important
+
     .v-input--selection-controls
         margin-top: 0 !important
         padding-top: 0 !important
+        margin-bottom: 8px
 
     .v-input__slot
         margin-bottom: 0 !important

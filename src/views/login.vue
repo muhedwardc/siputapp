@@ -109,11 +109,14 @@ export default {
             try {
                 const user = await this.$gAuth.signIn()
                 const token = user.getAuthResponse().id_token
+                // const res = await axios.post('/auth/login/', {token})
+                // await this.logUserIn(res.data)
+                // this.$router.push('/')
+                // this.isSubmitting = false
+            } catch (error) {
                 this.isSubmitting = false
-                console.log(token)
-            } catch (e) {
-                this.isSubmitting = false
-                console.log(e)
+                this.removeCookies()
+                this.showSnackbar(error)
             }
         }
     }

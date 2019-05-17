@@ -130,6 +130,9 @@ class CreateExamSerializer(serializers.ModelSerializer):
         
         return new_ujian
 
+class UploadEssaySerializer(serializers.Serializer):
+    file = serializers.FileField()
+
 
 
 

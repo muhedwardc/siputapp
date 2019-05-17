@@ -89,35 +89,16 @@ export default {
             return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
         },
 
-        fetchExams() {
-            axios.get('/me/exams/', {
-                headers: {
-                    'Authorization': this.$store.getters.authToken
-                }
-            })
-            .then(r => this.exams.push.apply(this.exams, r.data.results))
-            .then(() => {
-                axios.get('/me/exams/history/', {
-                    headers: {
-                        'Authorization': this.$store.getters.authToken
-                    }
-                })
-                .then(r => this.exams.push.apply(this.exams, r.data.results))
-                .catch(err => {
-                    this.exams = []
-                    this.showSnackbar({
-                        message: err,
-                        type: 'error'
-                    })                
-                })
-            })
-            .catch(err => {
+        async fetchExams() {
+            try {
+                const r = await axios.get('/me/exams/', this.$store.getters.authHeaders)
+                this.exams.push.apply(this.exams, r.data.results)
+                const history = await axios.get('/me/exams/history/', this.$store.getters.authHeaders)
+                this.exams.push.apply(this.exams, history.data.results)
+            } catch (error) {
                 this.exams = []
-                this.showSnackbar({
-                    message: err,
-                    type: 'error'
-                })                
-            })
+                this.showSnackbar(error.message)                
+            }
         },
 
         getStatus(status) {

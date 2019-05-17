@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import Cookies from 'js-cookie'
+import './plugins/axios'
 
 Vue.use(Vuex)
 
@@ -11,8 +12,7 @@ export default new Vuex.Store({
 	state: {
 		auth: {
 			token: userToken || null,
-			user: userData || null,
-			loggedIn: false
+			user: userData || null
 		},
 		snackbar: {
 			show: false,
@@ -36,6 +36,7 @@ export default new Vuex.Store({
 		dashboard: false,
 		dialog: false,
 		drawer: true,
+		loadViewContent: true
 	},
 	mutations: {
 		logUserIn(state, payload) {
@@ -48,15 +49,7 @@ export default new Vuex.Store({
 			state.snackbar = {
 				show: true,
 				message: payload.message ? payload.message : payload,
-				type: payload.type ? payload.type : 'success'
-			}
-		},
-		showAlert(state, payload) {
-			state.snackbar = {
-				show: true,
-				message: payload.message ? payload.message : payload,
-				type: payload.type ? payload.type : 'success',
-				action: payload.action ? payload.action : false
+				type: payload.type ? payload.type : 'error'
 			}
 		},
 		removeCookies(state) {
@@ -69,7 +62,8 @@ export default new Vuex.Store({
 	},
 	getters: {
 		authToken: (state) => 'Token ' + state.auth.token,
-		isLoggedIn: (state) => !!state.auth.token && !!state.auth.user
+		isLoggedIn: (state) => !!state.auth.token && !!state.auth.user,
+		authHeaders: (state) => ({headers: {'Authorization': 'Token ' + state.auth.token}})
 	},
 	actions: {
 		logUserIn({ commit }, payload) {
@@ -83,6 +77,15 @@ export default new Vuex.Store({
 		},
 		removeCookies({ commit }) {
 			commit('removeCookies')
+		},
+		async get({ commit, state }, payload) {
+			const header = {'Authorization': state.auth.token}
+			try {
+				const response = await axios.get(payload.path, header)
+				return response
+			} catch (error) {
+				return commit('showSnackbar', error.message)
+			}
 		}
 	}
 })

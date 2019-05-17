@@ -5,8 +5,8 @@ class Essay(models.Model):
     judul = models.CharField(max_length=250)
     intisari = models.TextField()
     naskah = models.FileField(upload_to='skripsi/%Y/%m/%d/', blank=True, null=True)
-    pembimbing_satu = models.ForeignKey(User, related_name='pembimbing_satu', on_delete=models.DO_NOTHING)
-    pembimbing_dua = models.ForeignKey(User, related_name='pembimbing_dua', on_delete=models.DO_NOTHING)
+    pembimbing_satu = models.ForeignKey(User, related_name='pembimbing_satu', on_delete=models.SET_NULL, null=True, blank=True)
+    pembimbing_dua = models.ForeignKey(User, related_name='pembimbing_dua', on_delete=models.SET_NULL, null=True, blank=True)
     is_capstone = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)
 
