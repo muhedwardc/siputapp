@@ -17,13 +17,13 @@
                             <v-form ref="form" v-model="valid" lazy-validation>
                             <v-layout wrap>
                             <v-flex xs12>
-                                <v-text-field v-model="editedItem.name" label="Nama"></v-text-field>
+                                <v-text-field :disabled="creating" v-model="editedItem.name" label="Nama"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
-                                <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
+                                <v-text-field :disabled="creating" v-model="editedItem.email" label="Email"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
-                                <v-text-field v-model="editedItem.nip" label="NIP"></v-text-field>
+                                <v-text-field :disabled="creating" v-model="editedItem.nip" label="NIP"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
                                 <v-select
@@ -32,6 +32,7 @@
                                     :rules="[v => !!v || 'Item is required']"
                                     label="Status"
                                     required
+                                    :disabled="creating"
                                     ></v-select>
                             </v-flex>
                             <template v-if="editedItem.role == roles[0]">
@@ -42,6 +43,7 @@
                                         :rules="[v => !!v || 'Item is required']"
                                         label="Prodi"
                                         required
+                                        :disabled="creating"
                                         ></v-select>
                                 </v-flex>
                                 <v-flex xs12>
@@ -50,16 +52,16 @@
                                         :items="konsentrasi"
                                         :rules="[v => !!v || 'Item is required']"
                                         label="Konsentrasi"
-                                        :disabled="!editedItem.prodi"
+                                        :disabled="!editedItem.prodi || creating"
                                         required
                                         ></v-select>
                                 </v-flex>
                             </template>
                             <v-flex xs12>
-                                <v-text-field v-model="editedItem.password" label="Password" type="password"></v-text-field>
+                                <v-text-field :disabled="creating" v-model="editedItem.password" label="Password" type="password"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
-                                <v-text-field v-model="editedItem.confirmPassword" :error-messages="matchPassword()" label="Konfirmasi Password" type="password"></v-text-field>
+                                <v-text-field :disabled="creating" v-model="editedItem.confirmPassword" :error-messages="matchPassword()" label="Konfirmasi Password" type="password"></v-text-field>
                             </v-flex>
                             </v-layout>
                             </v-form>
@@ -68,8 +70,8 @@
 
                     <v-card-actions class="pa-4">
                         <v-spacer></v-spacer>
-                        <v-btn color="error" @click="save">Simpan</v-btn>
-                        <v-btn color="success" @click="close">Batal</v-btn>
+                        <v-btn :disabled="creating" color="error" @click="close">Batal</v-btn>
+                        <v-btn :loading="creating" color="success" @click="save">Simpan</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -140,6 +142,7 @@ export default {
             valid: true,
             dialog: false,
             loading: false,
+            creating: false,
             headers: [
                 { text: 'Nama', align: 'left', sortable: true, value: 'nama' },
                 { text: 'Email', value: 'email', sortable: true },
@@ -302,6 +305,7 @@ export default {
         },
 
         async postUserData(role, user) {
+            this.creating = true
             try {
                 const response = await axios.post(`/users/${role.toLowerCase()}/`, user, this.$store.getters.authHeaders)
                 this.users.push(response.data.users)
@@ -309,13 +313,11 @@ export default {
                     message: response.data.message,
                     type: 'success'
                 })
+                this.creating = false
                 this.close()
             } catch (error) {
-                this.showSnackbar({
-                    message: error.message,
-                    type: 'error'
-                })
-                this.close()
+                this.showSnackbar(error)
+                this.creating = false
             }
         }
     }
