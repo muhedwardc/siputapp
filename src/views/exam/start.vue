@@ -8,12 +8,18 @@
             clipped
             persistent
             mobile-break-point="991" 
-            class="correction-section pt-2 pl-4 pr-4 pb-2">
+            class="correction-section pa-0">
             <v-layout column>
-                <h2 class="mb-2">Lembar Koreksi <v-btn @click="toggleCorrectionSection" v-if="mobileAndShow">sembunyikan</v-btn></h2>
+                <!-- <h2 class="mb-2">Lembar Koreksi <v-btn @click="toggleCorrectionSection" v-if="mobileAndShow">sembunyikan</v-btn></h2> -->
+                <v-toolbar dark color="primary">
+                    <v-toolbar-side-icon @click="toggleCorrectionSection"></v-toolbar-side-icon>
+                    <v-toolbar-title class="white--text">Koreksi</v-toolbar-title>
+                </v-toolbar>
+                <template class="pa-2">
+                    
+                </template>
                 <v-btn class="primary ma-0 mb-2" @click="creating = true" v-if="!creating">Tambah Koreksi</v-btn>
-                <v-layout style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: black;"></v-layout>
-                <v-layout v-if="creating" column>
+                <v-layout v-if="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
                     <v-form ref="add-correction-form" v-model="valid" lazy-validation></v-form>
                     <v-layout row justify-space-between>
                         <v-select
@@ -24,14 +30,12 @@
                             class="mr-2"></v-select>
                         <v-text-field style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.page" placeholder="hal" type="number" min="0"></v-text-field>
                     </v-layout>
-                    <template v-if="selectedBab">
-                        <v-textarea rows="3" solo v-model="newCorrection.text" placeholder="Masukkan koreksi"></v-textarea>
-                        <v-layout>
-                            <v-spacer></v-spacer>
-                            <v-btn class="primary ma-0 mb-2" @click="addCorrection(newCorrection.index)">Simpan</v-btn>
-                            <v-btn class="primary ma-0 mb-2" @click="resetNewCorrection">Batal</v-btn>
-                        </v-layout>
-                    </template>
+                    <v-textarea rows="3" solo v-model="newCorrection.text" placeholder="Masukkan koreksi"></v-textarea>
+                    <v-layout>
+                        <v-spacer></v-spacer>
+                        <v-btn class="primary ma-0 mb-2" @click="addCorrection(newCorrection.index)">Simpan</v-btn>
+                        <v-btn class="primary ma-0 mb-2" @click="resetNewCorrection">Batal</v-btn>
+                    </v-layout>
                 </v-layout>
                 <v-layout column>
                     <v-layout column v-for="(correction, section) in corrections" :key="section">
