@@ -19,7 +19,7 @@
                         <v-spacer></v-spacer>
                         <v-btn color="error darken-1" :disabled="editing" @click="discardEdit">Batal</v-btn>
                         <v-btn v-if="edit.type == 0" color="success darken-1" :loading="editing" @click="dialog = false">Ubah</v-btn>
-                        <v-btn v-else color="success darken-1" @click="deleteRoom" :loading="editing">Delete</v-btn>
+                        <v-btn v-else color="success darken-1" @click="deleteRoom" :loading="editing">Hapus</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -101,8 +101,8 @@
 
                     <v-card-actions class="pa-4">
                         <v-spacer></v-spacer>
-                        <v-btn color="success" :loading="!input" @click="createNew()">Simpan</v-btn>
-                        <v-btn color="error" v-if="input" @click="discard()">Batal</v-btn>
+                        <v-btn color="success" :loading="creating" @click="createNew(type)">Simpan</v-btn>
+                        <v-btn color="error" v-if="!creating" @click="discard()">Batal</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -116,7 +116,7 @@
                         :headers="roomsHeader"
                         :items="rooms">
                         <template v-slot:items="props">
-                            <td v-text="props.item.id"></td>
+                            <td v-text="props.index + 1"></td>
                             <td v-text="props.item.nama"></td>
                             <td class="justify-center layout pa-0 ma-0">
                                 <v-icon small class="mr-2" @click="editRoom(0, props.item.id, props.item.nama)">edit</v-icon>
@@ -132,7 +132,7 @@
                         :headers="sessionsHeader"
                         :items="sessions">
                         <template v-slot:items="props">
-                            <td v-text="props.item.id"></td>
+                            <td v-text="props.index + 1"></td>
                             <td v-text="props.item.nama"></td>
                             <td v-text="props.item.mulai"></td>
                             <td v-text="props.item.selesai"></td>
@@ -171,16 +171,18 @@ export default {
             modal2: false,
             valid: true,
             type: null,
+            types: ['rooms', 'sessions'],
+            creating: false,
             input: true,
             rooms: [],
             sessions: [],
-            roomsHeader: [{text: 'ID', value: 'id', sortable: true, align: 'left', width: '10px'}, {text: 'Nama Ruangan', value: 'nama', sortable: true, align: 'left'}, { text: 'Aksi', value: 'nama', sortable: false, align: 'center', width: '10px' }],
+            roomsHeader: [{text: 'No.', value: 'id', sortable: true, align: 'left', width: '10px'}, {text: 'Nama Ruangan', value: 'nama', sortable: true, align: 'left'}, { text: 'Aksi', value: 'nama', sortable: false, align: 'center', width: '10px' }],
             sessionsHeader: [
-                {text: 'ID', value: 'id', sortable: true, align: 'left', width: '10px'},
+                {text: 'No.', value: 'id', sortable: true, align: 'left', width: '10px'},
                 {text: 'Nama', value: 'nama', sortable: true, align: 'left'},
                 {text: 'Mulai', value: 'mulai', sortable: true, align: 'left'},
                 {text: 'Selesai', value: 'selesai', sortable: true, align: 'left'},
-                { text: 'Aksi', value: 'nama', sortable: false, align: 'center', width: '10px' }
+                {text: 'Aksi', value: 'nama', sortable: false, align: 'center', width: '10px'}
             ]
         }
     },
@@ -199,11 +201,23 @@ export default {
                 const res = await axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
                 this.rooms = res.data.Ruang
                 this.sessions = res.data.Sesi
-            } catch (err) {
-                this.showSnackbar({
-                    message: e.message,
-                    type: 'error'
-                })
+            } catch (error) {
+                this.showSnackbar(error)
+            }
+        },
+
+        async createNew(type) {
+            this.creating = true
+            let data = {}
+            type == 0 ? data = {nama: this.roomName} : data = {nama: this.sessionName, mulai: this.sessionStart, selesai: this.sessionEnd}
+            try {
+                const res = await axios.post('/exams/' + this.types[type] + '/', data, this.$store.getters.authHeaders)
+                this[this.types[type]] = res.data
+                this.creating = false
+                this.discard()
+            } catch (error) {
+                this.showSnackbar(error)
+                this.creating = false
             }
         },
 
