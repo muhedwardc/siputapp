@@ -125,6 +125,16 @@ class RoomViewSet(viewsets.GenericViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def edit_room(self, request, pk=None):
+        room = Room.objects.get(pk=pk)
+        serializer = CreateRoomSerializer(room, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            rooms = self.get_queryset()
+            serializer = self.get_serializer(rooms, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class SessionViewSet(viewsets.GenericViewSet):
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
     queryset = Session.objects.all()
