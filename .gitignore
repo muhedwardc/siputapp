@@ -2,6 +2,7 @@
 node_modules
 /dist
 /skripsi
+/public/uploads/
 db.sqlite3
 
 # local env files
