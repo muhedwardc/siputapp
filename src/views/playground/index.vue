@@ -1,6 +1,10 @@
 <template>
     <v-layout column>
-        <v-btn class="primary" color="primary" @click="generatePDF()">Download</v-btn>
+        <v-btn class="primary" color="primary" :disabled="generating" :loading="generating" @click="generateDocument()">Generate Report</v-btn>
+        <span v-if="generating">Generating document ...</span>
+        <v-layout column v-show="displayIFrame" id="iframeContainer">
+            <iframe style="height: 400px" :src="src" id="pdf-document" class="full-size" frameborder="0"></iframe>
+        </v-layout>
     </v-layout>
 </template>
 
@@ -14,6 +18,7 @@ import doc4 from './documents/document-4.js'
 import doc5 from './documents/document-5.js'
 import doc6 from './documents/document-6.js'
 import doc7 from './documents/document-7.js'
+import doc8 from './documents/document-8.js'
 
 export default {
     data() {
@@ -44,14 +49,23 @@ export default {
                 },
                 nilai: 98,
             },
+            generating: false,
+            displayIFrame: false,
+            src: ''
         }
     },
 
     methods: {
+        generateDocument () {
+            this.generating = true
+            this.displayIFrame = true
+            this.generatePDF()
+        },
+
         generatePDF(type) {
             const doc1 = beritaAcara(this.data)
             const doc2 = daftarHadir(this.data)
-            let content = [...doc1, ...doc2, ...doc3(this.data), ...doc4(this.data), ...doc5(this.data), ...doc6(this.data), ...doc7(this.data)]
+            let content = [...doc1, ...doc2, ...doc3(this.data), ...doc4(this.data), ...doc5(this.data), ...doc6(this.data), ...doc7(this.data), ...doc8(this.data)]
 
             if (pdfMake.vfs == undefined) {
                 pdfMake.vfs = pdfFonts.pdfMake.vfs
@@ -68,10 +82,26 @@ export default {
                 pageMargins: [ 20, 20, 20, 20 ]
             }
 
-            pdfMake.createPdf(docDefinition).open()
+            // pdfMake.createPdf(docDefinition).open()
+            const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+            pdfDocGenerator.getDataUrl((dataUrl) => {
+                this.src = dataUrl;
+                this.generating = false 
+            });
         }
+    },
+
+    mounted() {
+        this.generateDocument()
     }
 }
 </script>
+
+<style>
+    .full-size {
+        width: 100%;
+        height: 100%;
+    }
+</style>
 
 

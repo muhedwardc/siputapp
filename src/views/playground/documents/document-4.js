@@ -5,6 +5,37 @@ import scoreBoard from './partials/score-board'
 export default function (data) {
     let doc = []
     const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa } = data
+    const mahasiswaList = [
+        {
+            name: 'Muhammad Edward Chakim',
+            nim: '15/385407/TK/44069',
+            grade: [90, 91, 89, 92, 98, 89],
+            sum: 549,
+            average: 91.5,
+            pass: true
+        }
+    ]
+    let emptyCol = []
+    let romanian = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
+    let gradeCol = []
+    let gradeWidth = []
+    let mahasiswaGrade = []
+    dosen.forEach((e, i) => {
+        emptyCol.push({})
+        gradeWidth.push('*')
+        gradeCol.push({ text: romanian[i], alignment: 'center' })
+    })
+    mahasiswaList.forEach((e, i) => {
+        let row = new Array()
+        row.push(e.name)
+        row.push(e.nim)
+        e.grade.forEach(grade => row.push({ text: grade, alignment: 'center' }))
+        row.push({ text: e.sum, alignment: 'center' })
+        row.push({ text: e.average, alignment: 'center' })
+        row.push({ text: e.pass ? 'LULUS' : 'TIDAK LULUS', alignment: 'center' })
+        mahasiswaGrade.push(row)
+    })
+    emptyCol.pop()
     let dosenTabel = [
         [
             { text: 'NO.', alignment: 'center' },
@@ -47,7 +78,8 @@ export default function (data) {
                 ]
             ],
             pageBreak: 'before', 
-            pageOrientation: 'landscape'
+            pageOrientation: 'landscape',
+            pageSize: 'A4'
         },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 802, y2: 0, lineWidth: 1 } ], margin: [0, 5, 0, 0], pageOrientation: 'landscape' },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 802, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 0], pageOrientation: 'landscape' },
@@ -61,25 +93,23 @@ export default function (data) {
         },
         {
             table: {
-                widths: [100, 100, '*', '*', '*', '*', 100, 100, 100],
+                widths: [150, 100, ...gradeWidth, 70, 70, 80],
                 body: [
                     [
-                        { text: 'NAMA', alignment: 'center', rowSpan: 2 },
-                        { text: 'NIM', alignment: 'center', rowSpan: 2 },
-                        { text: 'SKOR PENILAIAN', alignment: 'center', colSpan: 4},
-                        {},{},{},
-                        { text: 'JUMLAH', alignment: 'center', rowSpan: 2 },
-                        { text: 'RATA-RATA', alignment: 'center', rowSpan: 2 },
-                        { text: 'KETERANGAN', alignment: 'center', rowSpan: 2 },
+                        { text: 'NAMA', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
+                        { text: 'NIM', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
+                        { text: 'SKOR PENILAIAN', alignment: 'center', colSpan: dosen.length},
+                        ...emptyCol,
+                        { text: 'JUMLAH', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
+                        { text: 'RATA-RATA', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
+                        { text: 'KETERANGAN', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
                     ],
                     [
                         {},{},
-                        { text: 'I', alignment: 'center' },
-                        { text: 'II', alignment: 'center' },
-                        { text: 'III', alignment: 'center' },
-                        { text: 'IV', alignment: 'center' },
+                        ...gradeCol,
                         {},{},{}
-                    ]
+                    ],
+                    ...mahasiswaGrade
                 ]
             },
             margin: [0, 0, 0, 10]

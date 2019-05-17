@@ -61,7 +61,7 @@ export default [
             requiresAuth: true,
             dosenRoute: true,
         },
-        component: () => import('@/views/dosen/ujian.vue')
+        component: () => import('@/views/exam/list.vue')
     },
     {
         path: '/ujian',
@@ -89,7 +89,7 @@ export default [
             dosenRoute: true,
             akademikRoute: true
         },
-        component: () => import('@/views/ujian/show.vue')
+        component: () => import('@/views/exam/show.vue')
     },
     {
         path: '/ujian/:id/mulai',
@@ -99,17 +99,7 @@ export default [
             requiresAuth: true,
             dosenRoute: true
         },
-        component: () => import('@/views/ujian/start.vue')
-    },
-    {
-        path: '/ujian/:id/tunggu',
-        name: 'Ruang Ujian',
-        meta: { 
-            exam: true,
-            requiresAuth: true,
-            dosenRoute: true
-        },
-        component: () => import('@/views/ujian/waiting.vue')
+        component: () => import('@/views/exam/start.vue')
     },
     {
         path: '/playground',
@@ -120,6 +110,16 @@ export default [
             akademikRoute: true
         },
         component: () => import('@/views/playground/index.vue')
+    },
+    {
+        path: '/ujian/:id/dokumen-pendadaran',
+        name: 'Dokumen Pendadaran',
+        meta: {
+            exam: true,
+            isDocument: true,
+            requiresAuth: true,
+        },
+        component: () => import('@/views/playground/document.vue')
     },
     {
         path: '*',

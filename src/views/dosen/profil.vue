@@ -11,13 +11,13 @@ export default {
     },
 
     methods: {
-        fetchUserProfile() {
-            axios.get('/me/profile/', {
-                headers: {
-                    'Authorization': this.$store.getters.authToken
-                }
-            })
-            .then(r => this.user = r.data)
+        async fetchUserProfile() {
+            try {
+                const r = await axios.get('/me/profile/', this.$store.getters.authHeaders)
+                this.user = r.data
+            } catch (error) {
+                this.$store.dispatch('showSnackbar', {message: error.message, type: 'error'})
+            }
         }
     },
 

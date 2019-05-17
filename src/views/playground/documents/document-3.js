@@ -4,6 +4,61 @@ import UGMLogo from './partials/ugm-logo'
 export default function (data) {
     let doc = []
     const { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa, judul } = data
+    const bab = ['ABSTRAK', 'BAB I\nPENDAHULUAN', 'BAB II\nDASAR TEORI', 'BAB III\nMETODE PENELITIAN', 'BAB IV\nHASIL DAN PEMBAHASAN', 'BAB V\nKESIMPULAN DAN SARAN', 'KOMENTAR UMUM/CATATAN']
+    const comments = [
+        [], [], [
+            {
+                page: 2,
+                text: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using'
+            },
+            {
+                page: 2,
+                text: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using'
+            },
+            {
+                page: 4,
+                text: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using'
+            },
+        ],
+        [], []
+    ]
+    let corrections = [
+        [
+            { text: 'NO.', alignment: 'center', margin: [0, 5, 0, 0] },
+            { text: 'Komentar', alignment: 'center', margin: [0, 5, 0, 0] },
+            { text: 'Halaman', alignment: 'center', margin: [0, 5, 0, 0] },
+            { text: 'Koreksi', alignment: 'center', margin: [0, 5, 0, 0] },
+            { text: 'Halaman Baru', alignment: 'center' },
+        ],
+    ]
+    for (let i = 0; i < bab.length; i ++) {
+        if (comments[i]) {
+            corrections.push([
+                { border: [true, true, true, false], text: (i+1) },
+                { border: [true, true, true, false], text: bab[i], bold: true },
+                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].page : '', alignment: 'center' },
+                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].text : '' },
+                { border: [true, true, true, false], text: '' },
+            ])
+            if (comments[i].length > 1) {
+                for (let j = 1; j < comments[i].length; j++) {
+                    corrections.push([
+                        { border: [true, false, true, false], text: '' },
+                        { border: [true, false, true, false], text: '' },
+                        { border: [true, false, true, false], text: comments[i][j] ? comments[i][j].page : '', alignment: 'center' },
+                        { border: [true, false, true, false], text: comments[i][j] ? comments[i][j].text : '' },
+                        { border: [true, false, true, false], text: '' },
+                    ])
+                }
+            } 
+        } else {
+            corrections.push([
+                i+1,
+                { text: bab[i], bold: true },
+                '', '', ''
+            ])
+        }
+    }
     let dosenTabel = [
         [
             { text: 'NO.', alignment: 'center' },
@@ -90,52 +145,9 @@ export default function (data) {
                 widths: ['auto', 100 , 50, '*', 50],
                 heights: function(i) {
                     if (i === 0) return
-                    return 50
+                    return 40
                 },
-                body: [
-                    [
-                        { text: 'NO.', alignment: 'center', margin: [0, 5, 0, 0] },
-                        { text: 'Komentar', alignment: 'center', margin: [0, 5, 0, 0] },
-                        { text: 'Halaman', alignment: 'center', margin: [0, 5, 0, 0] },
-                        { text: 'Koreksi', alignment: 'center', margin: [0, 5, 0, 0] },
-                        { text: 'Halaman Baru', alignment: 'center' },
-                    ],
-                    [
-                        '1.',
-                        { text: 'ABSTRAK', bold: true },
-                        '', "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here'", ''
-                    ],
-                    [
-                        '2.',
-                        { text: 'BAB I\nPENDAHULUAN', bold: true },
-                        '', '', ''
-                    ],
-                    [
-                        '3.',
-                        { text: 'BAB II\nDASAR TEORI', bold: true },
-                        '', '', ''
-                    ],
-                    [
-                        '4.',
-                        { text: 'BAB III\nMETODE PENELITIAN', bold: true },
-                        '', '', ''
-                    ],
-                    [
-                        '5.',
-                        { text: 'BAB IV\nHASIL DAN PEMBAHASAN', bold: true },
-                        '', '', ''
-                    ],
-                    [
-                        '6.',
-                        { text: 'BAB V\nKESIMPULAN DAN SARAN', bold: true },
-                        '', '', ''
-                    ],
-                    [
-                        '7.',
-                        { text: 'KOMENTAR UMUM/CATATAN', bold: true },
-                        '', '', ''
-                    ],
-                ]
+                body: corrections
             },
             margin: [ 0, 0, 0, 10 ]
         },

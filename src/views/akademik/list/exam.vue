@@ -6,6 +6,7 @@
             <v-btn color="primary" dark class="mb-2" @click="$router.push('/ujian/tambah')">Tambah ujian</v-btn>
         </v-layout>
         <v-data-table
+            class="no-v-borders"
             :headers="headers"
             :items="exams"
             :rows-per-page-items="perPage"
@@ -75,20 +76,13 @@ export default {
         async initialize () {
             this.loading = true
             try {
-                const exams = await axios.get('/exams/', {
-                    headers: {
-                        'Authorization': this.$store.getters.authToken
-                    }
-                }).then(r => r.data)
-
-                this.exams = exams.results
+                console.log(this.$store.getters.authHeaders)
+                const response = await axios.get('/exams/', this.$store.getters.authHeaders)
+                this.exams = response.data.results
                 this.loading = false
                 this.loaded = true
-            } catch (e) {
-                this.showSnackbar({
-                    message: e.message,
-                    type: 'error'
-                })
+            } catch (error) {
+                this.showSnackbar(error.message)
                 this.loading = false
                 this.loaded = true
             }
@@ -98,17 +92,18 @@ export default {
 </script>
 
 <style lang="sass">
-    .v-datatable 
-        tbody 
-            tr 
-                td:first-of-type
-                    padding-left: 0
-                td:last-of-type
-                    padding-right: 0
-        thead 
-            tr 
-                th:first-of-type
-                    padding-left: 0
-                th:last-of-type
-                    padding-right: 0
+    .no-v-borders
+        .v-datatable 
+            tbody 
+                tr 
+                    td:first-of-type
+                        padding-left: 0
+                    td:last-of-type
+                        padding-right: 0
+            thead 
+                tr 
+                    th:first-of-type
+                        padding-left: 0
+                    th:last-of-type
+                        padding-right: 0
 </style>
