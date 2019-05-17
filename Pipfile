@@ -13,6 +13,9 @@ psycopg2-binary = "*"
 pillow = "*"
 django-rest-knox = "*"
 django-cors-headers = "*"
+google-api-python-client = "*"
+requests = "*"
+pyjwt = "*"
 
 [dev-packages]
 
