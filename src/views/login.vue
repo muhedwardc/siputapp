@@ -39,7 +39,7 @@
                                 ></v-text-field>
                             
                             <!-- <v-btn class="mt-4 font-weight-light" round color="primary" @click="login()" :loading="isSubmitting" :disabled="isSubmitting">Login</v-btn> -->
-                            <v-btn id="google-btn" class="mt-4 font-weight-light" round color="primary" @click="googleLogin()" :loading="isSubmitting" :disabled="isSubmitting">Masuk dengan Google</v-btn>
+                            <v-btn id="google-btn" class="mt-4 font-weight-light" round color="primary" :loading="isSubmitting" :disabled="isSubmitting">Masuk dengan Google</v-btn>
                         </v-form>
                     </v-layout>
                 </v-layout>
@@ -69,6 +69,22 @@ export default {
             isSubmitting: false
         }
     },
+    
+    mounted () {
+        window.gapi.load('auth2', () => {
+            const auth2 = window.gapi.auth2.init({
+                client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+                cookiepolicy: 'single_host_origin'
+            })
+
+            auth2.attachClickHandler(document.getElementById('google-btn'), {},
+                (googleUser) => {
+                    const token = googleUser.getAuthResponse().id_token
+                    this.googleLogin(token)
+                }
+            )
+        })
+    },
 
     methods: {
         ...mapActions([
@@ -81,34 +97,9 @@ export default {
             return this.$refs.form.validate()
         },
 
-        login() {
-            const valid = this.validate()
-            if (valid) {
-                this.isSubmitting = true
-                axios.post('/auth/login/', {
-                    email: this.email,
-                    password: this.password
-                }, {})
-                .then(r => {
-                    this.logUserIn(r.data)
-                        .then(() => this.$router.push('/'))
-                })
-                .catch(err => {
-                    this.isSubmitting = false
-                    this.removeCookies()
-                    this.showSnackbar({
-                        type: 'error',
-                        message: err.message
-                    })
-                })
-            }
-        },
-
-        async googleLogin() {
+        async googleLogin(token) {
             this.isSubmitting = true
             try {
-                const user = await this.$gAuth.signIn()
-                const token = user.getAuthResponse().id_token
                 const res = await axios.post('/auth/login-google/', {token})
                 await this.logUserIn(res.data)
                 this.isSubmitting = false
