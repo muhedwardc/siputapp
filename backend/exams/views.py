@@ -74,13 +74,16 @@ class ExamViewSet(viewsets.ModelViewSet):
 
     def upload_skripsi(self, request, filename, format=None):
         upload_location = settings.ESSAY_FILE_LOCATION
-        essay_file = request.data['file']
-        fs = FileSystemStorage(location=upload_location)
+        essay_file = request.FILES['file']
+        fs = FileSystemStorage(location=upload_location, base_url='/media/skripsi/')
         filename = fs.save(essay_file.name, essay_file)
         file_url = fs.url(filename)
         return Response({
             "file": file_url
         }, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        pass
 
 class RoomSessionAPI(views.APIView):
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
