@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import './components'
 import '@/plugins'
-import '@/auth/google'
 import App from '@/App.vue'
 import router from '@/router'
 import store from '@/store'
