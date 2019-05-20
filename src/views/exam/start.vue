@@ -10,56 +10,57 @@
             mobile-break-point="991" 
             class="correction-section pa-0">
             <v-layout column>
-                <!-- <h2 class="mb-2">Lembar Koreksi <v-btn @click="toggleCorrectionSection" v-if="mobileAndShow">sembunyikan</v-btn></h2> -->
                 <v-toolbar dark color="primary">
                     <v-toolbar-side-icon @click="toggleCorrectionSection"></v-toolbar-side-icon>
                     <v-toolbar-title class="white--text">Koreksi</v-toolbar-title>
                 </v-toolbar>
-                <template class="pa-2">
-                    
-                </template>
-                <v-btn class="primary ma-0 mb-2" @click="creating = true" v-if="!creating">Tambah Koreksi</v-btn>
-                <v-layout v-if="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
-                    <v-form ref="add-correction-form" v-model="valid" lazy-validation></v-form>
-                    <v-layout row justify-space-between>
-                        <v-select
-                            v-model="selectedBab"
-                            :items="bab"
-                            solo
-                            placeholder="Pilih Bab"
-                            class="mr-2"></v-select>
-                        <v-text-field style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.page" placeholder="hal" type="number" min="0"></v-text-field>
-                    </v-layout>
-                    <v-textarea rows="3" solo v-model="newCorrection.text" placeholder="Masukkan koreksi"></v-textarea>
-                    <v-layout>
-                        <v-spacer></v-spacer>
-                        <v-btn class="primary ma-0 mb-2" @click="addCorrection(newCorrection.index)">Simpan</v-btn>
-                        <v-btn class="primary ma-0 mb-2" @click="resetNewCorrection">Batal</v-btn>
-                    </v-layout>
-                </v-layout>
-                <v-layout column>
-                    <v-layout column v-for="(correction, section) in corrections" :key="section">
-                        <template v-if="correction.items.length > 0">
-                            <h3 class="mb-1" v-text="bab[section]"></h3>
-                            <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
-                                <v-layout row align-center>
-                                    <span class="font-weight-bold">Halaman {{item.page}}</span>
-                                    <!-- <v-btn flat :ripple="false" @click="editcorrection(i, index)">
-                                        <v-icon class="warning--text" small>edit</v-icon>
-                                        <span class="primary--text ml-1">edit</span>
-                                    </v-btn> -->
-                                    <v-btn flat :ripple="false" @click="showDialog(section, index)">
-                                        <v-icon class="error--text" small>delete</v-icon>
-                                        <span class="primary--text ml-1">hapus</span>
-                                    </v-btn>
-                                </v-layout>
-                                <p class="mb-0" v-text="item.text"></p>
+                <v-layout column class="pa-2 pl-4 pr-4" style="position: relative;">
+                    <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah Koreksi</v-btn>
+                    <v-slide-y-reverse-transition>
+                        <v-layout column class="pa-4" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
+                            <v-form ref="add-correction-form" v-model="valid" lazy-validation></v-form>
+                            <v-layout row justify-space-between>
+                                <v-select
+                                    v-model="selectedBab"
+                                    :items="bab"
+                                    solo
+                                    placeholder="Pilih Bab"
+                                    class="mr-2"></v-select>
+                                <v-text-field style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.page" placeholder="hal" type="number" min="0"></v-text-field>
                             </v-layout>
-                        </template>
+                            <v-textarea rows="3" solo v-model="newCorrection.text" placeholder="Masukkan koreksi"></v-textarea>
+                            <v-layout>
+                                <v-spacer></v-spacer>
+                                <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection">Batal</v-btn>
+                                <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges">Edit</v-btn>
+                                <v-btn v-else class="success ma-0 mb-2" @click="addCorrection">Simpan</v-btn>
+                            </v-layout>
+                        </v-layout>
+                    </v-slide-y-reverse-transition>
+                    <v-layout column  v-show="!creating">
+                        <v-layout column v-for="(correction, section) in corrections" :key="section">
+                            <template v-if="correction.items.length > 0">
+                                <h3 class="mb-1" v-text="bab[section]"></h3>
+                                <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
+                                    <v-layout row align-center>
+                                        <span class="font-weight-bold">Halaman {{item.page}}</span>
+                                        <v-btn flat :ripple="false" @click="editCorrection(section, index)">
+                                            <v-icon class="warning--text" small>edit</v-icon>
+                                            <span class="primary--text ml-1">edit</span>
+                                        </v-btn>
+                                        <v-btn flat :ripple="false" @click="showDialog(section, index)">
+                                            <v-icon class="error--text" small>delete</v-icon>
+                                            <span class="primary--text ml-1">hapus</span>
+                                        </v-btn>
+                                    </v-layout>
+                                    <p class="mb-0" v-text="item.text"></p>
+                                </v-layout>
+                            </template>
+                        </v-layout>
                     </v-layout>
                 </v-layout>
             </v-layout>
-            <v-btn color="primary" class="ma-0" style="float: right">Selanjutnya</v-btn>
+            <v-btn v-if="!creating" color="primary" class="ma-0 mr-4" style="float: right">Selanjutnya</v-btn>
         </v-navigation-drawer>
         <v-dialog v-model="dialog.show" persistent max-width="600px">
             <v-card>
@@ -102,7 +103,7 @@ export default {
                 index: '',
                 page: ''
             },
-            // newCorrection: null,
+            itemIndex: 0,
             bab: ['ABSTRAK', 'BAB I PENDAHULUAN', 'BAB II DASAR TEORI', 'BAB III METODE PENELITIAN', 'BAB IV HASIL DAN PEMBAHASAN', 'KOMENTAR UMUM/CATATAN'],
             corrections: [],
             newCorrection: {
@@ -114,6 +115,14 @@ export default {
                     mustBeNumber: [v => !isNaN(v) && v >= 0 || 'Harus angka'],
                 }
             },
+            temp: {
+                edit: false,
+                text: '',
+                page: '',
+                index: 0,
+                section: 0,
+                selectedBab: null
+            },
             creating: false,
             selectedBab: null,
             valid: true,
@@ -123,7 +132,7 @@ export default {
 
     watch: {
         selectedBab(val) {
-            this.newCorrection.index = this.bab.indexOf(val)
+            return this.newCorrection.index = this.bab.indexOf(val)
         }
     },
 
@@ -155,58 +164,59 @@ export default {
         generateCorrectionsTemplate() {
             this.bab.map(bab => {
                 this.corrections.push({
-                    items: [],
-                    correctionTemp: {
-                        index: null,
-                        correctionItem: null,
-                        page: null,
-                        text: null,
-                        editing: null,
-                    },
+                    items: []
                 })
             })
         },
 
         generateExamData() {
-            const examData = JSON.parse(localStorage.getItem('exam-data'))
-            if (examData && this.$router.currentRoute.params.id == examData.id) {
-                this.step = examData.step
-                this.corrections = examData.corrections
-                this.sortCorrections()
-            } else {
-                this.updateLocalStorage()
-            }
+            // const examData = JSON.parse(localStorage.getItem('exam-data'))
+            // if (examData && this.$router.currentRoute.params.id == examData.id) {
+            //     this.step = examData.step
+            //     this.corrections = examData.corrections
+            //     this.sortCorrections()
+            // } else {
+            //     this.updateLocalStorage()
+            // }
         },
 
         editCorrection(section, index) {
-            this.newCorrection = null
             const { text, page } = this.corrections[section].items[index]
-            this.corrections[section].correctionTemp = {
-                page,
-                text,
-                editing: index
-            }
+            this.temp = {edit: true, text, page, index, selectedBab: this.bab[section], section}
+            this.newCorrection.text = text
+            this.newCorrection.page = page
+            this.newCorrection.section = section
+            this.itemIndex = index
+            this.selectedBab = this.bab[section]
+            this.creating = true
         },
 
-        saveChanges(section, index) {
-            const correction = this.corrections[section]
-            const { text, page } = correction.correctionTemp
-            this.corrections[section].items[index] = {
-                page,
-                text
+        saveChanges() {
+            const index = this.temp.index
+            const section = this.newCorrection.section
+            if (section != this.bab.indexOf(this.selectedBab)) {
+                this.corrections[this.temp.section].items.splice(index, 1)
+                this.corrections[this.bab.indexOf(this.selectedBab)].items.push({
+                    page: this.newCorrection.page, 
+                    text: this.newCorrection.text
+                })
+            } else {
+                this.corrections[section].items[index] = {
+                    page: this.newCorrection.page, 
+                    text: this.newCorrection.text
+                }
             }
-            this.corrections[section].correctionTemp = {
-                page: null,
-                text: null,
-                editing: null
-            }
+            this.resetNewCorrection()
         },
 
-        discardChanges(section) {
-            this.corrections[section].correctionTemp = {
-                page: null,
-                text: null,
-                editing: null
+        discardChanges() {
+            this.temp = {
+                edit: false,
+                text: '',
+                page: '',
+                index: 0,
+                section: 0,
+                selectedBab: null
             }
         },
 
@@ -235,11 +245,9 @@ export default {
         },
 
         resetNewCorrection() {
-            this.newCorrection = {
-                page: '',
-                text: '',
-                index: 0
-            }
+            this.newCorrection = {page: '', text: '', index: 0}
+            this.temp = {edit: false, text: '', page: '', index: 0, selectedBab: null, section: 0}
+            this.itemIndex = 0
             this.creating = false
             this.selectedBab = null
         },
@@ -248,15 +256,16 @@ export default {
             this.corrections.forEach(correction => correction.items.sort((a, b) => (a.page > b.page) ? 1 : -1)) 
         },
 
-        addCorrection(section) {
+        addCorrection() {
             const validInput = this.$refs['add-correction-form'].validate()
             if (validInput) {
-                const { page, text } = this.newCorrection
-                this.corrections[section].items.push({
+                const { page, text, index } = this.newCorrection
+                this.corrections[index].items.push({
+                    bab: index,
                     page,
                     text
                 })
-                this.corrections[section].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
+                this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
                 this.updateLocalStorage()
                 this.resetNewCorrection()
             }
