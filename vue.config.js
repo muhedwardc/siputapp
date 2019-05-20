@@ -1,3 +1,4 @@
+var path = require('path')
 // const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 module.exports = {
@@ -16,6 +17,11 @@ module.exports = {
           // Forward frontend dev server request for /api to django dev server
           target: 'http://localhost:8000/',
         }
+      },
+      watchOptions: {
+        ignored: [
+          path.resolve(__dirname, 'public/uploads/skripsi')
+        ]
       }
     }
   }
