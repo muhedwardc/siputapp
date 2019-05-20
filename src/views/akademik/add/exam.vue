@@ -43,6 +43,7 @@
                             ref="pdf"
                             readonly
                             :disabled="submitting"
+                            :loading="uploadingScriptProgress"
                             solo
                             accept="application/pdf,application/vnd.ms-excel"
                             @change="onFilePicked"
@@ -660,6 +661,7 @@ export default {
             this.$refs.pdf.click()
         },
 		onFilePicked (e) {
+            this.exam.skripsi.naskah = ''
 			const files = e.target.files
 			if(files[0] !== undefined) {
 				this.pdfName = files[0].name
@@ -696,15 +698,14 @@ export default {
             const config = {
                 onUploadProgress: (progressEvent) => {
                     this.uploadingScriptProgress = Math.round( (progressEvent.loaded * 100) / progressEvent.total )
-                    console.log(this.uploadingScriptProgress)
                 }
             }
-
             this.uploadingScript = true
             const formData = new FormData()
             formData.append('file', this.pdfFile)
             try {
-                const res = await axios.post('/exams/upload-skripsi/' + this.pdfName, formData, this.$store.getters.authHeaders, config)
+                const name = + new Date() + '_' + this.pdfName
+                const res = await axios.post('/exams/upload-skripsi/' + name, formData, {...this.$store.getters.authHeaders, ...config})
                 this.exam.skripsi.naskah = res.data.file
                 this.uploadingScript = false
                 this.uploadingScriptProgress = null
