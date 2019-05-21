@@ -76,7 +76,6 @@ export default {
         async initialize () {
             this.loading = true
             try {
-                console.log(this.$store.getters.authHeaders)
                 const response = await axios.get('/exams/', this.$store.getters.authHeaders)
                 this.exams = response.data.results
                 this.loading = false
