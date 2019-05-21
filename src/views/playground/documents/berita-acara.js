@@ -1,8 +1,8 @@
 // import head from './partials/head'
 import UGMLogo from './partials/ugm-logo'
-import scoreBoard from './partials/score-board'
+// import scoreBoard from './partials/score-board'
 
-export default function (data) {
+export default function (data, head, sb) {
     let doc = []
     const { judul, hari, tanggal, waktu, ruang, mahasiswa, dosen, nilai, kadep } = data
     const p = [
@@ -57,6 +57,7 @@ export default function (data) {
         },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
+        // ...head,
         { text: 'BERITA ACARA PENDADARAN', bold: true, alignment: 'center', margin: [0, 5, 0, 5] },
         { text: p[0] },
         { 
@@ -131,7 +132,7 @@ export default function (data) {
                     },
                     margin: [0, 0, 10, 0]
                 },
-                scoreBoard
+                sb
             ]
         },
         {

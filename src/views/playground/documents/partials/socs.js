@@ -40,12 +40,12 @@ export default [
                     text: [
                         'Penilai sedikit',
                         {text: ' mendapatkan kesulitan untuk memahami bagaimana proses desain ', decoration: 'underline'},
-                        'sesungguhnya dilakukan oleh mahasiswa tugas akhir'
+                        'sesungguhnya dilakukan oleh mahasiswa tugas akhir.'
                     ]
                 },
                 {
                     text: [
-                        {text: ' Motivasi pemilihan proses desain sangat kabur.', decoration: 'underline'},
+                        {text: ' Motivasi pemilihan proses', decoration: 'underline'},
                         'desain sangat kabur.'
                     ]
                 },
@@ -53,7 +53,7 @@ export default [
                     text: [
                         {text: ' Pertimbangan akan constraint-constraint', decoration: 'underline'},
                         'yang harus dipenuhi',
-                        {text: ' tidak tersedia ', decoration: 'underline'},
+                        {text: ' tidak tersedia.', decoration: 'underline'},
                     ]
                 }
             ]

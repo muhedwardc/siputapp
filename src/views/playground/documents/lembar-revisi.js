@@ -28,7 +28,7 @@ export default function (data) {
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
         {
-            text: 'LEMBAR KOREKSI PENDADARAN',
+            text: 'LEMBAR REVISI JUDUL SKRIPSI',
             alignment: 'center',
             margin: [0, 8, 0, 20],
             fontSize: 12,
