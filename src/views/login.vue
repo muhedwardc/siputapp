@@ -11,7 +11,7 @@
                 <v-layout align-center>
                     <v-layout column>
                         <h2 class="mb-4">Login to App</h2>
-                        <v-form
+                        <!-- <v-form
                             ref="form"
                             class="login-form"
                             v-model="valid"
@@ -38,9 +38,9 @@
                                 :disabled="isSubmitting"
                                 ></v-text-field>
                             
-                            <!-- <v-btn class="mt-4 font-weight-light" round color="primary" @click="login()" :loading="isSubmitting" :disabled="isSubmitting">Login</v-btn> -->
-                            <v-btn id="google-btn" class="mt-4 font-weight-light" round color="primary" :loading="isSubmitting" :disabled="isSubmitting">Masuk dengan Google</v-btn>
-                        </v-form>
+                            <v-btn class="mt-4 font-weight-light" round color="primary" @click="login()" :loading="isSubmitting" :disabled="isSubmitting">Login</v-btn>
+                        </v-form> -->
+                        <v-btn id="google-btn" class="mt-4 font-weight-light" round color="primary" :loading="isSubmitting" :disabled="isSubmitting">Masuk dengan Google</v-btn>
                     </v-layout>
                 </v-layout>
             </v-container>
