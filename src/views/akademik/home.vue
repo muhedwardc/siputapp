@@ -26,8 +26,8 @@
                         <h3 class="mb-2">{{ i == days.length-1 ? day.name : readableDate(day.date) }}</h3>
                         <app-loading></app-loading>
                         <template v-if="!$store.state.loadViewContent">
-                            <v-card flat v-if="day.exams.length > 0" class="mt-3">
-                                <v-layout class="exam-item" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
+                            <v-card flat v-if="day.exams.length > 0">
+                                <v-layout class="exam-item mt-3" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
                                     <v-layout class="ml-0 mr-0" row justify-space-between align-start>
                                         <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
                                         <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
