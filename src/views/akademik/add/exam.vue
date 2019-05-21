@@ -577,7 +577,7 @@ export default {
             this.$refs.form.resetValidation()
         },
         addMahasiswa() {
-            const valid = this.$refs.mhsInfo.validate()
+            const valid = this.validateMahasiswa()
             if (!valid) return
             if (this.exam.skripsi.is_capstone) {
                 if (this.exam.skripsi.mahasiswa.length >= 4) {
@@ -681,7 +681,6 @@ export default {
         },
         async createExam() {
             this.submitting = true
-            this.exam.skripsi.naskah = null
             try {
                 await axios.post('/exams/', this.exam, this.$store.getters.authHeaders)
                 this.showSnackbar({
