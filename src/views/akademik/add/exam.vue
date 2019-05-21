@@ -278,7 +278,7 @@
                                     </template>
                                     <v-list>
                                         <v-list-tile
-                                            v-for="(type, i) in (exam.skripsi.is_capstone ? dosenTypes : dosenTypes.slice(0, 4))"
+                                            v-for="(type, i) in dosenTypes"
                                             :key="i"
                                             @click="setType(i, props.item.id)"
                                             >
