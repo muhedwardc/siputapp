@@ -46,13 +46,14 @@ export default [
         component: () => import('@/views/dosen/home.vue')
     },
     {
-        path: '/dosen/profil',
+        path: '/profil',
         name: 'Profil Dosen',
         meta: {
             requiresAuth: true,
             dosenRoute: true,
+            akademikRoute: true
         },
-        component: () => import('@/views/dosen/profil.vue')
+        component: () => import('@/views/profile.vue')
     },
     {
         path: '/dosen/ujian',
