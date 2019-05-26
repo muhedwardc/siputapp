@@ -87,19 +87,23 @@ export default {
 
         async loadGapi() {
             await window.gapi
-            window.gapi.load('auth2', () => {
-                const auth2 = window.gapi.auth2.init({
-                    client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-                    cookiepolicy: 'single_host_origin'
-                })
+            try {
+                window.gapi.load('auth2', () => {
+                    const auth2 = window.gapi.auth2.init({
+                        client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+                        cookiepolicy: 'single_host_origin'
+                    })
 
-                auth2.attachClickHandler(document.getElementById('google-btn'), {},
-                    (googleUser) => {
-                        const token = googleUser.getAuthResponse().id_token
-                        this.googleLogin(token)
-                    }
-                )
-            })
+                    auth2.attachClickHandler(document.getElementById('google-btn'), {},
+                        (googleUser) => {
+                            const token = googleUser.getAuthResponse().id_token
+                            this.googleLogin(token)
+                        }
+                    )
+                })
+            } catch (error) {
+                this.loadGapi()
+            }
         },
 
         async googleLogin(token) {
