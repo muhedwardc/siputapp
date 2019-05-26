@@ -44,9 +44,9 @@
             </v-layout>
         </v-flex>
         <v-flex class="notifications pl-4" hidden-md-and-down lg4>
-            <h3 class="mb-2">Notifikasi</h3>
+            <!-- <h3 class="mb-2">Rekap {{ thisMonth }}</h3> -->
             <v-layout column>
-                <app-home-notification
+                <!-- <app-home-notification
                     v-for="n in notifications"
                     :key="n.id"
                     :id="n.id"
@@ -54,7 +54,7 @@
                     :room="n.room"
                     :text="n.text"
                     :type="n.type">
-                </app-home-notification>
+                </app-home-notification> -->
             </v-layout>
         </v-flex>
     </v-layout>
@@ -122,6 +122,13 @@ export default {
             ],
             todayDate: '',
             activeTab: 0,
+        }
+    },
+
+    computed: {
+        thisMonth() {
+            moment.locale('id')
+            return moment().format('MMMM YYYY')
         }
     },
 
