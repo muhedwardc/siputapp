@@ -3,7 +3,7 @@
         <v-toolbar-side-icon @click="$store.state.sidebar = !$store.state.sidebar" v-if="!$store.state.onExam.id"></v-toolbar-side-icon>
         <v-spacer></v-spacer>
         <v-toolbar-items class="hidden-xs-and-down toolbar-item">
-            <v-menu left offset-y overflow-x class="notifications">
+            <!-- <v-menu left offset-y overflow-x class="notifications">
                 <v-btn flat slot="activator">
                     <v-icon>notifications_none</v-icon>
                     <div class="has-notif" v-if="notifications.length > 0"></div>
@@ -22,10 +22,10 @@
                         <span>Tidak ada notifikasi</span>
                     </v-layout>
                 </v-list>
-            </v-menu>
-            <v-btn @click="$router.replace(`/${$store.state.auth.user.is_akademik ? 'akademik' : 'dosen'}/profil`)" flat slot="activator" class="pl-4 pr-4 profile">
-                <v-avatar class="profile-picture mr-2" size="32">
-                    <img src="" alt="">
+            </v-menu> -->
+            <v-btn @click="$router.replace(`/profil`)" flat slot="activator" class="pl-4 pr-4 profile">
+                <v-avatar tile class="profile-picture mr-2" size="32">
+                    <img :src="$store.state.auth.user.image || ''" alt="">
                 </v-avatar>
                 <span>{{ $store.state.auth.user.nama }}</span>
             </v-btn>
@@ -75,10 +75,9 @@ export default {
     }
 
     .profile-picture {
-        width: 28px;
-        height: 28px;
         background-color: #e7e7e7;
         border-radius: 4px;
+        overflow: hidden;
     }
 
     .profile-picture + span {

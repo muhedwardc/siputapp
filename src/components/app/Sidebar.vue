@@ -59,7 +59,7 @@ export default {
 				{
 					title: 'Profil',
 					icon: 'person',
-					path: '/dosen/profil'
+					path: '/profil'
 				}
 			],
 			akademikRoutes: [
@@ -91,7 +91,7 @@ export default {
 				{
 					title: 'Profil',
 					icon: 'person',
-					path: '/akademik/profil'
+					path: '/profil'
 				}
 			]
 		}
