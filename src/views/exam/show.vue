@@ -256,7 +256,17 @@
                             <span @click="edit('skripsi.judul', 'text', 'Judul Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span>
                         </h3>
                         <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }} <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span></span>
-                        <v-layout align-center wrap class="mt-2">
+                        <v-layout class="mt-3">
+                            <v-btn class="ma-0 mr-2" color="primary">
+                                <v-icon left>file_download</v-icon>
+                                Unduh
+                            </v-btn>
+                            <v-btn class="ma-0" color="warning">
+                                <v-icon left>print</v-icon>
+                                Cetak
+                            </v-btn>
+                        </v-layout>
+                        <v-layout align-center wrap class="mt-0">
                             <template>
                                 <!-- <v-btn v-if="isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startUjian(exam.id)"><v-icon left>edit</v-icon> edit ujian</v-btn> -->
                                 <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startUjian(exam.id)"><v-icon left>send</v-icon> masuk ujian</v-btn>
@@ -469,7 +479,7 @@ export default {
         },
 
         async getExam() {
-            this.fetchRoomSessions()
+            this.isAdmin ? this.fetchRoomSessions() : null
             try {
                 const exam = await axios.get(`/${this.isAdmin ? '' : 'me/'}exams/${this.$router.currentRoute.params.id}/`, this.$store.getters.authHeaders)
                 this.exam = this.isAdmin ? exam.data : exam.data.ujian
