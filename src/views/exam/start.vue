@@ -10,116 +10,139 @@
             mobile-break-point="991" 
             class="correction-section pb-4"
             fixed>
-            <v-toolbar dark color="primary">
+            <v-toolbar dark color="primary" app>
                 <v-toolbar-side-icon @click="toggleCorrectionSection"></v-toolbar-side-icon>
                 <v-toolbar-title class="white--text" v-text="title"></v-toolbar-title>
             </v-toolbar>
-            <v-layout column v-if="step == 1">
-                <v-layout column class="pa-2 pt-4 pl-4 pr-4" style="position: relative;">
-                    <v-slide-y-reverse-transition>
-                        <v-layout column class="pa-4" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
-                            <v-form ref="add-correction-form" v-model="valid" lazy-validation></v-form>
-                            <v-layout row justify-space-between>
-                                <v-select
-                                    v-model="selectedBab"
-                                    :items="bab"
-                                    solo
-                                    placeholder="Pilih Bab"
-                                    class="mr-2"></v-select>
-                                <v-text-field style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.page" placeholder="hal" type="number" min="0"></v-text-field>
+            <v-content>
+                <v-layout column v-if="step == 0">
+                    <v-layout column class="pa-2 pt-4 pl-4 pr-4" style="position: relative;">
+                        <v-slide-y-reverse-transition>
+                            <v-layout column class="pa-4" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
+                                <v-form ref="add-correction-form" v-model="valid" lazy-validation>
+                                <v-layout row justify-space-between>
+                                    <v-select
+                                        v-model="selectedBab"
+                                        :items="bab"
+                                        :rules="[v => !!v || 'Pilih salah satu']"
+                                        solo
+                                        placeholder="Pilih Bab"
+                                        class="mr-2"></v-select>
+                                    <v-text-field :rules="[v => !!v && !!v.trim() || 'Harus diisi', v => !isNaN(v.trim()) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.page" placeholder="hal" type="number" min="0"></v-text-field>
+                                </v-layout>
+                                <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.text" placeholder="Masukkan komentar"></v-textarea>
+                                <v-layout>
+                                    <v-spacer></v-spacer>
+                                    <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection">Batal</v-btn>
+                                    <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges">Edit</v-btn>
+                                    <v-btn v-else class="success ma-0 mb-2" @click="addCorrection">Simpan</v-btn>
+                                </v-layout>
+                                </v-form>
                             </v-layout>
-                            <v-textarea rows="3" solo v-model="newCorrection.text" placeholder="Masukkan koreksi"></v-textarea>
+                        </v-slide-y-reverse-transition>
+                        <v-layout column v-show="!creating">
+                            <v-layout column v-if="correctionFilled">
+                                <v-layout column v-for="(correction, section) in corrections" :key="section">
+                                    <template v-if="correction.items.length > 0">
+                                        <h3 class="mb-1" v-text="bab[section]"></h3>
+                                        <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
+                                            <p class="mb-0" v-text="item.text"></p>
+                                            <v-layout row align-center>
+                                                <span class="font-weight-bold">Halaman {{item.page}}</span>
+                                                <v-spacer></v-spacer>
+                                                <v-btn flat :ripple="false" @click="editCorrection(section, index)">
+                                                    <v-icon class="warning--text" small>edit</v-icon>
+                                                    <span class="primary--text ml-1">edit</span>
+                                                </v-btn>
+                                                <v-btn flat :ripple="false" @click="showDialog(section, index)">
+                                                    <v-icon class="error--text" small>delete</v-icon>
+                                                    <span class="primary--text ml-1">hapus</span>
+                                                </v-btn>
+                                            </v-layout>
+                                        </v-layout>
+                                    </template>
+                                </v-layout>
+                            </v-layout>
+                            <v-layout justify-center v-else>
+                                Anda belum memberikan komentar.
+                            </v-layout>
+                        </v-layout>
+                        <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
+                    </v-layout>
+                </v-layout>
+                <v-layout column v-if="step == 1" class="pa-2 pl-4 pr-4" style="position: relative;">
+                    <template v-show="!addingGrade">
+                        <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 1">
+                            <p class="mb-0"><b>Mahasiswa</b></p>
+                            <ol class="mb-3">
+                                <li v-for="mhs in exam.ujian.skripsi.mahasiswa" :key="mhs.nim" v-text="mhs.nama"></li>
+                            </ol>
+                        </template>
+                        <v-layout column v-if="exam.ujian">
+                            <v-layout align-start v-for="(so, index) in socs" :key="index">
+                                <v-chip label class="mr-3">{{index + 1}}</v-chip>
+                                <v-layout row>
+                                    <v-layout column>
+                                        <b v-text="so.name"></b>
+                                        <b v-if="filledGrades(index)" class="success--text">Nilai: {{ filledGrades(index) }}</b>
+                                        <b v-else class="error--text">Nilai belum lengkap</b>
+                                    </v-layout>
+                                    <v-btn class="primary ml-3" @click="addGrades(index)">beri nilai</v-btn>
+                                </v-layout>
+                            </v-layout>
+                        </v-layout>
+                    </template>
+                    <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
+                        <v-layout column>
+                            <b>{{ socs[gradeTemp.so].name }}</b>
+                            <p class="mb-1">{{ socs[gradeTemp.so].description }}</p>
+                            <v-form v-model="validGrades">
+                            <table class="mt-2 grade-list">
+                                    <tr v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim">
+                                        <td class="pb-4">Mhs {{index + 1}}</td>
+                                        <td><v-text-field :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
+                                        <td class="pb-4"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
+                                    </tr>
+                            </table>
+                            </v-form>
                             <v-layout>
                                 <v-spacer></v-spacer>
-                                <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection">Batal</v-btn>
-                                <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges">Edit</v-btn>
-                                <v-btn v-else class="success ma-0 mb-2" @click="addCorrection">Simpan</v-btn>
+                                <v-btn class="error" @click="discardGrades">Batal</v-btn>
+                                <v-btn class="success" @click="saveGrades">simpan</v-btn>
                             </v-layout>
                         </v-layout>
-                    </v-slide-y-reverse-transition>
-                    <v-layout column v-show="!creating">
-                        <v-layout v-if="correctionFilled">
-                            <v-layout column v-for="(correction, section) in corrections" :key="section">
-                                <template v-if="correction.items.length > 0">
-                                    <h3 class="mb-1" v-text="bab[section]"></h3>
-                                    <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
-                                        <p class="mb-0" v-text="item.text"></p>
-                                        <v-layout row align-center>
-                                            <span class="font-weight-bold">Halaman {{item.page}}</span>
-                                            <v-spacer></v-spacer>
-                                            <v-btn flat :ripple="false" @click="editCorrection(section, index)">
-                                                <v-icon class="warning--text" small>edit</v-icon>
-                                                <span class="primary--text ml-1">edit</span>
-                                            </v-btn>
-                                            <v-btn flat :ripple="false" @click="showDialog(section, index)">
-                                                <v-icon class="error--text" small>delete</v-icon>
-                                                <span class="primary--text ml-1">hapus</span>
-                                            </v-btn>
-                                        </v-layout>
-                                    </v-layout>
-                                </template>
-                            </v-layout>
-                        </v-layout>
-                        <v-layout justify-center v-else>
-                            Anda belum memberikan koreksi.
+                        <b class="mt-2">Indikator Penilaian</b>
+                        <v-layout column v-for="(list, i) in socs[selectedSO].indicators" :key="i">
+                            <b>{{ gradeIndicators[i] }}</b>
+                            <ul>
+                                <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
+                            </ul>
                         </v-layout>
                     </v-layout>
-                    <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah Koreksi</v-btn>
                 </v-layout>
-            </v-layout>
-            <v-layout column v-if="step == 2" class="pa-2 pl-4 pr-4" style="position: relative;">
-                <template v-show="!addingGrade">
-                    <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 1">
-                        <p class="mb-0"><b>Mahasiswa</b></p>
-                        <ol class="mb-3">
-                            <li v-for="mhs in exam.ujian.skripsi.mahasiswa" :key="mhs.nim" v-text="mhs.nama"></li>
-                        </ol>
+                <v-layout column v-if="step == 2" class="pa-4">
+                    <h3>Apakah ada revisi judul?</h3>
+                    <v-radio-group v-model="hasRevision" :mandatory="false">
+                        <v-radio color="primary" label="Tidak Ada" :value="false"></v-radio>
+                        <v-radio color="primary" label="Ada" :value="true"></v-radio>
+                    </v-radio-group>
+                    <template v-if="hasRevision">
+                        <p>Masukkan revisi judul</p>
+                        <v-textarea box label="revisi judul" v-model="revision"></v-textarea>
                     </template>
-                    <v-layout column v-if="exam.ujian">
-                        <v-layout align-start v-for="(so, index) in sos" :key="index">
-                            <v-chip label class="mr-3">{{index + 1}}</v-chip>
-                            <v-layout row>
-                                <v-layout column>
-                                    <b v-text="so.name"></b>
-                                    <b v-if="filledGrades(index)" class="success--text">Nilai: {{ filledGrades(index) }}</b>
-                                    <b v-else class="error--text">Nilai belum lengkap</b>
-                                </v-layout>
-                                <v-btn class="primary ml-3" @click="addGrades(index)">beri nilai</v-btn>
-                            </v-layout>
-                        </v-layout>
-                    </v-layout>
-                </template>
-                <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
-                    <v-layout column>
-                        <b>{{ sos[gradeTemp.so].name }}</b>
-                        <p class="mb-1">{{ sos[gradeTemp.so].description }}</p>
-                        <table v-if="exam.ujian" class="mt-2 grade-list">
-                            <tr v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim">
-                                <td class="pb-4">Mhs {{index + 1}}</td>
-                                <td><v-text-field class="grade" min="0" max="100" placeholder="contoh: 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
-                                <td class="pb-4"><b>Excellent</b></td>
-                            </tr>
-                        </table>
-                        <v-layout>
-                            <v-spacer></v-spacer>
-                            <v-btn class="error" @click="discardGrades">Batal</v-btn>
-                            <v-btn class="success" @click="saveGrades">simpan</v-btn>
-                        </v-layout>
-                    </v-layout>
-                    <b>Keterangan</b>
-                    <v-layout column v-for="(list, i) in sos[selectedSO].indicators" :key="i">
-                        <b>{{ gradeIndicators[i] }}</b>
-                        <ul>
-                            <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
-                        </ul>
+                    <v-layout>
+                        <v-spacer></v-spacer>
+                        <v-btn class="primary ma-0">simpan revisi</v-btn>
                     </v-layout>
                 </v-layout>
-            </v-layout>
-            <v-layout row>
-                <v-spacer></v-spacer>
-                <v-btn v-if="!creating && !addingGrade" color="primary" class="ma-0 mr-4" @click="step = 1">Sebelumnya</v-btn>
-                <v-btn v-if="!creating && !addingGrade" color="primary" class="ma-0 mr-4" @click="nextStep">Selanjutnya</v-btn>
-            </v-layout>
+                <v-layout row class="pr-4">
+                    <v-spacer></v-spacer>
+                    <v-btn v-if="!creating && !addingGrade && step !== 0" color="primary" class="ma-0 ml-2" @click="step = 0">Komentar</v-btn>
+                    <v-btn v-if="!creating && !addingGrade && step !== 1" color="primary" class="ma-0 ml-2" @click="step = 1">Penilaian</v-btn>
+                    <v-btn v-if="!creating && !addingGrade && step !== 2" color="primary" class="ma-0 ml-2" @click="step = 2">Revisi Judul</v-btn>
+                    <v-btn v-if="!creating && !addingGrade" color="primary" class="ma-0 ml-2" @click="fetchRecap">Rekap</v-btn>
+                </v-layout>
+            </v-content>
         </v-navigation-drawer>
         <v-dialog v-model="dialog.show" persistent max-width="600px">
             <v-card>
@@ -140,133 +163,87 @@
             <!-- <embed :src="'https://drive.google.com/viewerng/viewer?embedded=true&url=' + exam.ujian.skripsi.naskah" id="exam-content-view"> -->
             <embed :src="'https://drive.google.com/viewerng/viewer?embedded=true&url=https://www.otago.ac.nz/library/pdf/Google_searching.pdf'" id="exam-content-view">
             <!-- <iframe :src="this.exam.ujian.skripsi.naskah" id="exam-content-view"></iframe> -->
-            <v-layout row class="toggle-button">
+            <v-layout v-if="!drawer" row class="toggle-button">
                 <v-btn @click="toggleCorrectionSection()" class="pa-2 flat primary text-capitalize">
-                    {{ drawer ? 'Sembunyikan Komentar' : 'Tambah Komentar'}}
+                    Tambah Komentar
                 </v-btn>
             </v-layout>
         </v-content>
+        <v-dialog fullscreen v-model="showRecap" transition="dialog-bottom-transition" class="recap-dialog">
+            <v-toolbar fixed app dark color="primary">
+                <v-btn icon dark @click="showRecap = false">
+                    <v-icon>close</v-icon>
+                </v-btn>
+                <v-toolbar-title>Rekap</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-toolbar-items>
+                    <v-btn flat>
+                        <v-icon left :class="{rotating: sync}">sync</v-icon>
+                        <span class="text-capitalize">Sinkronkan Rekap</span>
+                    </v-btn>
+                </v-toolbar-items>
+            </v-toolbar>
+            <v-content>
+
+                <v-layout column class="pa-4">
+                    <h3>Intro</h3>
+                    <p class="mb-4">Rekap ujian tugas akhir yang berjudul <b>{{exam.ujian.skripsi.judul}}</b> pada <b>{{ today }}</b> di <b>{{ room }}</b> dengan mahasiswa <b>{{ mahasiswa }}</b>.</p>
+                    <h3>Rekap Penilaian</h3>
+                    <table class="recap-table">
+                        <tr class="text-xs-center">
+                            <td rowspan="2">Dosen</td>
+                            <td :colspan="exam.ujian.skripsi.mahasiswa.length">Nilai</td>
+                        </tr>
+                        <tr class="text-xs-center">
+                            <td v-for="mahasiswa in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim" v-text="mahasiswa.nama"></td>
+                        </tr>
+                        <tr v-for="dosen in exam.ujian.penguji" :key="dosen.nip">
+                            <td v-text="dosen.dosen"></td>
+                            <td>99</td>
+                            <td>97</td>
+                            <td>89</td>
+                        </tr>
+                        <tr>
+                            <td><b>Total</b></td>
+                            <td>{{ 99 * 6}}</td>
+                            <td>{{ 87 * 6}}</td>
+                            <td>{{ 89 * 6}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Rerata</b></td>
+                            <td>99</td>
+                            <td>87</td>
+                            <td>89</td>
+                        </tr>
+                    </table>
+                    <h3 class="mt-4">Rekap Komentar</h3>
+                    <table class="recap-table">
+
+                    </table>
+                </v-layout>
+            </v-content>
+        </v-dialog>
     </div>
 </template>
 
 <script>
+import {mapActions} from 'vuex'
+import moment from 'moment'
+import socs from './socs'
 export default {
     data() {
         return {
             exam: {},
+            sync: false,
             selectedSO: 0,
+            hasRevision: false,
+            revision: '',
             gradeTemp: {
                 so: 0,
                 grades: []
             },
             grades: [],
-            sos: [
-                {
-                    name: 'SO(c): Engineering Design',
-                    description: 'Mampu mengaplikasikan engineering design dengan memperimbangkan berbagai Batasan nyata',
-                    indicators: [
-                        [
-                            'Proses desain tidak dilakukan secara benar apabila ditinjau dari ilmu teori yang berkaitan.', 
-                            'Terdapat constraint-constraint penting yang sama sekali tidak dipertimbangkan.',
-                            'Mahasiswa tidak menguasai dan memahami proses desain yang dia lakukan sendiri.',
-                            'Mahasiswa sama sekali tidak menguasai ilmu teori yang mendasari proses desain yang dilakukan.'
-                        ],
-                        [
-                            'Proses desain tidak dipaparkan secara terstruktur.',
-                            'Penilai sedikit mendapatkan kesulitan untuk memahami bagaimana proses desain sesungguhnya dilakukan oleh mahasiswa tugas akhir.',
-                            'Motivasi pemilihan desain sangat kabur.',
-                            'Pertimbangan akan constraint-constraint yang harus dipenuhi tidak tersedia.'
-                        ],
-                        [
-                            'Proses desain dipaparkan secara terstruktur, namun tidak disertai dengan motivasi dan teori yang cukup kuat',
-                            'Penilai mendapatkan kesan bahwa proses desain yang dilakukan hanya difokuskan pada alasan operasional semata.',
-                            'Pemaparan yang menjelaskan bagaimana constraint-constraint yang ada dipenuhi juga tidak dikemukakan secara jelas.'
-                        ],
-                        [
-                            'Pemaparan proses desain pada laporan skripsi dilakukan secara terstruktur disertai dengan motivasi kuat yang mendukung proses desain yang diusulkan.',
-                            'Di samping itu, tersedia pula analisis yang berkaitan dengan pertimbangan constraint-constraint yang ada saat proses desain tersebut dilakukan.',
-                            'Mahasiswa dapat mengkolerasikan yang dilakukan dengan matakuliah teori yang melandasi topik skripsi yang dikerjakan.'
-                        ]
-                    ]
-                },
-                {
-                    name: 'SO(c): Engineering Design',
-                    description: 'Menuliskan dan mampu menjelaskan standar-standar keteknikan (jika tidak ditulis maka nilai poin ini adalah nol)',
-                    indicators: [
-                        [
-                            'Tidak menjelaskan standar apa pun yang berkaitan dengan tugas akhirnya.',
-                            'Atau tugas akhirnya tidak berhubungan dengan engineering design.'
-                        ],
-                        [
-                            'Menuliskan standar-standar keteknikan yang berkaitan dengan skripsinya tetapi tidak tepat dan terdapat kesalahan fatal.'
-                        ],
-                        [
-                            'Menuliskan standar-standar keteknikan yang berkaitan dengan skripsinya dengan tepat dengan sedikit kesalahan fatal.'
-                        ],
-                        [
-                            'Menuliskan standar-standar keteknikan yang berkaitan dengan skripsinya dengan tepat tanpa kesalahan atau sedikit kesalahan yang tidak fatal.'
-                        ]
-                    ]
-                },
-                {
-                    name: 'SO(j): Engineering Awareness and Society',
-                    description: 'Mampu menjelaskan akibat dari keteknikan yang terkait terhadap lingkungan, masyarakat dan atau bidang lain',
-                    indicators: [
-                        ['Analisis mahasiswa berkaitan dengan aspek masyarakat tidak ada'],
-                        ['Analisis mengenai dampak dari proses desain yang dilakukan terhadap lingkungan hidup dan masyarakat sangat minimal atau nyaris tidak ada'],
-                        [
-                            'Analisis mengenai dampak dari proses desain yang dilakukan terhadap lingkungan hidup dan masyarakat kurang jelas dan implisit',
-                            'Tidak ada section/subsection terpisah mengenai paparan tersebut'
-                        ],
-                        [
-                            'Mahasiswa mampu menganalisis secara eksplisit dan tajam mengenai dampak dari proses desain yang dilakukan terhadap lingkungan hidup dan masyarakat.',
-                            'Ada section/subsection terpisah di dalam laporan tugas akhir mengenai hal ini.'
-                        ]
-                    ]
-                },
-                {
-                    name: 'SO(g) Effective Communicaion',
-                    description: 'Mampu menyampaikan komunikasi dan presentasi secara baik dan benar',
-                    indicators: [
-                        ['Kualitas presentasi tugas akhir oleh mahasiswa sangat rendah. Penguji mendapat kesan seolah-olah mahasiswa tidak menguasai  materi dari tugas akhir yang dilakukan.'],
-                        ['Kualitas presentasi mahasiswa dalam merepresentasikan proses/hasil tugas akhir cukup', 'Namun penguji mendapatkan kesulitan untuk mendapatkan gambaran umum mengenai tugas akhir yang dilakukan.', 'Penguji perlu menggali lebih lanjut informasi mengenai proses/hasil tugas akhir dengan memanfaatkan forum tanya jawab.'],
-                        ['Pemaparan hasil tugas akhir pada siding pendadaran disampaikan secara terstruktur.', 'Penguji mendapatkan informasi mengenai gambaran umum proses tugas akhir yang dilakukan.', 'Akan tetapi informasi detail mengenai proses tugas akhir implisit akibat kualitas penyampaian informasi yang kurang sempurna'],
-                        ['Pemaparan hasil tugas akhir pada siding pendadaran disampaikan secara jelas dan stuktur yang mampu memberikan kesan kepada penguji bahwa mahasiswa sangat menguasai seluruh proses tugas akhir yang dilakukan.', 'Dari hasil presentasi tugas akhir, penguji mendapat gambaran lengkap mengenai seluruh proses tugas akhir yang dilakukan.']
-                    ]
-                },
-                {
-                    name: 'SO(i) Professional and Ethical Responsibility',
-                    description: 'Mahasiswa mampu menerapkan etika yang baik untuk menjawab pertanyaan',
-                    indicators: [
-                        ['Mahasiswa menjawab pertanyaan dengan memotong pertanyaan penguji.'],
-                        ['Mahasiswa mampu menjawab pertanyaan secara sopan walau keliru atau tidak sesuai dengan teori yang berlaku.'],
-                        ['Mahasiswa menjawab pertanyaan baik dengan beberapa argument yang tidak tepat.'],
-                        ['Mahasiswa menjawab pertanyaan dengan baik dan menunjukkan aspek kritis dan argument yang sesuai dengan tanggung jawabnya di skripsi tersebut.']
-                    ]
-                },
-                {
-                    name: 'SO(k) Sustainable Learning',
-                    description: 'Mahasiswa mampu mendemonstrasikan apa yang akan mereka lakukan dan mengikuti kebaruan yang terkait dengan tesis mereka',
-                    indicators: [
-                        [
-                            'Studi literatur yang dilakukan tidak memadai dan tidak layak untuk disebut untuk studi literatur karena analisis dari mahasiswa terhadap penelitian-penelitian yang dilakukan oleh peneliti lain tidak tersedia.',
-                            'Bagian studi literatur hanya berisikan cuplikan-cuplikan dari makalah-makalah tanpa pembahasan'
-                        ],
-                        [
-                            'Referensi yang direview tidak cukup up to date. Banyak referensi terbaru yang tidak disertakan pada proses review.',
-                            'Ada kecenderungan bahwa mahasiswa menyediakan bagian studi literatur di dalam laporan skripsi hanya untuk memenuhi persyaratan format laporan skripsi saja'
-                        ],
-                        [
-                            'Studi literatur berisikan review yang cukup lengkap mengenai penelitian-penelitian (termasuk penelitian) terbaru yang telah dilakukan namun tidak disertai dengan alur dan kronologis yang memadai.',
-                            'Hubungan antar review pada penelitian yang berbeda tidak cukup jelas memberi kesan bahwa mahasiswa hanya sekedar mengambil potongan-potongan dari makalah-makalah penelitian yang sudah ada.'
-                        ],
-                        [
-                            'Bagian dari laporan skripsi yang berkaitain dengan studi literatur (literature review) direpresentasikan secara runtut dengan alur dan kronologis yang memadai, lengkap dengan motivasi-motivasi dari setiap referensi yang direview',
-                            'Di samping itu mahasiswa juga mampu memberikan prediksi atau gambaran bagaimana arah penelitian di masa mendatang berkaitan dengan topik yang diteliti'
-                        ]
-                    ]
-                }
-            ],
+            socs: socs,
             gradeIndicators: ['Unsatisfactory (0-49)', 'Adequate (50-74)', 'Satisfactory (75-84)', 'Excellent (85-100)'],
             drawerWidth: '',
             drawer: true,
@@ -302,7 +279,10 @@ export default {
             addingGrade: false,
             selectedBab: null,
             valid: true,
-            step: 2,
+            validGrades: true,
+            step: 0,
+            showRecap: false,
+            recap: {}
         }
     },
 
@@ -319,18 +299,64 @@ export default {
 
         title() {
             return this.step == 1
-                ? 'Koreksi'
-                : 'SO'
+                ? 'Lembar Koreksi'
+                : 'Lembar Penilaian SO'
         },
 
         correctionFilled() {
             let filled = false
             this.corrections.forEach(correction => correction && correction.items.length > 0 ? filled = true : null)
             return filled
+        },
+
+        gradeIndicator() {
+            return function(grade) {
+                if (grade) {
+                    let indicator = ''
+                    if (grade >= 0 && grade < 50) indicator = 'Unsatisfactory'
+                    else if (grade >= 50 && grade < 75) indicator = 'Adequate'
+                    else if (grade >= 75 && grade < 85) indicator = 'Satisfactory'
+                    else if (grade >= 85 && grade <= 100) indicator = 'Excelent'
+                    return indicator
+                }
+                return ''
+            }
+        },
+
+        today() {
+            moment.locale('id')
+            return moment().format('DD MMMM YYYY')
+        },
+
+        room() {
+            if (this.exam.ujian) {
+                if (this.exam.ujian.ruang.toLowerCase().includes('ruang')) return this.exam.ujian.ruang
+                else return 'Ruang ' + this.exam.ujian.ruang
+            }
+            return ''
+        },
+
+        mahasiswa() {
+            if (this.exam.ujian) {
+                const listMahasiswa = this.exam.ujian.skripsi.mahasiswa.map(mhs => mhs.nama)
+                return listMahasiswa.join(', ')
+            } 
+            return ''
         }
     },
 
-    methods: {        
+    methods: {
+        ...mapActions(['showSnackbar']),
+
+        async fetchRecap() {
+            this.showRecap = true
+            try {
+                this.recap = {}
+            } catch (error) {
+                this.showSnackbar(error)
+            }
+        },
+
         nextStep() {
             this.step += 1
         },
@@ -351,6 +377,7 @@ export default {
                 so: 0,
                 grades: []
             }
+            this.validGrades = true
         },
 
         filledGrades(i) {
@@ -380,7 +407,7 @@ export default {
         },
 
         generateGrades() {
-            this.exam.ujian.skripsi.mahasiswa.forEach(mahasiswa => this.grades.push({mahasiswa, grades: new Array(this.sos.length).fill(null)}))
+            this.exam.ujian.skripsi.mahasiswa.forEach(mahasiswa => this.grades.push({mahasiswa, grades: new Array(this.socs.length).fill(null)}))
         },
 
         async fetchExam() {
@@ -425,21 +452,24 @@ export default {
         },
 
         saveChanges() {
-            const index = this.temp.index
-            const section = this.newCorrection.section
-            if (section != this.bab.indexOf(this.selectedBab)) {
-                this.corrections[this.temp.section].items.splice(index, 1)
-                this.corrections[this.bab.indexOf(this.selectedBab)].items.push({
-                    page: this.newCorrection.page, 
-                    text: this.newCorrection.text
-                })
-            } else {
-                this.corrections[section].items[index] = {
-                    page: this.newCorrection.page, 
-                    text: this.newCorrection.text
+            const validInput = this.$refs['add-correction-form'].validate()
+            if(validInput) {
+                const index = this.temp.index
+                const section = this.newCorrection.section
+                if (section != this.bab.indexOf(this.selectedBab)) {
+                    this.corrections[this.temp.section].items.splice(index, 1)
+                    this.corrections[this.bab.indexOf(this.selectedBab)].items.push({
+                        page: this.newCorrection.page, 
+                        text: this.newCorrection.text
+                    })
+                } else {
+                    this.corrections[section].items[index] = {
+                        page: this.newCorrection.page, 
+                        text: this.newCorrection.text
+                    }
                 }
+                this.resetNewCorrection()
             }
-            this.resetNewCorrection()
         },
 
         discardChanges() {
@@ -451,6 +481,7 @@ export default {
                 section: 0,
                 selectedBab: null
             }
+            this.valid = true
         },
 
         showDialog(section, index) {
@@ -489,10 +520,15 @@ export default {
             this.corrections.forEach(correction => correction.items.sort((a, b) => (a.page > b.page) ? 1 : -1)) 
         },
 
-        addCorrection() {
+        async addCorrection() {
             const validInput = this.$refs['add-correction-form'].validate()
             if (validInput) {
                 const { page, text, index } = this.newCorrection
+                // await axios.post('/', {
+                //     bab: index,
+                //     halaman: page,
+                //     komentar: text
+                // }, this.$store.getters.authHeaders)
                 this.corrections[index].items.push({
                     bab: index,
                     page,
@@ -537,12 +573,60 @@ export default {
 }
 </script>
 
+<style>
+    @keyframes rotating {
+        from {
+            transform: rotate(360deg);
+            -o-transform: rotate(360deg);
+            -ms-transform: rotate(360deg);
+            -moz-transform: rotate(360deg);
+            -webkit-transform: rotate(360deg);
+        }
+        to {
+            transform: rotate(0deg);
+            -o-transform: rotate(0deg);
+            -ms-transform: rotate(0deg);
+            -moz-transform: rotate(0deg);
+            -webkit-transform: rotate(0deg);
+        }
+	}
+    @-webkit-keyframes rotating {
+        from {
+            transform: rotate(360deg);
+            -webkit-transform: rotate(360deg);
+        }
+        to {
+            transform: rotate(0deg);
+            -webkit-transform: rotate(0deg);
+        }
+	}
+    .rotating {
+        -webkit-animation: rotating 1s linear infinite;
+        -moz-animation: rotating 1s linear infinite;
+        -ms-animation: rotating 1s linear infinite;
+        -o-animation: rotating 1s linear infinite;
+        animation: rotating 1s linear infinite;
+	}
+</style>
+
+
 <style lang="sass">
     .full
         min-height: 100vh
     
     td 
         vertical-align: middle
+    
+    .v-dialog--fullscreen
+        background-color: white
+    
+    .recap-table,.recap-table td
+            border: 1px solid black
+            border-collapse: collapse
+
+    .recap-table
+        td
+            padding: 4px
     
     .grade-list
         tr 
