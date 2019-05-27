@@ -6,8 +6,12 @@ from .serializers import SiputPengujiSerializer, ListSiputPengujiSerializer
 from backend.essays.serializers import EssaySerializer, StudentSerializer
 from backend.comments.serializers import CommentSerializer, CreateCommentSerializer
 from backend.grades.serializers import GradeSerializer, CreateGradeSerializer
+from backend.users.serializers import ProfileSerializer
+
 from backend.exams.models import Penguji, Exam
 from backend.comments.models import Comment
+from backend.users.models import User
+
 from backend.pagination import CustomPagination
 
 
@@ -135,3 +139,25 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             grades.append(serializer.data)
         
         return Response({"grades": grades}, status=status.HTTP_201_CREATED)
+
+class SiputProfileViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.IsAuthenticated, )
+    serializer_class = ProfileSerializer
+    
+    def get_queryset(self):
+        return self.request.user
+
+    def profile(self, request, *args, **kwargs):
+        login_user = self.get_queryset()
+        serializer = self.get_serializer(login_user)
+        return Response(serializer.data, status=200)
+
+    def edit_profile(self, request, *args, **kwargs):
+        login_user = self.get_queryset()
+        serializer = self.get_serializer(login_user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Berhasil edit profile",
+                "user": serializer.data
+            }, status=200)
