@@ -5,8 +5,22 @@
             <v-spacer></v-spacer>
             <v-btn color="primary" dark class="mb-2" @click="$router.push('/ujian/tambah')">Tambah ujian</v-btn>
         </v-layout>
+        <v-layout>
+            <v-spacer></v-spacer>
+            <v-spacer></v-spacer>
+            <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Cari Ujian"
+                :disabled="creating"
+                single-line
+                hide-details
+                class="pt-0"
+            ></v-text-field>
+        </v-layout>
         <v-data-table
             class="no-v-borders"
+            :search="search"
             :headers="headers"
             :items="exams"
             :rows-per-page-items="perPage"
@@ -41,6 +55,7 @@ export default {
         return {
             loaded: false,
             loading: false,
+            search: '',
             headers: [
                 { text: 'Judul', align: 'left', sortable: false, value: 'skripsi.judul' },
                 { text: 'Tanggal', value: 'tanggal', sortable: false },

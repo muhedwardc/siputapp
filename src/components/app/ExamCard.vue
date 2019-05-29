@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <v-card class="exam-card mb-3" :to="`/ujian/${item.id}`">
+        <v-card v-if="type == 0" class="exam-card mb-3" :to="`/ujian/${item.id}`">
             <v-layout style="height: 100%;" column justify-start>
                 <v-card-title class="pb-0">
                     <v-layout row align-start class="ma-0">
@@ -24,6 +24,15 @@
                 <v-spacer></v-spacer>
             </v-layout>
         </v-card>
+        <v-card v-if="type == 1" flat class="exam-item mb-3" column @click="$router.push(`/ujian/${item.id}`)">
+            <v-layout class="ml-0 mr-0" row justify-space-between align-start>
+                <h4><span class="warning--text" v-if="item.skripsi.is_capstone">Capstone: </span>{{item.skripsi.judul}}</h4>
+                <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
+            </v-layout>
+            <p class="mb-0"><span :class="isToday ? 'purple--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : readableDate }}</span> - {{ item.sesi }} - {{ item.ruang }}</p>
+            <p class="mb-0">Mahasiswa: {{ readableString(item.skripsi.mahasiswa, 'nama') }}</p>
+            <p class="mb-0">Penguji: {{ readableString(item.penguji, 'dosen') }}</p>
+        </v-card>
     </transition>
 </template>
 
@@ -39,19 +48,39 @@ export default {
         index: {
             type: Number,
             required: false
+        },
+        type: {
+            type: Number,
+            required: true,
+            default: 0
         }
     },
 
     computed: {
         isToday() {
-            return this.item.ujian.tanggal == moment().format('L')
-            // return true
+            moment.locale('id')
+            return this.item.tanggal ? moment().format('DD/MM/YYYY') === this.item.tanggal : this.item.ujian.tanggal == moment().format('L')
         },
 
         dateUjian() {
             return moment(this.item.ujian.tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
             // return moment(this.item.ujian.tanggal).format('LLLL')
-        }
+        },
+
+        readableDate() {
+            moment.locale('id')
+            return moment(this.item.tanggal, 'DD/MM/YYYY').format('dddd, DD MMMM YYYY')
+        },
+
+        readableString() {
+            return function (arr, par) {
+                let res = ''
+                for (let i = 0; i < arr.length; i ++ ){
+                    res += arr[i][par] + (i == arr.length-1 ? '' : ', ')
+                }
+                return res
+            }
+        },
     },
 
     created() {
@@ -111,6 +140,16 @@ export default {
 
         &:hover
             transform: scale(1.01)
+    
+    .exam-item
+        padding: 8px
+        border-radius: 8px
+        box-shadow: 0 0 10px 5px rgba(0, 0, 0, .03)
+        cursor: pointer
 
+    .exam-status > .v-chip__content
+        height: auto
+        padding-top: 2px
+        padding-bottom: 2px
 </style>
 

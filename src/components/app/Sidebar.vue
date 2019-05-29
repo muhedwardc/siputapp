@@ -75,18 +75,23 @@ export default {
 				},
 				{
 					title: 'Daftar Ujian',
-					icon: 'list',
+					icon: 'today',
 					path: '/ujian'
 				},
 				{
 					title: 'Daftar Pengguna',
-					icon: 'list',
+					icon: 'group',
 					path: '/daftar-pengguna'
 				},
 				{
-					title: 'Daftar Ruangan',
-					icon: 'list',
-					path: '/daftar-ruangan'
+					title: 'Ruang dan Sesi',
+					icon: 'meeting_room',
+					path: '/ruang-sesi'
+				},
+				{
+					title: 'Pengurus',
+					icon: 'account_balance',
+					path: '/pengurus-departemen'
 				},
 				{
 					title: 'Profil',

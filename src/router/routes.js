@@ -28,13 +28,22 @@ export default [
         component: () => import('@/views/akademik/list/user.vue')
     },
     {
-        path: '/daftar-ruangan',
+        path: '/ruang-sesi',
         name: 'Daftar Ruangan dan Sesi',
         meta: {
             requiresAuth: true,
             akademikRoute: true,
         },
         component: () => import('@/views/akademik/list/room.vue')
+    },
+    {
+        path: '/pengurus-departemen',
+        name: 'Pengurus Departemen',
+        meta: {
+            requiresAuth: true,
+            akademikRoute: true,
+        },
+        component: () => import('@/views/akademik/principal.vue')
     },
     {
         path: '/dosen',

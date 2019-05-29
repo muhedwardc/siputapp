@@ -36,7 +36,7 @@
                             ></v-textarea>
                         
                         <label>Tambahkan Naskah</label>
-                        <v-text-field :disabled="submitting" placeholder="pilih naskah" :rules="rules.required" readonly @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
+                        <v-text-field :disabled="submitting" placeholder="pilih naskah" readonly @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
                         <input
                             type="file"
                             style="display: none"
@@ -255,10 +255,13 @@
                         :headers="dosenHeaders"
                         :items="dosen"
                         :search="search"
-                        :rows-per-page-items='[ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]'
+                        :pagination.sync="pagination"
+                        :total-items="totalItems"
+                        :rows-per-page-items="pagination.rowsPerPageItems"
                         :loading="loadingDosen">
                         <template v-slot:items="props">
                             <td>{{ props.item.nama || props.item.email }}</td>
+                            <td>{{ props.item.konsentrasi || props.item.prodi }}</td>
                             <td>
                                 <v-menu
                                     bottom
@@ -373,8 +376,16 @@ export default {
                     pembimbing_dua: null,
                     is_capstone: false,
                     mahasiswa: [{}],
-                    naskah: ''
+                    naskah: null
                 },
+            },
+            totalItems: 0,
+            pagination: {
+                page: 1,
+                rowsPerPage: 10,
+                rowsPerPageItems: [10],
+                current: 1,
+                links: {}
             },
             tanggal_dialog: false,
             loadingRoomSessions: true,
@@ -402,6 +413,7 @@ export default {
             selectedPenguji: [null, null],
             dosenHeaders: [
                 { text: 'Nama', align: 'left', value: 'nama' },
+                { text: 'Konsentrasi', align: 'left', value: 'konsentrasi' },
                 { text: 'Aksi', align: 'left', sortable: false, value: 'selectedType', width: '200px' }
             ],
             dosenTypes: [
@@ -415,9 +427,9 @@ export default {
             dateMenu: false,
             timeMenu: false,
             checkbox: false,
-            pdfName: '',
-            pdfUrl: '',
-            pdfFile: '',
+            pdfName: null,
+            pdfUrl: null,
+            pdfFile: null,
             dialog: {
                 show: false,
                 name: '',
@@ -440,6 +452,16 @@ export default {
         FormWizard,
         TabContent,
         WizardButton
+    },
+
+    watch: {
+        pagination: {
+            handler () {
+                    // this.fetchDosen()
+                    //     .then(() => this.loadingDosen = false)
+            },
+            deep: true
+        }
     },
 
     computed: {
@@ -626,8 +648,10 @@ export default {
         async fetchDosen() {
             this.loadingDosen = true
             try {
-                const response = await axios.get('/users/dosen/', this.$store.getters.authHeaders)
+                const response = await axios.get(`/users/dosen/?page=${this.pagination.page}`, this.$store.getters.authHeaders)
                 this.dosen = response.data.results
+                this.totalItems = response.data.count
+                this.pagination.links = response.data.links
                 this.loadingDosen = false
             } catch (error) {
                 this.showSnackbar(error)

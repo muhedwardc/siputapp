@@ -10,139 +10,137 @@
             mobile-break-point="991" 
             class="correction-section pb-4"
             fixed>
-            <v-toolbar dark color="primary" app>
+            <v-toolbar dark color="primary">
                 <v-toolbar-side-icon @click="toggleCorrectionSection"></v-toolbar-side-icon>
                 <v-toolbar-title class="white--text" v-text="title"></v-toolbar-title>
             </v-toolbar>
-            <v-content>
-                <v-layout column v-if="step == 0">
-                    <v-layout column class="pa-2 pt-4 pl-4 pr-4" style="position: relative;">
-                        <v-slide-y-reverse-transition>
-                            <v-layout column class="pa-4" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
-                                <v-form ref="add-correction-form" v-model="valid" lazy-validation>
-                                <v-layout row justify-space-between>
-                                    <v-select
-                                        v-model="selectedBab"
-                                        :items="bab"
-                                        :rules="[v => !!v || 'Pilih salah satu']"
-                                        solo
-                                        placeholder="Pilih Bab"
-                                        class="mr-2"></v-select>
-                                    <v-text-field :rules="[v => !!v && !!v.trim() || 'Harus diisi', v => !isNaN(v.trim()) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.page" placeholder="hal" type="number" min="0"></v-text-field>
-                                </v-layout>
-                                <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.text" placeholder="Masukkan komentar"></v-textarea>
-                                <v-layout>
-                                    <v-spacer></v-spacer>
-                                    <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection">Batal</v-btn>
-                                    <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges">Edit</v-btn>
-                                    <v-btn v-else class="success ma-0 mb-2" @click="addCorrection">Simpan</v-btn>
-                                </v-layout>
-                                </v-form>
+            <v-layout column v-if="step == 0">
+                <v-layout column class="pa-2 pt-4 pl-4 pr-4" style="position: relative;">
+                    <v-slide-y-reverse-transition>
+                        <v-layout column class="pa-4" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
+                            <v-form ref="add-correction-form" v-model="valid" lazy-validation>
+                            <v-layout row justify-space-between>
+                                <v-select
+                                    v-model="selectedBab"
+                                    :items="bab"
+                                    :rules="[v => !!v || 'Pilih salah satu']"
+                                    solo
+                                    placeholder="Pilih Bab"
+                                    class="mr-2"></v-select>
+                                <v-text-field :rules="[v => !!v && !!v.trim() || 'Harus diisi', v => !isNaN(v.trim()) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.page" placeholder="hal" type="number" min="0"></v-text-field>
                             </v-layout>
-                        </v-slide-y-reverse-transition>
-                        <v-layout column v-show="!creating">
-                            <v-layout column v-if="correctionFilled">
-                                <v-layout column v-for="(correction, section) in corrections" :key="section">
-                                    <template v-if="correction.items.length > 0">
-                                        <h3 class="mb-1" v-text="bab[section]"></h3>
-                                        <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
-                                            <p class="mb-0" v-text="item.text"></p>
-                                            <v-layout row align-center>
-                                                <span class="font-weight-bold">Halaman {{item.page}}</span>
-                                                <v-spacer></v-spacer>
-                                                <v-btn flat :ripple="false" @click="editCorrection(section, index)">
-                                                    <v-icon class="warning--text" small>edit</v-icon>
-                                                    <span class="primary--text ml-1">edit</span>
-                                                </v-btn>
-                                                <v-btn flat :ripple="false" @click="showDialog(section, index)">
-                                                    <v-icon class="error--text" small>delete</v-icon>
-                                                    <span class="primary--text ml-1">hapus</span>
-                                                </v-btn>
-                                            </v-layout>
-                                        </v-layout>
-                                    </template>
-                                </v-layout>
-                            </v-layout>
-                            <v-layout justify-center v-else>
-                                Anda belum memberikan komentar.
-                            </v-layout>
-                        </v-layout>
-                        <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
-                    </v-layout>
-                </v-layout>
-                <v-layout column v-if="step == 1" class="pa-2 pl-4 pr-4" style="position: relative;">
-                    <template v-show="!addingGrade">
-                        <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 1">
-                            <p class="mb-0"><b>Mahasiswa</b></p>
-                            <ol class="mb-3">
-                                <li v-for="mhs in exam.ujian.skripsi.mahasiswa" :key="mhs.nim" v-text="mhs.nama"></li>
-                            </ol>
-                        </template>
-                        <v-layout column v-if="exam.ujian">
-                            <v-layout align-start v-for="(so, index) in socs" :key="index">
-                                <v-chip label class="mr-3">{{index + 1}}</v-chip>
-                                <v-layout row>
-                                    <v-layout column>
-                                        <b v-text="so.name"></b>
-                                        <b v-if="filledGrades(index)" class="success--text">Nilai: {{ filledGrades(index) }}</b>
-                                        <b v-else class="error--text">Nilai belum lengkap</b>
-                                    </v-layout>
-                                    <v-btn class="primary ml-3" @click="addGrades(index)">beri nilai</v-btn>
-                                </v-layout>
-                            </v-layout>
-                        </v-layout>
-                    </template>
-                    <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
-                        <v-layout column>
-                            <b>{{ socs[gradeTemp.so].name }}</b>
-                            <p class="mb-1">{{ socs[gradeTemp.so].description }}</p>
-                            <v-form v-model="validGrades">
-                            <table class="mt-2 grade-list">
-                                    <tr v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim">
-                                        <td class="pb-4">Mhs {{index + 1}}</td>
-                                        <td><v-text-field :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
-                                        <td class="pb-4"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
-                                    </tr>
-                            </table>
-                            </v-form>
+                            <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.text" placeholder="Masukkan komentar"></v-textarea>
                             <v-layout>
                                 <v-spacer></v-spacer>
-                                <v-btn class="error" @click="discardGrades">Batal</v-btn>
-                                <v-btn class="success" @click="saveGrades">simpan</v-btn>
+                                <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection">Batal</v-btn>
+                                <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges">Edit</v-btn>
+                                <v-btn v-else class="success ma-0 mb-2" @click="addCorrection">Simpan</v-btn>
+                            </v-layout>
+                            </v-form>
+                        </v-layout>
+                    </v-slide-y-reverse-transition>
+                    <v-layout column v-show="!creating">
+                        <v-layout column v-if="correctionFilled">
+                            <v-layout column v-for="(correction, section) in corrections" :key="section">
+                                <template v-if="correction.items.length > 0">
+                                    <h3 class="mb-1" v-text="bab[section]"></h3>
+                                    <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
+                                        <p class="mb-0" v-text="item.text"></p>
+                                        <v-layout row align-center>
+                                            <span class="font-weight-bold">Halaman {{item.page}}</span>
+                                            <v-spacer></v-spacer>
+                                            <v-btn flat :ripple="false" @click="editCorrection(section, index)">
+                                                <v-icon class="warning--text" small>edit</v-icon>
+                                                <span class="primary--text ml-1">edit</span>
+                                            </v-btn>
+                                            <v-btn flat :ripple="false" @click="showDialog(section, index)">
+                                                <v-icon class="error--text" small>delete</v-icon>
+                                                <span class="primary--text ml-1">hapus</span>
+                                            </v-btn>
+                                        </v-layout>
+                                    </v-layout>
+                                </template>
                             </v-layout>
                         </v-layout>
-                        <b class="mt-2">Indikator Penilaian</b>
-                        <v-layout column v-for="(list, i) in socs[selectedSO].indicators" :key="i">
-                            <b>{{ gradeIndicators[i] }}</b>
-                            <ul>
-                                <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
-                            </ul>
+                        <v-layout justify-center v-else>
+                            Anda belum memberikan komentar.
                         </v-layout>
                     </v-layout>
+                    <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
                 </v-layout>
-                <v-layout column v-if="step == 2" class="pa-4">
-                    <h3>Apakah ada revisi judul?</h3>
-                    <v-radio-group v-model="hasRevision" :mandatory="false">
-                        <v-radio color="primary" label="Tidak Ada" :value="false"></v-radio>
-                        <v-radio color="primary" label="Ada" :value="true"></v-radio>
-                    </v-radio-group>
-                    <template v-if="hasRevision">
-                        <p>Masukkan revisi judul</p>
-                        <v-textarea box label="revisi judul" v-model="revision"></v-textarea>
+            </v-layout>
+            <v-layout column v-if="step == 1" class="pa-2 pl-4 pr-4" style="position: relative;">
+                <template v-show="!addingGrade">
+                    <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 1">
+                        <p class="mb-0"><b>Mahasiswa</b></p>
+                        <ol class="mb-3">
+                            <li v-for="mhs in exam.ujian.skripsi.mahasiswa" :key="mhs.nim" v-text="mhs.nama"></li>
+                        </ol>
                     </template>
-                    <v-layout>
-                        <v-spacer></v-spacer>
-                        <v-btn class="primary ma-0">simpan revisi</v-btn>
+                    <v-layout column v-if="exam.ujian">
+                        <v-layout align-start v-for="(so, index) in socs" :key="index">
+                            <v-chip label class="mr-3">{{index + 1}}</v-chip>
+                            <v-layout row>
+                                <v-layout column>
+                                    <b v-text="so.name"></b>
+                                    <b v-if="filledGrades(index)" class="success--text">Nilai: {{ filledGrades(index) }}</b>
+                                    <b v-else class="error--text">Nilai belum lengkap</b>
+                                </v-layout>
+                                <v-btn class="primary ml-3" @click="addGrades(index)">beri nilai</v-btn>
+                            </v-layout>
+                        </v-layout>
+                    </v-layout>
+                </template>
+                <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
+                    <v-layout column>
+                        <b>{{ socs[gradeTemp.so].name }}</b>
+                        <p class="mb-1">{{ socs[gradeTemp.so].description }}</p>
+                        <v-form v-model="validGrades">
+                        <table class="mt-2 grade-list">
+                                <tr v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim">
+                                    <td class="pb-4">Mhs {{index + 1}}</td>
+                                    <td><v-text-field :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
+                                    <td class="pb-4"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
+                                </tr>
+                        </table>
+                        </v-form>
+                        <v-layout>
+                            <v-spacer></v-spacer>
+                            <v-btn class="error" @click="discardGrades">Batal</v-btn>
+                            <v-btn class="success" @click="saveGrades">simpan</v-btn>
+                        </v-layout>
+                    </v-layout>
+                    <b class="mt-2">Indikator Penilaian</b>
+                    <v-layout column v-for="(list, i) in socs[selectedSO].indicators" :key="i">
+                        <b>{{ gradeIndicators[i] }}</b>
+                        <ul>
+                            <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
+                        </ul>
                     </v-layout>
                 </v-layout>
-                <v-layout row class="pr-4">
+            </v-layout>
+            <v-layout column v-if="step == 2" class="pa-4">
+                <h3>Apakah ada revisi judul?</h3>
+                <v-radio-group v-model="hasRevision" :mandatory="false">
+                    <v-radio color="primary" label="Tidak Ada" :value="false"></v-radio>
+                    <v-radio color="primary" label="Ada" :value="true"></v-radio>
+                </v-radio-group>
+                <template v-if="hasRevision">
+                    <p>Masukkan revisi judul</p>
+                    <v-textarea box label="revisi judul" v-model="revision"></v-textarea>
+                </template>
+                <v-layout>
                     <v-spacer></v-spacer>
-                    <v-btn v-if="!creating && !addingGrade && step !== 0" color="primary" class="ma-0 ml-2" @click="step = 0">Komentar</v-btn>
-                    <v-btn v-if="!creating && !addingGrade && step !== 1" color="primary" class="ma-0 ml-2" @click="step = 1">Penilaian</v-btn>
-                    <v-btn v-if="!creating && !addingGrade && step !== 2" color="primary" class="ma-0 ml-2" @click="step = 2">Revisi Judul</v-btn>
-                    <v-btn v-if="!creating && !addingGrade" color="primary" class="ma-0 ml-2" @click="fetchRecap">Rekap</v-btn>
+                    <v-btn class="primary ma-0">simpan revisi</v-btn>
                 </v-layout>
-            </v-content>
+            </v-layout>
+            <v-layout row class="pr-4">
+                <v-spacer></v-spacer>
+                <v-btn v-if="!creating && !addingGrade && step !== 0" color="primary" class="ma-0 ml-2" @click="step = 0">Komentar</v-btn>
+                <v-btn v-if="!creating && !addingGrade && step !== 1" color="primary" class="ma-0 ml-2" @click="step = 1">Penilaian</v-btn>
+                <v-btn v-if="!creating && !addingGrade && step !== 2" color="primary" class="ma-0 ml-2" @click="step = 2">Revisi Judul</v-btn>
+                <v-btn v-if="!creating && !addingGrade" color="primary" class="ma-0 ml-2" @click="fetchRecap">Rekap</v-btn>
+            </v-layout>
         </v-navigation-drawer>
         <v-dialog v-model="dialog.show" persistent max-width="600px">
             <v-card>
@@ -170,7 +168,7 @@
             </v-layout>
         </v-content>
         <v-dialog fullscreen v-model="showRecap" transition="dialog-bottom-transition" class="recap-dialog">
-            <v-toolbar fixed app dark color="primary">
+            <v-toolbar fixed dark color="primary">
                 <v-btn icon dark @click="showRecap = false">
                     <v-icon>close</v-icon>
                 </v-btn>
@@ -183,39 +181,40 @@
                     </v-btn>
                 </v-toolbar-items>
             </v-toolbar>
-            <v-content>
-
+            <v-content style="margin-top: 50px">
                 <v-layout column class="pa-4">
                     <h3>Intro</h3>
                     <p class="mb-4">Rekap ujian tugas akhir yang berjudul <b>{{exam.ujian.skripsi.judul}}</b> pada <b>{{ today }}</b> di <b>{{ room }}</b> dengan mahasiswa <b>{{ mahasiswa }}</b>.</p>
                     <h3>Rekap Penilaian</h3>
-                    <table class="recap-table">
-                        <tr class="text-xs-center">
-                            <td rowspan="2">Dosen</td>
-                            <td :colspan="exam.ujian.skripsi.mahasiswa.length">Nilai</td>
-                        </tr>
-                        <tr class="text-xs-center">
-                            <td v-for="mahasiswa in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim" v-text="mahasiswa.nama"></td>
-                        </tr>
-                        <tr v-for="dosen in exam.ujian.penguji" :key="dosen.nip">
-                            <td v-text="dosen.dosen"></td>
-                            <td>99</td>
-                            <td>97</td>
-                            <td>89</td>
-                        </tr>
-                        <tr>
-                            <td><b>Total</b></td>
-                            <td>{{ 99 * 6}}</td>
-                            <td>{{ 87 * 6}}</td>
-                            <td>{{ 89 * 6}}</td>
-                        </tr>
-                        <tr>
-                            <td><b>Rerata</b></td>
-                            <td>99</td>
-                            <td>87</td>
-                            <td>89</td>
-                        </tr>
-                    </table>
+                    <v-layout style="overflow-x: scroll">
+                        <table class="recap-table">
+                            <tr class="text-xs-center">
+                                <td rowspan="2">Dosen</td>
+                                <td :colspan="exam.ujian.skripsi.mahasiswa.length">Nilai</td>
+                            </tr>
+                            <tr class="text-xs-center">
+                                <td v-for="mahasiswa in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim" v-text="mahasiswa.nama"></td>
+                            </tr>
+                            <tr v-for="dosen in exam.ujian.penguji" :key="dosen.nip">
+                                <td v-text="dosen.dosen"></td>
+                                <td>99</td>
+                                <td>97</td>
+                                <td>89</td>
+                            </tr>
+                            <tr>
+                                <td><b>Total</b></td>
+                                <td>{{ 99 * 6}}</td>
+                                <td>{{ 87 * 6}}</td>
+                                <td>{{ 89 * 6}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Rerata</b></td>
+                                <td>99</td>
+                                <td>87</td>
+                                <td>89</td>
+                            </tr>
+                        </table>
+                    </v-layout>
                     <h3 class="mt-4">Rekap Komentar</h3>
                     <table class="recap-table">
 
@@ -298,7 +297,7 @@ export default {
         },
 
         title() {
-            return this.step == 1
+            return this.step == 0
                 ? 'Lembar Koreksi'
                 : 'Lembar Penilaian SO'
         },
