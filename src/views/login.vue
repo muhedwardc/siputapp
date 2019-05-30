@@ -11,36 +11,8 @@
                 <v-layout align-center>
                     <v-layout column>
                         <h2 class="mb-4">Login to App</h2>
-                        <!-- <v-form
-                            ref="form"
-                            class="login-form"
-                            v-model="valid"
-                            @keyup.native.enter="login"
-                            lazy-validation>
-
-                            <v-text-field
-                                v-model="email"
-                                :rules="emailRules"
-                                label="Email"
-                                required
-                                :disabled="isSubmitting"
-                                autocomplete="email"
-                                class="mb-2"
-                                ></v-text-field>
-
-                            <v-text-field
-                                v-model="password"
-                                :rules="passwordRules"
-                                label="Password"
-                                type="password"
-                                autocomplete="password"
-                                required
-                                :disabled="isSubmitting"
-                                ></v-text-field>
-                            
-                            <v-btn class="mt-4 font-weight-light" round color="primary" @click="login()" :loading="isSubmitting" :disabled="isSubmitting">Login</v-btn>
-                        </v-form> -->
                         <v-btn id="google-btn" class="mt-4 font-weight-light" round color="primary" :loading="isSubmitting" :disabled="isSubmitting">Masuk dengan Google</v-btn>
+                        <span v-if="error" class="error--text text-xs-center" v-text="message"></span>
                     </v-layout>
                 </v-layout>
             </v-container>
@@ -58,14 +30,7 @@ export default {
             email: '',
             password: '',
             message: '',
-            emailRules: [
-                v => !!v || 'E-mail is required',
-                v => /.+@.+/.test(v) || 'E-mail must be valid'
-            ],
-            passwordRules: [
-                v => !!v || 'E-mail is required',
-                // v => (v && v.length >= 6) || 'Name must be 6 characters or more'
-            ],
+            error: false,
             isSubmitting: false
         }
     },
@@ -77,7 +42,7 @@ export default {
     methods: {
         ...mapActions([
             'logUserIn',
-            'removeCookies',
+            'logUserOut',
             'showSnackbar'
         ]),
 
@@ -86,8 +51,9 @@ export default {
         },
 
         async loadGapi() {
-            await window.gapi
+            this.error = false
             try {
+                await window.gapi
                 window.gapi.load('auth2', () => {
                     const auth2 = window.gapi.auth2.init({
                         client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
@@ -102,7 +68,10 @@ export default {
                     )
                 })
             } catch (error) {
-                this.loadGapi()
+                this.error = true
+                this.message = 'Terjadi kesalahan koneksi ke server, harap coba lagi atau muat ulang halaman'
+                console.log(error)
+                this.showSnackbar(error)
             }
         },
 
@@ -115,8 +84,9 @@ export default {
                 this.$router.push('/')
             } catch (error) {
                 this.isSubmitting = false
-                this.removeCookies()
-                this.showSnackbar(error)
+                this.message = error.message
+                this.logUserOut()
+                this.showSnackbar(error.message)
             }
         }
     }
