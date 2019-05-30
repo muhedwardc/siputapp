@@ -1,7 +1,6 @@
-// import head from './partials/head.js'
 import UGMLogo from './partials/ugm-logo'
 
-export default function (data) {
+function documentByMahasiswa(data, dosenIndex, i) {
     let doc = []
     const { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa, judul } = data
     const bab = ['ABSTRAK', 'BAB I\nPENDAHULUAN', 'BAB II\nDASAR TEORI', 'BAB III\nMETODE PENELITIAN', 'BAB IV\nHASIL DAN PEMBAHASAN', 'BAB V\nKESIMPULAN DAN SARAN', 'KOMENTAR UMUM/CATATAN']
@@ -108,12 +107,12 @@ export default function (data) {
                     [
                         'Nama Mahasiswa - NIM',
                         ':',
-                        `${mahasiswa.nama.toUpperCase()} - ${mahasiswa.nim}`
+                        `${mahasiswa[i].nama.toUpperCase()} - ${mahasiswa[i].nim}`
                     ],
                     [
                         'Prodi/Konsentrasi',
                         ':',
-                        `${mahasiswa.prodi}/${mahasiswa.konsentrasi}`
+                        `${mahasiswa[i].prodi}/${mahasiswa[i].konsentrasi}`
                     ],
                     [
                         'Judul Skripsi',
@@ -133,7 +132,7 @@ export default function (data) {
                     [
                         'Dikoreksi Oleh',
                         ':',
-                        dosen[2]
+                        dosen[dosenIndex]
                     ]
                 ]
             },
@@ -165,7 +164,7 @@ export default function (data) {
                     width: '*',
                     text: [
                         `Yogyakarta, ${tanggal}\nDosen Pengoreksi\n\n\n\n\n`,
-                        { text: dosen[2], bold: true }
+                        { text: dosen[dosenIndex], bold: true }
                     ]
                 }
             ],
@@ -174,3 +173,18 @@ export default function (data) {
 
     return doc
 }
+
+function generateDoc(data, dosenIndex) {
+    let doc = []
+    data.mahasiswa.forEach((e, i) => doc.push(...documentByMahasiswa(data, dosenIndex, i)))
+    return doc
+}
+
+export default function (data) {
+    let doc = []
+    for (let i = 2; i < data.dosen.length; i ++) {
+        doc.push(...generateDoc(data, i))
+    }
+    return doc
+}
+

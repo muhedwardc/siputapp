@@ -1,7 +1,7 @@
 // import head from './partials/head.js'
 import UGMLogo from './partials/ugm-logo'
 
-export default function (data) {
+function generateDoc(data, i) {
     let doc = []
     const { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa } = data
     let dosenTabel = [
@@ -20,8 +20,8 @@ export default function (data) {
             image: UGMLogo,
             fit: [30, 30],
             alignment: 'center',
-            margin: [0, 0, 0, 2]
-    
+            margin: [0, 0, 0, 2],
+            pageBreak: 'before'
         },
         {
             text: [
@@ -89,12 +89,20 @@ export default function (data) {
                 },
                 {
                     width: '*',
-                    text: `Mahasiswa yang diuji\n\n\n\n\n${mahasiswa.nama}\nNIP ${mahasiswa.nim}`,
+                    text: `Mahasiswa yang diuji\n\n\n\n\n${mahasiswa[i].nama}\nNIP ${mahasiswa[i].nim}`,
                     margin: [ 40, 0, 0, 0 ]
                 }
             ],
         }
     )
 
+    return doc
+}
+
+export default function (data) {
+    let doc = []
+    data.mahasiswa.forEach((e, i) => {
+        doc.push(...generateDoc(data, i))
+    })
     return doc
 }

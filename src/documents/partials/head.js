@@ -1,4 +1,4 @@
-import UGMLogo from './ugm-logo.js'
+import UGMLogo from '../ugm-logo.png'
 const vertical = [
     {
         image: UGMLogo,

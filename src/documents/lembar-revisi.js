@@ -1,6 +1,6 @@
 import UGMLogo from './partials/ugm-logo'
 
-export default function (data) {
+function generateDoc(data, i) {
     let doc = []
     const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa } = data
     doc.push(
@@ -50,10 +50,10 @@ export default function (data) {
                             margin: [0, 10, 0, 10]
                         }
                     ],
-                    [ 'Nama Mahasiswa', ':', mahasiswa.nama ],
-                    [ 'NIM', ':', mahasiswa.nim ],
-                    [ 'Program Studi', ':', mahasiswa.prodi ],
-                    [ 'Tempat, Tanggal Lahir', ':', `${mahasiswa.tl.toUpperCase()}, ${mahasiswa.tgl}` ],
+                    [ 'Nama Mahasiswa', ':', mahasiswa[i].nama ],
+                    [ 'NIM', ':', mahasiswa[i].nim ],
+                    [ 'Program Studi', ':', mahasiswa[i].prodi ],
+                    [ 'Tempat, Tanggal Lahir', ':', `${mahasiswa[i].tl.toUpperCase()}, ${mahasiswa[i].tgl}` ],
                 ]
             },
             layout: 'noBorders',
@@ -82,5 +82,11 @@ export default function (data) {
         }
     )
 
+    return doc
+}
+
+export default function (data) {
+    let doc = []
+    data.mahasiswa.forEach((e, i) => doc.push(...generateDoc(data, i)))
     return doc
 }

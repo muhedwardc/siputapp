@@ -13,6 +13,14 @@ export default function (data) {
             sum: 549,
             average: 91.5,
             pass: true
+        },
+        {
+            name: 'Muhammad Edward Chakim 2',
+            nim: '15/385407/TK/44069',
+            grade: [97, 92, 88, 82, 95, 80],
+            sum: 549,
+            average: 89.5,
+            pass: true
         }
     ]
     let emptyCol = []

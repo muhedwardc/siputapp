@@ -111,26 +111,26 @@ export default [
         },
         component: () => import('@/views/exam/start.vue')
     },
-    {
-        path: '/playground',
-        name: 'Playground',
-        meta: {
-            requiresAuth: true,
-            dosenRoute: true,
-            akademikRoute: true
-        },
-        component: () => import('@/views/playground/index.vue')
-    },
-    {
-        path: '/ujian/:id/dokumen-pendadaran',
-        name: 'Dokumen Pendadaran',
-        meta: {
-            exam: true,
-            isDocument: true,
-            requiresAuth: true,
-        },
-        component: () => import('@/views/playground/document.vue')
-    },
+    // {
+    //     path: '/playground',
+    //     name: 'Playground',
+    //     meta: {
+    //         requiresAuth: true,
+    //         dosenRoute: true,
+    //         akademikRoute: true
+    //     },
+    //     component: () => import('@/views/playground/index.vue')
+    // },
+    // {
+    //     path: '/ujian/:id/dokumen-pendadaran',
+    //     name: 'Dokumen Pendadaran',
+    //     meta: {
+    //         exam: true,
+    //         isDocument: true,
+    //         requiresAuth: true,
+    //     },
+    //     component: () => import('@/views/playground/document.vue')
+    // },
     {
         path: '*',
         name: '404 Page Not Found',

@@ -257,11 +257,11 @@
                         </h3>
                         <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }} <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span></span>
                         <v-layout class="mt-3">
-                            <v-btn class="ma-0 mr-2" color="primary">
+                            <v-btn @click="generateReadyDocument('download')" class="ma-0 mr-2" color="primary">
                                 <v-icon left>file_download</v-icon>
                                 Unduh
                             </v-btn>
-                            <v-btn class="ma-0" color="warning">
+                            <v-btn @click="generateReadyDocument('print')" class="ma-0" color="warning">
                                 <v-icon left>print</v-icon>
                                 Cetak
                             </v-btn>
@@ -342,7 +342,10 @@
 </template>
 
 <script>
+import pdfMake from 'pdfmake/build/pdfmake.js'
+import pdfFonts from 'pdfmake/build/vfs_fonts.js'
 import moment from 'moment'
+import doc from '@/documents'
 import { mapActions } from 'vuex'
 export default {
     data() {
@@ -415,6 +418,10 @@ export default {
                 'Penguji',
                 'Hapus'
             ],
+            report: null,
+            objDocument: null,
+            pdfDocGenerator: null,
+            generating: false,
         }
     },
 
@@ -450,6 +457,90 @@ export default {
         ...mapActions([
             'showSnackbar'
         ]),
+
+        async fetchReport() {
+            try {
+                return await {
+                    hari: 'SENIN',
+                    tanggal: '12 Mei 2019',
+                    waktu: '09.00 WIB',
+                    ruang: 'Ruang Sidang',
+                    mahasiswa: [
+                        {
+                            nama: 'Muhammad Edward Chakim',
+                            nim: '15/385407/TK/44069',
+                            tl: 'Batang',
+                            tgl: '4 Juni 1998',
+                            prodi: 'Teknologi Informasi',
+                            konsentrasi: 'Rekayasa Perangkat Lunak',
+                            nilai: 98,
+                        },
+                        {
+                            nama: 'Muhammad Edward Chakim 2 Asdasdas asdasdasd',
+                            nim: '15/385407/TK/44069',
+                            tl: 'Batang 2',
+                            tgl: '4 Juni 1998',
+                            prodi: 'Teknologi Informasi 2',
+                            konsentrasi: 'Rekayasa Perangkat Lunak 2',
+                            nilai: 99
+                        }
+                    ],
+                    judul: 'Pengembangan aplikasi ujian tugas akhir berbasis Outcome Based Assessment Test Dua Baris',
+                    dosen: ['Ridi Ferdiana', 'Rudi Hartanto', 'Selo', 'Markus', 'Silmi', 'Teguh Bharata Adji'],
+                    kadep: {
+                        nama: 'Sarjiya, S.T., M.T., Ph.D.',
+                        nip: '197307061999031005'
+                    },
+                    sekretaris: {
+                        nama: 'Hanung Adi  Nugroho, S.T., M.E., Ph.D.',
+                        nip: '197802242002121001'
+                    },
+                }
+            } catch (error) {
+                return false
+            }
+        },
+
+        async generateObjDocument() {
+            this.report = await this.fetchReport()
+            return this.report ? doc(this.report) : null
+        },
+
+        async generateReadyDocument(type) {
+            this.report = null
+            this.objDocument = await this.generateObjDocument()
+            if (this.objDocument) {
+                if (pdfMake.vfs == undefined) {
+                    pdfMake.vfs = pdfFonts.pdfMake.vfs
+                }
+    
+                const docDefinition = { 
+                    pageOrientation: 'portrait',
+                    content: this.objDocument,
+                    defaultStyle: {
+                        fontSize: 10,
+                        lineHeight: 1
+                    },
+                    pageSize: 'A4',
+                    pageMargins: [ 20, 20, 20, 20 ]
+                }
+    
+                this.pdfDocGenerator = pdfMake.createPdf(docDefinition);
+                if (type == 'open') {
+                    // this.pdfDocGenerator.open()
+                    pdfMake.createPdf(docDefinition).open({}, window)
+                    this.generating = false
+                } else if (type == 'print') {
+                    this.pdfDocGenerator.print()
+                } else {
+                    this.pdfDocGenerator.download()
+                }
+                // this.pdfDocGenerator.getDataUrl((dataUrl) => {
+                //     this.src = dataUrl;
+                //     this.generating = false
+                // })
+            }
+        },
 
         isSelected(i) {
             if (i < 2) return !!this.selectedPenguji[i]
