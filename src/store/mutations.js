@@ -20,6 +20,14 @@ const mutations = {
         Object.keys(Cookies.get()).forEach(function(cookieName) {
             Cookies.remove(cookieName)
         })
+    },
+    async logUserOut(state) {
+        state.auth.token = null
+        state.auth.user = null
+        await gapi.auth2.getAuthInstance().disconnect()
+        await Object.keys(Cookies.get()).forEach(function(cookieName) {
+            Cookies.remove(cookieName)
+        })
     }
 }
 

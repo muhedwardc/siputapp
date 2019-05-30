@@ -10,6 +10,9 @@ const actions = {
     },
     removeCookies({ commit }) {
         commit('removeCookies')
+    },
+    logUserOut({ commit }) {
+        commit('logUserOut')
     }
 }
 
