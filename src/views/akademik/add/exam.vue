@@ -3,6 +3,7 @@
         <v-card flat class="pa-2 pl-3 pr-3">
             <form-wizard
                 @on-complete="onComplete"
+                :startIndex="3"
                 color="blue">
                 <tab-content title="Informasi Ujian" :before-change="validateExamInfo">
                     <v-form
@@ -77,17 +78,25 @@
                         <v-date-picker :disabled="submitting" @input="getThisDayExams(exam.tanggal)" v-model="exam.tanggal"></v-date-picker>
                     </v-menu>
                     <template v-if="exam.tanggal">
-                        <v-container class="pa-0" grid-list-md v-if="this.thisDayExams.length > 0">
+                        <a @click="getThisDayExams(exam.tanggal)" v-if="errorFetchingSpecificExams" class="error--text">Terjadi kesalahan saat memuat ujian, tekan untuk memuat ulang</a>
+                        <v-container class="pa-0" grid-list-md v-else-if="thisDayExams.length && !errorFetchingSpecificExams">
                             <p class="mb-1">Daftar ujian ditanggal {{exam.tanggal}}</p>
                             <v-layout row wrap>
                                 <v-chip v-for="e in thisDayExams" :key="e.id" label class="ml-2 mr-2">{{ e.ruang + ', ' + e.sesi }}</v-chip>
                             </v-layout>
                         </v-container>
-                        <p v-else>Tidak ada ujian untuk tanggal {{exam.tanggal}}</p>
+                        <p v-else-if="!errorFetchingSpecificExams && !thisDayExams.length">Tidak ada ujian untuk tanggal {{exam.tanggal}}</p>
                     </template>
                     <v-container class="no-h-padding" grid-list-md>
                         <p class="mb-0">Pilih ruangan dan sesi ujian</p>
-                        <v-layout row wrap>
+                        <a class="error--text" @click="fetchRoomSessions" v-if="errorFetchRoomSessions">Terdapat masalah dalam memuat ruangan dan sesi, tekan untuk memuat ulang</a>
+                        <v-layout justify-center v-if="loadingRoomSessions">
+                            <v-progress-circular
+                                indeterminate
+                                color="purple"
+                                ></v-progress-circular>
+                        </v-layout>
+                        <v-layout v-else-if="!loadingRoomSessions && !errorFetchRoomSessions" row wrap>
                             <v-flex xs12 sm4>
                                 <v-select
                                     :items="rooms"
@@ -387,6 +396,8 @@ export default {
                 current: 1,
                 links: {}
             },
+            errorFetchRoomSessions: false,
+            errorFetchingSpecificExams: false,
             tanggal_dialog: false,
             loadingRoomSessions: true,
             loadingThisDayExams: true,
@@ -452,16 +463,6 @@ export default {
         FormWizard,
         TabContent,
         WizardButton
-    },
-
-    watch: {
-        pagination: {
-            handler () {
-                    // this.fetchDosen()
-                    //     .then(() => this.loadingDosen = false)
-            },
-            deep: true
-        }
     },
 
     computed: {
@@ -660,24 +661,26 @@ export default {
         },
         async fetchRoomSessions() {
             this.loadingRoomSessions = true
+            this.errorFetchRoomSessions = false
             try {
                 const response = await axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
                 this.rooms = response.data.Ruang
                 this.sessions = response.data.Sesi
                 this.loadingRoomSessions = false
             } catch (error) {
-                this.showSnackbar(error)
-                this.fetchRoomSessions()
+                this.errorFetchRoomSessions = true
+                this.loadingRoomSessions = false
             }
         },
         async getThisDayExams(date) {
             this.dateMenu = false
             this.loadingThisDayExams = true
+            this.errorFetchingSpecificExams = false
             try {
                 const response = await axios.get('/exams/?tanggal=' + date, this.$store.getters.authHeaders)
                 this.thisDayExams = response.data.results
             } catch (error) {
-                this.showSnackbar(error)
+                this.errorFetchingSpecificExams = true
                 this.loadingThisDayExams = false
             }
         },
