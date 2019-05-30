@@ -3,7 +3,6 @@
         <v-card flat class="pa-2 pl-3 pr-3">
             <form-wizard
                 @on-complete="onComplete"
-                :startIndex="3"
                 color="blue">
                 <tab-content title="Informasi Ujian" :before-change="validateExamInfo">
                     <v-form
