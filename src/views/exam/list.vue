@@ -1,10 +1,23 @@
 <template>
     <v-layout column>
         <p class="font-weight-bold pb-2 mb-0" style="color: #365075">Daftar Ujian Anda</p>
+        <v-layout>
+            <v-spacer></v-spacer>
+            <v-spacer></v-spacer>
+            <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Cari Ujian"
+                single-line
+                hide-details
+                class="pt-0"
+            ></v-text-field>
+        </v-layout>
         <div>
             <v-data-table
                 class="no-barrier"
                 :headers="headers"
+                :search="search"
                 :items="exams"
                 :rows-per-page-items="perPage"
                 :loading="loading"
@@ -20,11 +33,11 @@
                 </v-layout>
             </template>
             <template v-slot:items="props">
-                <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
                 <td>{{ readableData(props.item.ujian.tanggal) }}</td>
+                <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
                 <td>{{ props.item.ujian.sesi }}</td>
                 <td>{{ props.item.ujian.ruang }}</td>
-                <td>{{ props.item.is_leader ? 'Ketua' : 'Anggota' }}</td>
+                <td>{{ props.item.ujian.penguji[0].dosen == $store.state.auth.user.nama ? 'Ketua' : 'Anggota' }}</td>
             </template>
             </v-data-table>
         </div>
@@ -39,17 +52,18 @@ export default {
     data() {
         return {
             loading: false,
+            search: '',
             headers: [
-                {
-                    text: 'Nama Ujian',
-                    value: 'ujian.judul',
-                    sortable: true,
-                    align: 'left'
-                },
                 {
                     text: 'Tanggal',
                     value: 'ujian.tanggal',
-                    sortable: false
+                    sortable: true
+                },
+                {
+                    text: 'Nama Ujian',
+                    value: 'ujian.skripsi.judul',
+                    sortable: true,
+                    align: 'left'
                 },
                 {
                     text: 'Jam',
@@ -68,7 +82,7 @@ export default {
                 },
             ],
             exams: [],
-            perPage: [ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]
+            perPage: [ 10 ]
         }   
     },
 
