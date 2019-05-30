@@ -114,14 +114,14 @@ export default {
 
 	methods: {
 		...mapActions([
-			'removeCookies',
+			'logUserOut',
 			'showSnackbar'
 		]),
 
 		async logout() {
 			try {
 				await axios.post('/auth/logout/', {}, this.$store.getters.authHeaders)
-				await this.removeCookies()
+				await this.logUserOut()
 				await this.$router.replace('/login')
 			} catch (error) {
 				this.showSnackbar({
