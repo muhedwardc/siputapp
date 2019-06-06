@@ -13,7 +13,7 @@ from backend.users.serializers import ProfileSerializer
 from backend.exams.models import Penguji, Exam
 from backend.comments.models import Comment
 from backend.users.models import User
-from backend.essays.models import Student
+from backend.essays.models import Student, Essay, TitleRevision
 from backend.grades.models import Grade, StudentOutcome
 
 from backend.pagination import CustomPagination
@@ -155,7 +155,30 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             response['status'] = "Sukses"
             response['result'] = json_data
             return Response(response, status=201)
+
+    @action(methods=['POST'], detail=True)
+    def add_revision(self, request, *args, **kwargs):
+        response = {"status": "Gagal"}
+        json_data = request.data
+        if self.get_object().is_leader == False:
+            return Response({
+                "message": "Anda tidak memiliki authoritas untuk menambah revisi judul."
+            }, status=403)
+
+        skripsi = self.get_object().ujian.skripsi
+        if json_data.get('revisi') == True:
+            revision = TitleRevision.objects.create(skripsi=skripsi)
+            revision.revisi = json_data.get('konten')
+            revision.save()
+
+            skripsi.title_revision = True
+            skripsi.save()
+
+        response['status'] = "Sukses"
+        response['result'] = json_data
+        return Response(response, status=201)
         
+
 class SiputProfileViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
     serializer_class = ProfileSerializer
