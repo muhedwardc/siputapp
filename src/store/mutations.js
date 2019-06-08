@@ -28,6 +28,10 @@ const mutations = {
         await Object.keys(Cookies.get()).forEach(function(cookieName) {
             Cookies.remove(cookieName)
         })
+    },
+    updateUser(state, payload) {
+        state.auth.user = { ...state.auth.user, ...payload }
+        Cookies.set('_usr', state.auth.user)
     }
 }
 
