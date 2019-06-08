@@ -18,7 +18,7 @@
                     <b>Nama</b>
                 </v-flex>
                 <v-flex xs12 sm8>
-                    <v-text-field :rules="[v => !!v.trim() || 'Harus diisi']" v-model="user.nama"></v-text-field>
+                    <v-text-field :disabled="loading" :rules="[v => !!v.trim() || 'Harus diisi']" v-model="user.nama"></v-text-field>
                 </v-flex>
             </v-layout>
             <v-layout row wrap align-center>
@@ -26,7 +26,7 @@
                     <b>NIP</b>
                 </v-flex>
                 <v-flex xs12 sm8>
-                    <v-text-field :rules="[v => !!v.trim() || 'Harus diisi', v => !isNaN(v.replace(/\s/g, '')) || 'Hanya dapat berisi angka']" v-model="user.nip"></v-text-field>
+                    <v-text-field :disabled="loading" :rules="[v => !!v.trim() || 'Harus diisi', v => !isNaN(v.replace(/\s/g, '')) || 'Hanya dapat berisi angka']" v-model="user.nip"></v-text-field>
                 </v-flex>
             </v-layout>
             <template v-if="!user.is_admin">
@@ -40,6 +40,7 @@
                             :items="prodiOptions"
                             :rules="[v => !!v || 'Harus diisi']"
                             required
+                            :disabled="loading"
                             ></v-select>
                     </v-flex>
                 </v-layout>
@@ -53,14 +54,15 @@
                             :items="konsentrasiOptions[selectedProdi]"
                             :rules="[v => !!v || 'Harus diisi']"
                             required
+                            :disabled="loading"
                             ></v-select>
                     </v-flex>
                 </v-layout>
             </template>
             <v-layout>
                 <v-spacer></v-spacer>
-                <v-btn v-show="changed" class="secondary" @click="reset">reset</v-btn>
-                <v-btn v-show="changed" class="primary" @click="saveChanges">simpan</v-btn>
+                <v-btn v-show="changed" class="secondary" @click="reset" :disabled="loading">reset</v-btn>
+                <v-btn v-show="changed" class="primary" @click="saveChanges" :loading="loading">simpan</v-btn>
             </v-layout>
         </v-form>
         </v-layout>
@@ -78,7 +80,8 @@ export default {
             konsentrasiOptions: [
                 ['STL', 'SIE', 'SK'],
                 ['RSI', 'RPL', 'RSK']
-            ]
+            ],
+            loading: false
         }
     },
 
@@ -112,9 +115,10 @@ export default {
             if (this.valid) {
                 this.loading = true
                 try {
-                    const res = await axios.put('/me/profile/', this.$store.getters.authHeaders)
+                    const res = await axios.put('/me/profile/', this.user, this.$store.getters.authHeaders)
                     this.loading = false
-                    console.log(res)
+                    this.$store.dispatch('updateUser', res.data.user)
+                    this.$store.dispatch('showSnackbar', {message: 'Berhasil mengubah profil', type: 'success'})
                 } catch(error) {
                     this.$store.dispatch('showSnackbar', error)
                     this.loading = false
