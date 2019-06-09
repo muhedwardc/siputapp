@@ -107,11 +107,15 @@
                         <p class="mb-1">{{ socs[gradeTemp.so].description }}</p>
                         <v-form v-model="validGrades">
                         <table class="mt-2 grade-list">
-                                <tr v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim">
-                                    <td class="pb-4">Mhs {{index + 1}}</td>
-                                    <td><v-text-field :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
-                                    <td class="pb-4"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
+                            <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
+                                <tr :key="mahasiswa.nim">
+                                    <td v-text="mahasiswa.nama" colspan="2"></td>
                                 </tr>
+                                <tr :key="mahasiswa.nim">
+                                    <td><v-text-field :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
+                                    <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
+                                </tr>
+                            </template>
                         </table>
                         </v-form>
                         <v-layout>
