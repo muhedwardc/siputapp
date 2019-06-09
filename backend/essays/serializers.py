@@ -6,7 +6,7 @@ from backend.users.models import User
 class ListStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ('nama', 'nim', 'prodi', 'konsentrasi')
+        fields = ('id', 'nama', 'nim', 'prodi', 'konsentrasi', 'tempat_lahir', 'tanggal_lahir', 'telepon')
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
