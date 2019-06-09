@@ -3,6 +3,7 @@ import SOCS from './partials/socs'
 import SOCS_HEADER from './partials/socs-header'
 import DOC_HEADER from './partials/head'
 
+import COVER from './cover'
 import BERITA_ACARA from './berita-acara'
 import DAFTAR_HADIR from './daftar-hadir'
 import LEMBAR_KOREKSI from './lembar-koreksi'
@@ -16,6 +17,7 @@ export default function index(data) {
     const RUBRIK = mahasiswa.length ? RUBRIK_CAPSTONE(data) : RUBRIK_INDIVIDU(data, SOCS_HEADER, SOCS)
     
     var doc = [
+        ...COVER(data),
         ...BERITA_ACARA(data, DOC_HEADER.vertical, SB),
         ...DAFTAR_HADIR(data),
         ...RUBRIK,

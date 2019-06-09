@@ -476,12 +476,12 @@ export default {
                             nilai: 98,
                         },
                         {
-                            nama: 'Muhammad Edward Chakim 2 Asdasdas asdasdasd',
+                            nama: 'Muhammad Edward Chakim Dua',
                             nim: '15/385407/TK/44069',
-                            tl: 'Batang 2',
+                            tl: 'Batang Dua',
                             tgl: '4 Juni 1998',
-                            prodi: 'Teknologi Informasi 2',
-                            konsentrasi: 'Rekayasa Perangkat Lunak 2',
+                            prodi: 'Teknologi Informasi',
+                            konsentrasi: 'Rekayasa Sistem Informasi',
                             nilai: 99
                         }
                     ],

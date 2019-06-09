@@ -27,44 +27,54 @@
                                     solo
                                     placeholder="Pilih Bab"
                                     class="mr-2"></v-select>
-                                <v-text-field :rules="[v => !!v && !!v.trim() || 'Harus diisi', v => !isNaN(v.trim()) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.page" placeholder="hal" type="number" min="0"></v-text-field>
+                                <v-text-field :rules="[v => !!v || 'Harus diisi', v => !isNaN(v) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
                             </v-layout>
-                            <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.text" placeholder="Masukkan komentar"></v-textarea>
+                            <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.komentar" placeholder="Masukkan komentar"></v-textarea>
                             <v-layout>
                                 <v-spacer></v-spacer>
-                                <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection">Batal</v-btn>
-                                <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges">Edit</v-btn>
-                                <v-btn v-else class="success ma-0 mb-2" @click="addCorrection">Simpan</v-btn>
+                                <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection" :disabled="saving">Batal</v-btn>
+                                <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges" :loading="saving">Edit</v-btn>
+                                <v-btn v-else class="success ma-0 mb-2" @click="addCorrection" :loading="saving">Simpan</v-btn>
                             </v-layout>
                             </v-form>
                         </v-layout>
                     </v-slide-y-reverse-transition>
                     <v-layout column v-show="!creating">
-                        <v-layout column v-if="correctionFilled">
-                            <v-layout column v-for="(correction, section) in corrections" :key="section">
-                                <template v-if="correction.items.length > 0">
-                                    <h3 class="mb-1" v-text="bab[section]"></h3>
-                                    <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
-                                        <p class="mb-0" v-text="item.text"></p>
-                                        <v-layout row align-center>
-                                            <span class="font-weight-bold">Halaman {{item.page}}</span>
-                                            <v-spacer></v-spacer>
-                                            <v-btn flat :ripple="false" @click="editCorrection(section, index)">
-                                                <v-icon class="warning--text" small>edit</v-icon>
-                                                <span class="primary--text ml-1">edit</span>
-                                            </v-btn>
-                                            <v-btn flat :ripple="false" @click="showDialog(section, index)">
-                                                <v-icon class="error--text" small>delete</v-icon>
-                                                <span class="primary--text ml-1">hapus</span>
-                                            </v-btn>
+                        <app-loading :loadingState="fetchingComments"></app-loading>
+                        <v-layout align-center v-if="errorFetchingComments" column>
+                            <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat komentar</p>
+                            <v-btn flat class="primary--text" @click="fetchComments">
+                                <v-icon left small>refresh</v-icon>
+                                <span class="text-lowercase">muat ulang komentar</span>
+                            </v-btn>
+                        </v-layout>
+                        <template v-else-if="!fetchingComments">
+                            <v-layout column v-if="correctionFilled">
+                                <v-layout column v-for="(correction, section) in corrections" :key="section">
+                                    <template v-if="correction.items.length > 0">
+                                        <h3 class="mb-1" v-text="bab[section]"></h3>
+                                        <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
+                                            <p class="mb-0" v-text="item.komentar"></p>
+                                            <v-layout row align-center>
+                                                <span class="font-weight-bold">Halaman {{item.halaman}}</span>
+                                                <v-spacer></v-spacer>
+                                                <v-btn flat :ripple="false" @click="editCorrection(section, index)">
+                                                    <v-icon class="warning--text" small>edit</v-icon>
+                                                    <span class="primary--text ml-1">edit</span>
+                                                </v-btn>
+                                                <v-btn flat :ripple="false" @click="showDialog(section, index)">
+                                                    <v-icon class="error--text" small>delete</v-icon>
+                                                    <span class="primary--text ml-1">hapus</span>
+                                                </v-btn>
+                                            </v-layout>
                                         </v-layout>
-                                    </v-layout>
-                                </template>
+                                    </template>
+                                </v-layout>
                             </v-layout>
-                        </v-layout>
-                        <v-layout justify-center v-else>
-                            Anda belum memberikan komentar.
-                        </v-layout>
+                            <v-layout justify-center v-else>
+                                Anda belum memberikan komentar.
+                            </v-layout>
+                        </template>
                     </v-layout>
                     <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
                 </v-layout>
@@ -97,11 +107,15 @@
                         <p class="mb-1">{{ socs[gradeTemp.so].description }}</p>
                         <v-form v-model="validGrades">
                         <table class="mt-2 grade-list">
-                                <tr v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim">
-                                    <td class="pb-4">Mhs {{index + 1}}</td>
-                                    <td><v-text-field :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
-                                    <td class="pb-4"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
+                            <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
+                                <tr :key="mahasiswa.nim">
+                                    <td v-text="mahasiswa.nama" colspan="2"></td>
                                 </tr>
+                                <tr :key="mahasiswa.nim">
+                                    <td><v-text-field :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
+                                    <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
+                                </tr>
+                            </template>
                         </table>
                         </v-form>
                         <v-layout>
@@ -258,8 +272,8 @@ export default {
             bab: ['ABSTRAK', 'BAB I PENDAHULUAN', 'BAB II DASAR TEORI', 'BAB III METODE PENELITIAN', 'BAB IV HASIL DAN PEMBAHASAN', 'KOMENTAR UMUM/CATATAN'],
             corrections: [],
             newCorrection: {
-                text: '',
-                page: '',
+                komentar: '',
+                halaman: '',
                 index: 0,
                 rules: {
                     required: [v => !!v && v.length > 0 || 'Harus diisi'],
@@ -281,7 +295,10 @@ export default {
             validGrades: true,
             step: 0,
             showRecap: false,
-            recap: {}
+            recap: {},
+            fetchingComments: false, 
+            errorFetchingComments: false,
+            saving: false
         }
     },
 
@@ -440,34 +457,28 @@ export default {
         },
 
         editCorrection(section, index) {
-            const { text, page } = this.corrections[section].items[index]
-            this.temp = {edit: true, text, page, index, selectedBab: this.bab[section], section}
-            this.newCorrection.text = text
-            this.newCorrection.page = page
-            this.newCorrection.section = section
+            const { halaman, komentar, bab, id } = this.corrections[section].items[index]
+            this.temp = {edit: true, text: komentar, page: halaman, index, selectedBab: this.bab[section], section}
+            this.newCorrection = {...this.newCorrection, komentar, halaman, bab, id }
             this.itemIndex = index
-            this.selectedBab = this.bab[section]
+            this.selectedBab = this.bab[bab]
             this.creating = true
         },
 
-        saveChanges() {
+        async saveChanges() {
             const validInput = this.$refs['add-correction-form'].validate()
             if(validInput) {
-                const index = this.temp.index
-                const section = this.newCorrection.section
-                if (section != this.bab.indexOf(this.selectedBab)) {
-                    this.corrections[this.temp.section].items.splice(index, 1)
-                    this.corrections[this.bab.indexOf(this.selectedBab)].items.push({
-                        page: this.newCorrection.page, 
-                        text: this.newCorrection.text
-                    })
-                } else {
-                    this.corrections[section].items[index] = {
-                        page: this.newCorrection.page, 
-                        text: this.newCorrection.text
-                    }
+                this.saving = true
+                try {
+                    const {id, halaman, komentar, bab} = this.newCorrection
+                    const comments = await axios.put(`/me/exams/${this.$router.currentRoute.params.id}/comments/`, {id, bab, komentar, halaman}, this.$store.getters.authHeaders)
+                    this.constructComment(comments.data)
+                    this.resetNewCorrection()
+                    this.saving = false
+                } catch (error) {
+                    this.showSnackbar(error)
+                    this.saving = false
                 }
-                this.resetNewCorrection()
             }
         },
 
@@ -508,8 +519,8 @@ export default {
         },
 
         resetNewCorrection() {
-            this.newCorrection = {page: '', text: '', index: 0}
-            this.temp = {edit: false, text: '', page: '', index: 0, selectedBab: null, section: 0}
+            this.newCorrection = {halaman: '', komentar: '', index: 0}
+            this.temp = {edit: false, komentar: '', halaman: '', index: 0, selectedBab: null, section: 0}
             this.itemIndex = 0
             this.creating = false
             this.selectedBab = null
@@ -522,20 +533,47 @@ export default {
         async addCorrection() {
             const validInput = this.$refs['add-correction-form'].validate()
             if (validInput) {
-                const { page, text, index } = this.newCorrection
-                // await axios.post('/', {
-                //     bab: index,
-                //     halaman: page,
-                //     komentar: text
-                // }, this.$store.getters.authHeaders)
-                this.corrections[index].items.push({
-                    bab: index,
-                    page,
-                    text
+                this.saving = true
+                try {
+                    const { halaman, komentar, index } = this.newCorrection
+                    const comments = await axios.post(`/me/exams/${this.$router.currentRoute.params.id}/comments/`, {
+                        bab: index,
+                        halaman,
+                        komentar
+                    }, this.$store.getters.authHeaders)
+                    this.constructComment(comments.data)
+                    this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
+                    this.updateLocalStorage()
+                    this.resetNewCorrection()
+                    this.saving = false
+                } catch (error) {
+                    this.showSnackbar(error)
+                    this.saving = false
+                }
+            }
+        },
+
+        constructComment(comments) {
+            if (!this.errorFetchingComments) {
+                this.corrections = []
+                this.generateCorrectionsTemplate()
+                comments.forEach(comment => {
+                    this.corrections[comment.bab].items.push(comment)
                 })
-                this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
-                this.updateLocalStorage()
-                this.resetNewCorrection()
+            }
+        },
+
+        async fetchComments() {
+            this.fetchingComments = true
+            try {
+                const comments = await axios.get(`/me/exams/${this.$router.currentRoute.params.id}/comments/`, this.$store.getters.authHeaders)
+                this.fetchingComments = false
+                this.errorFetchingComments = false
+                this.constructComment(comments.data)
+            } catch (error) {
+                this.errorFetchingComments = true
+                this.fetchingComments = false
+                this.showSnackbar(error)
             }
         },
 
@@ -556,6 +594,7 @@ export default {
     created() {
         if (this.$store.state.auth.token) {
             this.fetchExam()
+            this.fetchComments()
             this.generateExamData()
             this.generateCorrectionsTemplate()
             this.getDrawerWidth()

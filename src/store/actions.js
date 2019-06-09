@@ -13,6 +13,9 @@ const actions = {
     },
     logUserOut({ commit }) {
         commit('logUserOut')
+    },
+    updateUser({commit}, payload) {
+        commit('updateUser', payload)
     }
 }
 

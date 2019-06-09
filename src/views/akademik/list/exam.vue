@@ -12,7 +12,7 @@
                 v-model="search"
                 append-icon="search"
                 label="Cari Ujian"
-                :disabled="creating"
+                :disabled="loading"
                 single-line
                 hide-details
                 class="pt-0"
