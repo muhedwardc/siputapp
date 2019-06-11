@@ -256,11 +256,28 @@ Endpoint untuk umum:
 				{
 					"so_id": 1,
 					"nilai" :87
-				}
+				},
+				{
+					"so_id": 2,
+					"nilai": 92
+				},
+				{
+					"so_id": 3,
+					"nilai": 85,
+				},
+				...
 			]
 		}
 	]
 ```
+1. **POST** /api/me/exams/\<id>\/add_revision/ : create revisi judul
+```JSON
+	{
+		"revisi": true, // jika ada revisi judul, jika tidak maka nilai false
+		"konten": "Pengembangan Aplikasi Tesis" // revisi judul, jika revisi: true. jika false maka tidak ada.
+	}
+```
+
 
 1. **GET** /api/me/profile/ 
 1. **PUT** /api/me/profile/
