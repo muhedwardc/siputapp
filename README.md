@@ -230,7 +230,7 @@ Endpoint untuk umum:
 1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
 ```JSON
 {
-	"bab": "hasil dan pembahasan",
+	"bab": 0,
 	"halaman": 105,
 	"komentar": "Grafik kurang detail dan belum ada penjelasan."
 }
@@ -249,7 +249,17 @@ Endpoint untuk umum:
 1. **GET** /api/me/exams/\<id>\/grades/ : list all grades
 1. **POST** /api/me/exams/\<id>\/grades/ : create grades for students
 ```JSON
-	....
+	[
+		{
+			"mahasiswa": 35,
+			"grades": [
+				{
+					"so_id": 1,
+					"nilai" :87
+				}
+			]
+		}
+	]
 ```
 
 1. **GET** /api/me/profile/ 
