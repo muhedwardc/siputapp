@@ -76,9 +76,23 @@
                 </v-card>
             </v-dialog>
         </v-layout>
+        <v-layout>
+            <v-spacer></v-spacer>
+            <v-spacer></v-spacer>
+            <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Cari Pengguna"
+                :disabled="creating"
+                single-line
+                hide-details
+                class="pt-0"
+            ></v-text-field>
+        </v-layout>
         <v-data-table
             class="user-table"
             :headers="headers"
+            :search="search"
             :items="users"
             :rows-per-page-items="perPage"
             :loading="loading">
@@ -143,6 +157,7 @@ export default {
             dialog: false,
             loading: false,
             creating: false,
+            search: '',
             headers: [
                 { text: 'Nama', align: 'left', sortable: true, value: 'nama' },
                 { text: 'Email', value: 'email', sortable: true },

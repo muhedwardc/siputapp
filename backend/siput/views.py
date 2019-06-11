@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import viewsets, mixins, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,8 +8,14 @@ from .serializers import SiputPengujiSerializer, ListSiputPengujiSerializer
 from backend.essays.serializers import EssaySerializer, StudentSerializer
 from backend.comments.serializers import CommentSerializer, CreateCommentSerializer
 from backend.grades.serializers import GradeSerializer, CreateGradeSerializer
+from backend.users.serializers import ProfileSerializer
+
 from backend.exams.models import Penguji, Exam
 from backend.comments.models import Comment
+from backend.users.models import User
+from backend.essays.models import Student, Essay, TitleRevision
+from backend.grades.models import Grade, StudentOutcome
+
 from backend.pagination import CustomPagination
 
 
@@ -127,11 +135,68 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
     @grades.mapping.post
     def add_grades(self, request, *args, **kwargs):
+        response = {"status": "Gagal"}
+        json_data = request.data
         grades = []
-        for data in request.data['grades']:
-            serializer = CreateGradeSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(penguji=self.get_object())
-            grades.append(serializer.data)
+        for data in json_data:
+            # student = Student.objects.get(pk=data.get('mahasiswa'))
+            for grade in data.get('grades'):
+                grade = {
+                    "mahasiswa": data.get('mahasiswa'),
+                    "penguji": self.get_object().pk,
+                    "so": grade.get('so'),
+                    "nilai": grade.get('nilai')
+                }
+                grades.append(grade)
+
+        serializer = CreateGradeSerializer(data=grades, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            response['status'] = "Sukses"
+            response['result'] = json_data
+            return Response(response, status=201)
+
+    @action(methods=['POST'], detail=True)
+    def add_revision(self, request, *args, **kwargs):
+        response = {"status": "Gagal"}
+        json_data = request.data
+        if self.get_object().is_leader == False:
+            return Response({
+                "message": "Anda tidak memiliki authoritas untuk menambah revisi judul."
+            }, status=403)
+
+        skripsi = self.get_object().ujian.skripsi
+        if json_data.get('revisi') == True:
+            revision = TitleRevision.objects.create(skripsi=skripsi)
+            revision.revisi = json_data.get('konten')
+            revision.save()
+
+            skripsi.title_revision = True
+            skripsi.save()
+
+        response['status'] = "Sukses"
+        response['result'] = json_data
+        return Response(response, status=201)
         
-        return Response({"grades": grades}, status=status.HTTP_201_CREATED)
+
+class SiputProfileViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.IsAuthenticated, )
+    serializer_class = ProfileSerializer
+    
+    def get_queryset(self):
+        return self.request.user
+
+    def profile(self, request, *args, **kwargs):
+        login_user = self.get_queryset()
+        serializer = self.get_serializer(login_user)
+        return Response(serializer.data, status=200)
+
+    def edit_profile(self, request, *args, **kwargs):
+        login_user = self.get_queryset()
+        serializer = self.get_serializer(login_user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Berhasil edit profile",
+                "user": serializer.data
+            }, status=200)

@@ -1,10 +1,10 @@
 // import head from './partials/head'
 import UGMLogo from './partials/ugm-logo'
-import scoreBoard from './partials/score-board'
+// import scoreBoard from './partials/score-board'
 
-export default function (data) {
+function generateObj(data, sb, i) {
     let doc = []
-    const { judul, hari, tanggal, waktu, ruang, mahasiswa, dosen, nilai, kadep } = data
+    const { judul, hari, tanggal, waktu, ruang, mahasiswa, dosen, kadep } = data
     const p = [
         `Pada hari ini ${hari}, ${tanggal} pukul ${waktu} bertempat di ${ruang} Departemen Teknik Elektro dan Teknologi Informasi, Fakultas Teknik UGM telah dilaksanakan ujian skripsi bagi mahasiswa:`
     ]
@@ -20,7 +20,7 @@ export default function (data) {
         dosenTabel.push([{ text: `${i+1}.`, alignment: 'center' }, dosen, (i == 0 ? 'Ketua Tim *)' : 'Anggota'), `${i+1}.`])
     })
     let result = []
-    if (nilai < 54.6 ) {
+    if (mahasiswa[i].nilai < 54.6 ) {
         result = [
             { text: 'LULUS', decoration: 'lineThrough' },
             ' / ',
@@ -38,8 +38,8 @@ export default function (data) {
             image: UGMLogo,
             fit: [30, 30],
             alignment: 'center',
-            margin: [0, 0, 0, 2]
-    
+            margin: [0, 0, 0, 2],
+			pageBreak: 'before'
         },
         {
             text: [
@@ -57,15 +57,16 @@ export default function (data) {
         },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
         { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
+        // ...head,
         { text: 'BERITA ACARA PENDADARAN', bold: true, alignment: 'center', margin: [0, 5, 0, 5] },
         { text: p[0] },
         { 
             table: {
                 widths: [ 100, 15, 'auto' ],
                 body: [
-                    [ 'Nama', {text: ':', alignment: 'right'}, mahasiswa.nama ],
-                    [ 'NIM', {text: ':', alignment: 'right'}, mahasiswa.nim ],
-                    [ 'Tempat, tanggal Lahir', {text: ':', alignment: 'right'}, `${mahasiswa.tl.toUpperCase()}, ${mahasiswa.tgl}` ],
+                    [ 'Nama', {text: ':', alignment: 'right'}, mahasiswa[i].nama ],
+                    [ 'NIM', {text: ':', alignment: 'right'}, mahasiswa[i].nim ],
+                    [ 'Tempat, tanggal Lahir', {text: ':', alignment: 'right'}, `${mahasiswa[i].tl.toUpperCase()}, ${mahasiswa[i].tgl}` ],
                     [ 'Judul Skripsi', {text: ':', alignment: 'right'}, '' ],
                 ]
             },
@@ -114,7 +115,7 @@ export default function (data) {
                                 { 
                                     text: [
                                         'NILAI ANGKA (0-100): ', 
-                                        { text: nilai, bold: true }
+                                        { text: mahasiswa[i].nilai, bold: true }
                                     ],
                                     margin: [0, 5, 0, 0]
                                 }
@@ -131,7 +132,54 @@ export default function (data) {
                     },
                     margin: [0, 0, 10, 0]
                 },
-                scoreBoard
+                {
+                    width: 180,
+                    table: {
+                        widths: [ '*', 80 ],
+                        body: [
+                            [
+                                { text: 'Skor', fillColor: '#CCCCCC', alignment: 'center' },
+                                { text: 'Nilai', fillColor: '#CCCCCC', alignment: 'center' },
+                            ],
+                            [ 
+                                { text: '≥ 84.6', alignment: 'center' }, 
+                                { text: 'A', alignment: 'center'} 
+                            ],
+                            [ 
+                                { text: '81.6 - 84.5', alignment: 'center' }, 
+                                { text: 'A-', alignment: 'center'} 
+                            ],
+                            [ 
+                                { text: '79.6 - 81.5', alignment: 'center' }, 
+                                { text: 'A/B', alignment: 'center'} 
+                            ],
+                            [ 
+                                { text: '75.6 - 79.5', alignment: 'center' }, 
+                                { text: 'B+', alignment: 'center'} 
+                            ],
+                            [ 
+                                { text: '69.6 - 75.5', alignment: 'center' }, 
+                                { text: 'B', alignment: 'center'} 
+                            ],
+                            [ 
+                                { text: '65.6 - 69.5', alignment: 'center' }, 
+                                { text: 'B-', alignment: 'center'} 
+                            ],
+                            [ 
+                                { text: '59.6 - 65.5', alignment: 'center' }, 
+                                { text: 'B/C', alignment: 'center'} 
+                            ],
+                            [ 
+                                { text: '54.6 - 59.5', alignment: 'center' }, 
+                                { text: 'C', alignment: 'center'} 
+                            ],
+                            [ 
+                                { text: '≤ 54.5', alignment: 'center' }, 
+                                { text: 'D', alignment: 'center'} 
+                            ],
+                        ],
+                    }
+                }
             ]
         },
         {
@@ -149,7 +197,7 @@ export default function (data) {
                     text: [
                         'Mahasiswa yang diuji',
                         '\n\n\n\n',
-                        { text: mahasiswa.nama, bold: true }
+                        { text: mahasiswa[i].nama, bold: true }
                     ]
                 }
             ],
@@ -168,9 +216,16 @@ export default function (data) {
         },
         {
             text: '*). Jika Pembimbing 1 berhalangan hadir, maka Pembimbing 2 bertindak sebagai Ketua Tim Penguji.',
-			pageBreak: 'after'
         }
     )
 
+    return doc
+}
+
+export default function (data, head, sb) {
+    let doc = []
+    data.mahasiswa.forEach((e, i) => {
+        doc.push(...generateObj(data, sb, i))
+    })
     return doc
 }

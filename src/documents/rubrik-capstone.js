@@ -44,7 +44,8 @@ export default function (data) {
                             'yang dilakukan.'
                         ]
                     }
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -71,7 +72,8 @@ export default function (data) {
                             {text: ' tidak tersedia ', decoration: 'underline'},
                         ]
                     }
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -96,14 +98,16 @@ export default function (data) {
                             'secara jelas.'
                         ]
                     },
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
                     'Pemaparan proses desain pada laporan skripsi dilakukan secara terstruktur disertai dengan motivasi kuat yang mendukung proses desain yang diusulkan.',
                     'Di samping itu, tersedia pula analisis yang berkaitan dengan pertimbangan constraint-constraint yang ada saat proses desain tersebut dilakukan.',
                     'Mahasiswa dapat mengkolerasikan yang dilakukan dengan matakuliah teori yang melandasi topik skripsi yang dikerjakan.'
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             }
         ],
         [
@@ -113,7 +117,8 @@ export default function (data) {
                 ul: [
                     'Tidak menjelaskan standar apa pun yang berkaitan dengan tugas akhirnya.',
                     'Atau tugas akhirnya tidak berhubungan dengan engineering design.',
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -126,7 +131,8 @@ export default function (data) {
                             {text: ' terdapat kesalahan fatal ', decoration: 'underline'}
                         ]
                     }
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -136,7 +142,8 @@ export default function (data) {
                             {text: ' sedikit kesalahan fatal ', decoration: 'underline'}
                         ]
                     }
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -148,7 +155,8 @@ export default function (data) {
                             {text: ' tanpa kesalahan atau sedikit kesalahan yang tidak fatal ', decoration: 'underline'}
                         ]
                     }
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             }
         ],
         [
@@ -162,7 +170,8 @@ export default function (data) {
                             {text: ' aspek masyarakat tidak ada ', decoration: 'underline'}
                         ]
                     },
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -174,7 +183,8 @@ export default function (data) {
                             {text: ' sangat minimal atau nyaris tidak ada ', decoration: 'underline'}
                         ]
                     },
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -186,7 +196,8 @@ export default function (data) {
                         ],
                     },
                     'Tidak ada section/subsection terpisah mengenai paparan tersebut'
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -204,7 +215,8 @@ export default function (data) {
                             'di dalam laporan tugas akhir mengenai hal ini.'
                         ]
                     }
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             }
         ],
         [
@@ -217,7 +229,8 @@ export default function (data) {
                         {text: ' mahasiswa tidak menguasai  materi dari tugas akhir ', decoration: 'underline'},
                         'yang dilakukan.'
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -230,7 +243,8 @@ export default function (data) {
                         {text: ' Penguji perlu menggali lebih lanjut informasi ', decoration: 'underline'},
                         'mengenai proses/hasil tugas akhir dengan memanfaatkan forum tanya jawab.'
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
 
             },
             {
@@ -249,7 +263,8 @@ export default function (data) {
                         {text: ' detail mengenai proses tugas akhir implisit ', decoration: 'underline'},
                         'akibat kualitas penyampaian informasi yang kurang sempurna'
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -262,7 +277,8 @@ export default function (data) {
                         {text: ' penguji mendapat gambaran lengkap mengenai seluruh proses tugas akhir ', decoration: 'underline'},
                         'yang dilakukan.'
                     ]},
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             }
         ],
         [
@@ -274,7 +290,8 @@ export default function (data) {
                         'Mahasiswa menjawab pertanyaan dengan',
                         {text: ' memotong pertanyaan penguji. ', decoration: 'underline'}
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -282,7 +299,8 @@ export default function (data) {
                         'Mahasiswa mampu',
                         {text: ' menjawab pertanyaan secara sopan walau keliru atau tidak sesuai dengan teori yang berlaku. ', decoration: 'underline'}
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -290,7 +308,8 @@ export default function (data) {
                         'Mahasiswa',
                         {text: ' menjawab pertanyaan baik dengan beberapa argument yang tidak tepat. ', decoration: 'underline'}
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -298,7 +317,8 @@ export default function (data) {
                         {text: ' Mahasiswa menjawab pertanyaan dengan baik dan menunjukkan aspek kritis dan argument ', decoration: 'underline'},
                         'yang sesuai dengan tanggung jawabnya di skripsi tersebut.'
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             }
         ],
         [
@@ -314,7 +334,8 @@ export default function (data) {
                         'Bagian studi literatur hanya',
                         {text: ' berisikan cuplikan-cuplikan dari makalah-makalah tanpa pembahasan ', decoration: 'underline'}
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -329,7 +350,8 @@ export default function (data) {
                         {text: ' bagian studi literatur di dalam laporan skripsi hanya untuk memenuhi persyaratan format laporan ', decoration: 'underline'},
                         'skripsi saja'
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -344,7 +366,8 @@ export default function (data) {
                         {text: ' antar review pada penelitian yang berbeda tidak cukup jelas ', decoration: 'underline'},
                         'memberi kesan bahwa mahasiswa hanya sekedar mengambil potongan-potongan dari makalah-makalah penelitian yang sudah ada.'
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
             {
                 ul: [
@@ -358,14 +381,15 @@ export default function (data) {
                         {text: ' mampu memberikan prediksi atau gambaran bagaimana arah penelitian di masa mendatang ', decoration: 'underline'},
                         'berkaitan dengan topik yang diteliti'
                     ]}
-                ]
+                ],
+                margin: [0, 0, 0, 10]
             },
         ]
     ]
     let mhsGrade = []
     let averages = []
     mahasiswa.forEach((e, i) => averages.push(
-        { text: 'Mhs ' + (i+1) + ': ' + (e.grade.reduce((total, num) => total + num)/e.grade.length).toFixed(2), margin: [0, 8, 0, 8] }
+        { text: 'Mhs ' + (i+1) + ': ' + (e.grade.reduce((total, num) => total + num)/e.grade.length).toFixed(2), margin: [0, 8, 0, 8], fontSize: 12, bold: true }
     ))
     for (let i = 0; i <= 7 - averages.length; i ++) averages.push('')
     socs.forEach((s, i) => {
@@ -380,7 +404,7 @@ export default function (data) {
         mhsGrade = []
     })
     const doc = [
-        { text: '', pageBreak: 'before', pageOrientation: 'landscape', margin: [0, 0, 0, 50] },
+        { text: '', pageBreak: 'before', pageOrientation: 'landscape', margin: [0, 0, 0, 50], pageSize: 'A4' },
         {
             text: 'Rubrik Penilaian Sidang Skripsi',
             alignment: 'center',
@@ -395,7 +419,7 @@ export default function (data) {
         },
         {
             table: {
-                widths: [70, 70, '*', '*', '*', '*', 30],
+                widths: [70, 100, '*', '*', '*', '*', 30],
                 body: [
                     [
                         {text: 'Student Outcome', fillColor: '#CCCCCC', alignment: 'center', rowSpan: 2, margin: [0, 7, 0, 0]},
@@ -414,12 +438,12 @@ export default function (data) {
                     ], 
                     ...socs,
                     [
-                        {text: 'Total Rerata', margin: [0, 8, 0, 8]},
+                        {text: 'Total Rerata', margin: [0, 10, 0, 8]},
                         ...averages
                     ]
                 ]
             },
-            fontSize: 7.5,
+            fontSize: 7.8,
         },
         { text: 'Keterangan:', margin: [0, 10, 0, 10] },
         {

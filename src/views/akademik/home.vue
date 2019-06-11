@@ -26,17 +26,11 @@
                         <h3 class="mb-2">{{ i == days.length-1 ? day.name : readableDate(day.date) }}</h3>
                         <app-loading></app-loading>
                         <template v-if="!$store.state.loadViewContent">
-                            <v-card flat v-if="day.exams.length > 0" class="mt-3">
-                                <v-layout class="exam-item" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
-                                    <v-layout class="ml-0 mr-0" row justify-space-between align-start>
-                                        <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
-                                        <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
-                                    </v-layout>
-                                    <p class="mb-0"><span :class="isToday(exam.tanggal) ? 'purple--text font-weight-bold' : ''">{{ isToday(exam.tanggal) ? 'Hari ini' : readableDate(exam.tanggal) }}</span> - {{ exam.sesi }} - {{ exam.ruang }}</p>
-                                    <p class="mb-0">Mahasiswa: {{ readableString(exam.skripsi.mahasiswa, 'nama') }}</p>
-                                    <p class="mb-0">Penguji: {{ readableString(exam.penguji, 'dosen') }}</p>
+                            <template v-if="day.exams.length > 0">
+                                <v-layout column v-for="exam in day.exams" :key="exam.id">
+                                    <app-exam-card :item="exam" :type="1"></app-exam-card>
                                 </v-layout>
-                            </v-card>
+                            </template>
                             <p v-else>Tidak ada ujian.</p>
                         </template>
                     </v-tab-item>
@@ -44,9 +38,9 @@
             </v-layout>
         </v-flex>
         <v-flex class="notifications pl-4" hidden-md-and-down lg4>
-            <h3 class="mb-2">Notifikasi</h3>
+            <!-- <h3 class="mb-2">Rekap {{ thisMonth }}</h3> -->
             <v-layout column>
-                <app-home-notification
+                <!-- <app-home-notification
                     v-for="n in notifications"
                     :key="n.id"
                     :id="n.id"
@@ -54,7 +48,7 @@
                     :room="n.room"
                     :text="n.text"
                     :type="n.type">
-                </app-home-notification>
+                </app-home-notification> -->
             </v-layout>
         </v-flex>
     </v-layout>
@@ -122,6 +116,13 @@ export default {
             ],
             todayDate: '',
             activeTab: 0,
+        }
+    },
+
+    computed: {
+        thisMonth() {
+            moment.locale('id')
+            return moment().format('MMMM YYYY')
         }
     },
 
@@ -230,20 +231,6 @@ export default {
 
     .day-active {
         color: white;
-    }
-
-    .exam-item {
-        padding: 8px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px 5px rgba(0, 0, 0, .03);
-        margin-top: 16px;
-        cursor: pointer;
-    }
-
-    .exam-status > .v-chip__content {
-        height: auto;
-        padding-top: 2px;
-        padding-bottom: 2px;
     }
 </style>
 

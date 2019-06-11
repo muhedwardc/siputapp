@@ -1,6 +1,7 @@
 <template>
     <div class="dosen-home">
-        <v-container grid-list-lg class="no-padding">
+        <app-loading></app-loading>
+        <v-container v-if="!$store.state.loadViewContent" grid-list-lg class="no-padding">
             <v-layout row wrap>
                 <v-flex xs12 sm6 column>
                     <h3 class="mb-1">UJIAN HARI INI</h3>
@@ -43,7 +44,7 @@ export default {
     methods: {
         ...mapActions([
             'showSnackbar',
-            'removeCookies'
+            'logUserOut'
         ]),
 
         filterUjian() {
@@ -70,9 +71,8 @@ export default {
                 }
                 this.$store.state.loadViewContent = false
             } catch (error) {
-                const errArr = err.message.split(' ')
-                if (errArr[errArr.length-1] == '401') {
-                    this.removeCookies()
+                if (error.response && error.response.status == 401) {
+                    this.logUserOut()
                     this.$router.replace('/login')
                 } else {
                     this.showSnackbar({

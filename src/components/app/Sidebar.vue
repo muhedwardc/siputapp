@@ -59,7 +59,7 @@ export default {
 				{
 					title: 'Profil',
 					icon: 'person',
-					path: '/dosen/profil'
+					path: '/profil'
 				}
 			],
 			akademikRoutes: [
@@ -75,23 +75,28 @@ export default {
 				},
 				{
 					title: 'Daftar Ujian',
-					icon: 'list',
+					icon: 'today',
 					path: '/ujian'
 				},
 				{
 					title: 'Daftar Pengguna',
-					icon: 'list',
+					icon: 'group',
 					path: '/daftar-pengguna'
 				},
 				{
-					title: 'Daftar Ruangan',
-					icon: 'list',
-					path: '/daftar-ruangan'
+					title: 'Ruang dan Sesi',
+					icon: 'meeting_room',
+					path: '/ruang-sesi'
+				},
+				{
+					title: 'Pengurus',
+					icon: 'account_balance',
+					path: '/pengurus-departemen'
 				},
 				{
 					title: 'Profil',
 					icon: 'person',
-					path: '/akademik/profil'
+					path: '/profil'
 				}
 			]
 		}
@@ -109,14 +114,14 @@ export default {
 
 	methods: {
 		...mapActions([
-			'removeCookies',
+			'logUserOut',
 			'showSnackbar'
 		]),
 
 		async logout() {
 			try {
 				await axios.post('/auth/logout/', {}, this.$store.getters.authHeaders)
-				await this.removeCookies()
+				await this.logUserOut()
 				await this.$router.replace('/login')
 			} catch (error) {
 				this.showSnackbar({

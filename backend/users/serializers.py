@@ -70,3 +70,8 @@ class PasswordSerializer(serializers.Serializer):
         if data['password1'] != data['password2']:
             raise serializers.ValidationError("Password doesn't match!")
         return data
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('nama', 'prodi', 'konsentrasi', 'nip')

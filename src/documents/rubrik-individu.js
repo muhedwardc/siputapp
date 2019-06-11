@@ -2,16 +2,6 @@ import UGMLogo from './partials/ugm-logo'
 import socsHeader from './partials/socs-header';
 import socs from './partials/socs'
 
-const SOs = [
-    {
-        so: 'SO(c): Engineering Design',
-        lo: 'Mampu mengaplikasikan engineering design dengan mempertimbangkan berbagai Batasan nyata',
-        pi: [
-            ['Proses desain tidak dilakukan secara benar apabila ditinjau dari ilmu teori yang berkaitan']
-        ]
-    }
-]
-
 export default function (data) {
     let doc = []
     const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa, nilai } = data

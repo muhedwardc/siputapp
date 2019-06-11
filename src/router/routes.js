@@ -28,13 +28,22 @@ export default [
         component: () => import('@/views/akademik/list/user.vue')
     },
     {
-        path: '/daftar-ruangan',
+        path: '/ruang-sesi',
         name: 'Daftar Ruangan dan Sesi',
         meta: {
             requiresAuth: true,
             akademikRoute: true,
         },
         component: () => import('@/views/akademik/list/room.vue')
+    },
+    {
+        path: '/pengurus-departemen',
+        name: 'Pengurus Departemen',
+        meta: {
+            requiresAuth: true,
+            akademikRoute: true,
+        },
+        component: () => import('@/views/akademik/principal.vue')
     },
     {
         path: '/dosen',
@@ -46,13 +55,14 @@ export default [
         component: () => import('@/views/dosen/home.vue')
     },
     {
-        path: '/dosen/profil',
+        path: '/profil',
         name: 'Profil Dosen',
         meta: {
             requiresAuth: true,
             dosenRoute: true,
+            akademikRoute: true
         },
-        component: () => import('@/views/dosen/profil.vue')
+        component: () => import('@/views/profile.vue')
     },
     {
         path: '/dosen/ujian',
@@ -101,26 +111,26 @@ export default [
         },
         component: () => import('@/views/exam/start.vue')
     },
-    {
-        path: '/playground',
-        name: 'Playground',
-        meta: {
-            requiresAuth: true,
-            dosenRoute: true,
-            akademikRoute: true
-        },
-        component: () => import('@/views/playground/index.vue')
-    },
-    {
-        path: '/ujian/:id/dokumen-pendadaran',
-        name: 'Dokumen Pendadaran',
-        meta: {
-            exam: true,
-            isDocument: true,
-            requiresAuth: true,
-        },
-        component: () => import('@/views/playground/document.vue')
-    },
+    // {
+    //     path: '/playground',
+    //     name: 'Playground',
+    //     meta: {
+    //         requiresAuth: true,
+    //         dosenRoute: true,
+    //         akademikRoute: true
+    //     },
+    //     component: () => import('@/views/playground/index.vue')
+    // },
+    // {
+    //     path: '/ujian/:id/dokumen-pendadaran',
+    //     name: 'Dokumen Pendadaran',
+    //     meta: {
+    //         exam: true,
+    //         isDocument: true,
+    //         requiresAuth: true,
+    //     },
+    //     component: () => import('@/views/playground/document.vue')
+    // },
     {
         path: '*',
         name: '404 Page Not Found',
