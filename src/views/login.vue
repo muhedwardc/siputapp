@@ -3,7 +3,7 @@
         <v-flex hidden-sm-and-down md7 class="banner">
             <v-layout column class="welcome" pa-4>
                 <h2>Selamat datang!</h2>
-                <h3 class="font-weight-light">Silahkan masuk mengggunakan akun UGM Anda</h3>
+                <h3 class="font-weight-light">Silahkan masuk menggunakan akun UGM Anda</h3>
             </v-layout>
         </v-flex>
         <v-flex sm12 md5>
@@ -11,7 +11,7 @@
                 <v-layout align-center>
                     <v-layout column>
                         <h2 class="mb-4">Login to App</h2>
-                        <v-btn id="google-btn" class="mt-4 font-weight-light" round color="primary" :loading="isSubmitting" :disabled="isSubmitting">Masuk dengan Google</v-btn>
+                        <app-google-auth></app-google-auth>
                         <span v-if="error" class="error--text text-xs-center" v-text="message"></span>
                     </v-layout>
                 </v-layout>
@@ -19,79 +19,6 @@
         </v-flex>
     </v-layout>
 </template>
-
-<script>
-import { mapActions } from 'vuex'
-
-export default {
-    data() {
-        return {
-            valid: true,
-            email: '',
-            password: '',
-            message: '',
-            error: false,
-            isSubmitting: false
-        }
-    },
-    
-    mounted () {
-        this.loadGapi()
-    },
-
-    methods: {
-        ...mapActions([
-            'logUserIn',
-            'logUserOut',
-            'showSnackbar'
-        ]),
-
-        validate() {
-            return this.$refs.form.validate()
-        },
-
-        async loadGapi() {
-            this.error = false
-            try {
-                await window.gapi
-                window.gapi.load('auth2', () => {
-                    const auth2 = window.gapi.auth2.init({
-                        client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-                        cookiepolicy: 'single_host_origin'
-                    })
-
-                    auth2.attachClickHandler(document.getElementById('google-btn'), {},
-                        (googleUser) => {
-                            const token = googleUser.getAuthResponse().id_token
-                            this.googleLogin(token)
-                        }
-                    )
-                })
-            } catch (error) {
-                this.error = true
-                this.message = 'Terjadi kesalahan koneksi ke server, harap coba lagi atau muat ulang halaman'
-                console.log(error)
-                this.showSnackbar(error)
-            }
-        },
-
-        async googleLogin(token) {
-            this.isSubmitting = true
-            try {
-                const res = await axios.post('/auth/login-google/', {token})
-                await this.logUserIn(res.data)
-                this.isSubmitting = false
-                this.$router.push('/')
-            } catch (error) {
-                this.isSubmitting = false
-                this.message = error.message
-                this.logUserOut()
-                this.showSnackbar(error.message)
-            }
-        }
-    }
-}
-</script>
 
 <style lang="scss">
     .banner {
@@ -125,6 +52,7 @@ export default {
         height: 100%;
         padding-left: 10%;
         padding-right: 10%;
+        background-color: #f0f0f0;
 
         > div {
             height: 100%;
