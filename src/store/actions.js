@@ -16,6 +16,9 @@ const actions = {
     },
     updateUser({commit}, payload) {
         commit('updateUser', payload)
+    },
+    setAuthInstance({commit}, payload) {
+        commit('setAuthInstance', payload)
     }
 }
 

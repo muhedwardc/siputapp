@@ -4,7 +4,9 @@ const userToken = Cookies.getJSON('_tkn')
 const state = {
     auth: {
         token: userToken || null,
-        user: userData || null
+        user: userData || null,
+        google: null,
+        isSignIn: null
     },
     snackbar: {
         show: false,

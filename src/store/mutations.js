@@ -24,7 +24,7 @@ const mutations = {
     async logUserOut(state) {
         state.auth.token = null
         state.auth.user = null
-        await gapi.auth2.getAuthInstance().disconnect()
+        state.auth.google ? await state.auth.google.signOut() : null
         await Object.keys(Cookies.get()).forEach(function(cookieName) {
             Cookies.remove(cookieName)
         })
@@ -32,6 +32,11 @@ const mutations = {
     updateUser(state, payload) {
         state.auth.user = { ...state.auth.user, ...payload }
         Cookies.set('_usr', state.auth.user)
+    },
+    setAuthInstance(state, authInstance) {
+        state.auth.google = authInstance
+        state.auth.isSignIn = authInstance.isSignedIn.get()
+        authInstance.isSignedIn.listen(() => state.auth.isSignIn = state.auth.google.isSignedIn.get())
     }
 }
 
