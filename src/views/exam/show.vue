@@ -318,6 +318,8 @@
                                     <td>{{ props.item.nim }}</td>
                                     <td>{{ props.item.prodi }}</td>
                                     <td>{{ props.item.konsentrasi }}</td>
+                                    <td>{{ props.item.tempat_lahir + ', ' + readableDate(props.item.tanggal_lahir)}}</td>
+                                    <td>{{ props.item.telepon }}</td>
                                 </template>
                             </v-data-table>
                         </v-layout>
@@ -395,6 +397,16 @@ export default {
                     sortable: false,
                     value: 'konsentrasi'
                 },
+                {
+                    text: 'TTL',
+                    sortable: false,
+                    value: 'tempat_lahir'
+                },
+                {
+                    text: 'Telepon',
+                    sortable: false,
+                    value: 'telepon'
+                },
             ],
             dosenHeaders: [
                 {
@@ -450,6 +462,12 @@ export default {
                 : type == 'mahasiswa' ? changed = JSON.stringify(value).trim() && JSON.stringify(value).trim() != JSON.stringify(this.exam.skripsi.mahasiswa)
                 : changed = oldValue && oldValue != value
             return changed
+        },
+        readableDate() {
+            return function (date) {
+                moment.locale('id')
+                return moment(date, 'DD/MM/YYYY').format('LL')
+            }
         }
     },
 
@@ -527,7 +545,6 @@ export default {
     
                 this.pdfDocGenerator = pdfMake.createPdf(docDefinition);
                 if (type == 'open') {
-                    // this.pdfDocGenerator.open()
                     pdfMake.createPdf(docDefinition).open({}, window)
                     this.generating = false
                 } else if (type == 'print') {
@@ -535,10 +552,6 @@ export default {
                 } else {
                     this.pdfDocGenerator.download()
                 }
-                // this.pdfDocGenerator.getDataUrl((dataUrl) => {
-                //     this.src = dataUrl;
-                //     this.generating = false
-                // })
             }
         },
 

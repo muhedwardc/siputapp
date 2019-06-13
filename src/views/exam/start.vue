@@ -108,20 +108,22 @@
                         <v-form v-model="validGrades">
                         <table class="mt-2 grade-list">
                             <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
-                                <tr :key="mahasiswa.nim">
-                                    <td v-text="mahasiswa.nama" colspan="2"></td>
-                                </tr>
-                                <tr :key="mahasiswa.nim">
-                                    <td><v-text-field :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
-                                    <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
-                                </tr>
+                                <div :key="mahasiswa.nim">
+                                    <tr>
+                                        <td v-text="mahasiswa.nama" colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><v-text-field :disabled="saving" :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
+                                        <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
+                                    </tr>
+                                </div>
                             </template>
                         </table>
                         </v-form>
                         <v-layout>
                             <v-spacer></v-spacer>
-                            <v-btn class="error" @click="discardGrades">Batal</v-btn>
-                            <v-btn class="success" @click="saveGrades">simpan</v-btn>
+                            <v-btn class="error" @click="discardGrades" :disabled="saving">Batal</v-btn>
+                            <v-btn class="success" @click="saveGrades" :loading="saving">simpan</v-btn>
                         </v-layout>
                     </v-layout>
                     <b class="mt-2">Indikator Penilaian</b>
@@ -378,6 +380,7 @@ export default {
         },
 
         addGrades(index) {
+            this.validGrades = true
             let grades = []
             this.grades.forEach((mhs,i) => mhs.grades[index] && mhs.grades[index].nilai ? grades.splice(i, 1, mhs.grades[index].nilai) : null)
             this.addingGrade = true
@@ -414,16 +417,33 @@ export default {
             return filled
         },
 
-        saveGrades() {
+        async saveGrades() {
             const { so, grades } = this.gradeTemp
+            this.saving = true
+            let tempGrades = JSON.parse(JSON.stringify(this.grades))
             this.exam.ujian.skripsi.mahasiswa.forEach((mahasiswa, i) => {
-                this.grades[i].grades.splice(so, 1, {so, nilai: grades[i]})
+                tempGrades[i].grades.splice(so, 1, {so, nilai: grades[i]})
             })
+            try {
+                const response = await axios.post(`/me/exams/${this.$router.currentRoute.params.id}/grades/`, tempGrades, this.$store.getters.authHeaders)
+                console.log(response)
+                this.grades.push.apply(this.grades, tempGrades);
+                this.saving = false
+            } catch (error) {
+                this.showSnackbar(error)
+                this.saving = false
+            }
             this.discardGrades()
         },
 
         generateGrades() {
-            this.exam.ujian.skripsi.mahasiswa.forEach(mahasiswa => this.grades.push({mahasiswa, grades: new Array(this.socs.length).fill(null)}))
+            let grades = this.exam.ujian.skripsi.mahasiswa.map(({ id }) => {
+                return {
+                    mahasiswa: id,
+                    grades: Array.from(Array(this.socs.length), (_, index) => {return {so: index, nilai: null}})
+                }
+            })
+            this.grades = grades
         },
 
         async fetchExam() {
