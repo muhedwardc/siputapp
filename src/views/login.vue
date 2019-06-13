@@ -12,7 +12,6 @@
                     <v-layout column>
                         <h2 class="mb-4">Login to App</h2>
                         <app-google-auth></app-google-auth>
-                        <span v-if="error" class="error--text text-xs-center" v-text="message"></span>
                     </v-layout>
                 </v-layout>
             </v-container>
