@@ -69,9 +69,10 @@ export default {
                 this.submitting = false
                 this.$router.push('/')
             } catch (error) {
+                const res = error.response
                 this.submitting = false
                 this.$store.dispatch('logUserOut')
-                this.$store.dispatch('showSnackbar', error.message ? error.message : 'Terjadi kesalahan dalam proses autentikasi')
+                this.message = res.status == 404 ? res.data.message : 'Terjadi kesalahan dalam proses autentikasi'
             }
         }
     }
