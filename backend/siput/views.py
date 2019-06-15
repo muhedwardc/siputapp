@@ -161,7 +161,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             return Response(response, status=201)
 
     @action(methods=['POST'], detail=True)
-    def add_revision(self, request, *args, **kwargs):
+    def revision(self, request, *args, **kwargs):
         response = {"status": "Gagal"}
         json_data = request.data
         if self.get_object().is_leader == False:
@@ -181,6 +181,36 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         response['status'] = "Sukses"
         response['result'] = json_data
         return Response(response, status=201)
+    
+    @revision.mapping.put
+    def edit_revision(self, request, *args, **kargs):
+        response = {"status": "Gagal"}
+        json_data = request.data
+        if self.get_object().is_leader == False:
+            return Response({
+                "message": "Anda tidak memiliki authoritas untuk menambah revisi judul."
+            }, status=403)
+    
+        skripsi = self.get_object().ujian.skripsi
+        try:
+            revisi = TitleRevision.objects.get(skripsi=skripsi)
+        except TitleRevision.DoesNotExist:
+            return Response({
+                "message": "Belum ada revisi judul untuk skripsi: %s" % skripsi.judul
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        if json_data.get('revisi') == False:
+            revisi.delete()
+            return Response({
+                "message": "revisi judul berhasil dihapus."
+            }, status=status.HTTP_204_NO_CONTENT)
+        else:
+            revisi.revisi = json_data.get('revisi')
+            revisi.save()
+            response['status'] = "Sukses"
+            response['result'] = json_data
+            return Response(response, status=status.HTTP_200_OK)
+        
         
     @action(detail=True)
     def recap(self, request, *args, **kwargs):
