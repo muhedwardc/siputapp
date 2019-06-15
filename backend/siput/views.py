@@ -1,11 +1,15 @@
 import json
 
+from django.db.models import Avg, Count, Min, Sum
+from django.db.models import FloatField
+
 from rest_framework import viewsets, mixins, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .serializers import SiputPengujiSerializer, ListSiputPengujiSerializer
 from backend.essays.serializers import EssaySerializer, StudentSerializer
+from backend.exams.serializers import RecapExamSerializer
 from backend.comments.serializers import CommentSerializer, CreateCommentSerializer
 from backend.grades.serializers import GradeSerializer, CreateGradeSerializer
 from backend.users.serializers import ProfileSerializer
@@ -178,6 +182,44 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         response['result'] = json_data
         return Response(response, status=201)
         
+    @action(detail=True)
+    def recap(self, request, *args, **kwargs):
+        response = {"Status": "Gagal"}
+        ujian = self.get_object().ujian
+        students = self.get_object().ujian.skripsi.students.all()
+        grades = []
+        for student in students:
+            grade = {
+                "mahasiswa": student.nama,
+                "nilai": []
+            }
+            for penguji in ujian.penguji.all():
+                grade['nilai'].append({
+                    "penguji": penguji.dosen.nama,
+                    "rerata": penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
+                })
+            grades.append(grade)
+
+        comments = []
+        for bab in range(0, 7):
+            comment = {
+                "bab": bab,
+                "komentar": []
+            }
+            for penguji in ujian.penguji.all():
+                for komentar in penguji.comments.filter(bab=bab):
+                    comment['komentar'].append({
+                        "penguji": penguji.dosen.nama,
+                        "komentar": komentar.komentar
+                    })
+            comments.append(comment)
+
+        return Response({
+            "message": "Sukses",
+            "ujian": RecapExamSerializer(ujian).data,
+            "nilai": grades,
+            "komentar": comments
+        }, status=200)
 
 class SiputProfileViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
