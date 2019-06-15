@@ -114,4 +114,4 @@ class LoginGoogle(views.APIView):
             except User.DoesNotExist:
                 return Response({
                     "message": "Pengguna dengan email {} tidak terdaftar".format(email)
-                }, status=status.HTTP_200_OK)
+                }, status=status.HTTP_404_NOT_FOUND)

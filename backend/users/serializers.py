@@ -25,7 +25,6 @@ class RegisterUserSerializer(serializers.Serializer):
     prodi = serializers.CharField(required=False, allow_null=True)
     konsentrasi = serializers.CharField(required=False, allow_null=True)
     nip = serializers.CharField()
-    password = serializers.CharField(write_only=True)
 
     def create(self, validated_data):
         if validated_data['is_admin']:
@@ -33,7 +32,6 @@ class RegisterUserSerializer(serializers.Serializer):
                 nama=validated_data['nama'],
                 email=validated_data['email'],
                 nip=validated_data['nip'],
-                password=validated_data['password']
             )
             # user.prodi = validated_data['prodi']
             # user.konsentrasi = validated_data['konsentrasi']
@@ -43,7 +41,6 @@ class RegisterUserSerializer(serializers.Serializer):
                 nama=validated_data['nama'],
                 email=validated_data['email'],
                 nip=validated_data['nip'],
-                password=validated_data['password']
             )
             user.prodi = validated_data['prodi']
             user.konsentrasi = validated_data['konsentrasi']
