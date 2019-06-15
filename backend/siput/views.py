@@ -184,8 +184,10 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         
     @action(detail=True)
     def recap(self, request, *args, **kwargs):
-        response = {"Status": "Gagal"}
+        response = dict()
         ujian = self.get_object().ujian
+        response.update({'ujian': RecapExamSerializer(ujian).data})
+
         students = self.get_object().ujian.skripsi.students.all()
         grades = []
         for student in students:
@@ -199,6 +201,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                     "rerata": penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
                 })
             grades.append(grade)
+        response.update({'nilai': grades})
 
         comments = []
         for bab in range(0, 7):
@@ -213,13 +216,13 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                         "komentar": komentar.komentar
                     })
             comments.append(comment)
+        response.update({'komentar': comments})
 
-        return Response({
-            "message": "Sukses",
-            "ujian": RecapExamSerializer(ujian).data,
-            "nilai": grades,
-            "komentar": comments
-        }, status=200)
+        if hasattr(ujian.skripsi, 'revision'):
+            revisi = ujian.skripsi.revision
+            response.update({'revisi': revisi.revisi})
+
+        return Response(response, status=200)
 
 class SiputProfileViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
