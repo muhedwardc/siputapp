@@ -50,6 +50,7 @@ export default {
     methods: {
         async signInWithGoogle() {
             this.message = ''
+            if (this.googleAuth) this.googleAuth.disconnect()
             try {
                 this.googleAuth.signIn().then(() => {
                     const token = this.googleAuth.currentUser.get().getAuthResponse().id_token
