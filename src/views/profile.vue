@@ -1,5 +1,5 @@
 <template>
-    <v-layout justify-center row>
+    <v-layout justify-center row v-if="user">
         <v-layout column class="profile-wrap">
             <v-form v-model="valid" ref="edit-profile">
             <v-layout row wrap align-center class="mb-3">
