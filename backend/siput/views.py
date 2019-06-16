@@ -226,9 +226,10 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                 "nilai": []
             }
             for penguji in ujian.penguji.all():
+                nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
                 grade['nilai'].append({
                     "penguji": penguji.dosen.nama,
-                    "rerata": penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
+                    "rerata": nilai.get('rerata', 0)
                 })
             grades.append(grade)
         response.update({'nilai': grades})
