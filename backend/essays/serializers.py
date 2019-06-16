@@ -27,8 +27,8 @@ class SimpleEssaySerializer(serializers.ModelSerializer):
         fields = ('judul', 'mahasiswa', 'is_capstone')
 
 class EssaySerializer(serializers.ModelSerializer):
-    pembimbing_satu = serializers.StringRelatedField()
-    pembimbing_dua = serializers.StringRelatedField()
+    # pembimbing_satu = serializers.StringRelatedField()
+    # pembimbing_dua = serializers.StringRelatedField()
     mahasiswa = ListStudentSerializer(many=True, source='students')
 
     class Meta:
