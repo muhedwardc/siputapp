@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser, FileUploadParser
 
-from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer, UploadEssaySerializer
+from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer, UploadEssaySerializer, EditExamSerializer
 from backend.grades.serializers import RecapGradeSerializer
 from .models import Exam, Penguji, Room, Session
 from backend.pagination import CustomPagination
@@ -86,7 +86,19 @@ class ExamViewSet(viewsets.ModelViewSet):
             "file": file_url
         }, status=status.HTTP_201_CREATED)
 
-    def update(self, request, *args, **kwargs):
+    @action(methods=['PUT'], detail=True)
+    def edit_exam(self, request, *args, **kwargs):
+        exam = self.get_object()
+        serializer = EditExamSerializer(exam, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Data ujian berhasil diubah.",
+                "ujian": ExamSerializer(exam).data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def edit_essay(self, request, *args, **kwargs):
         pass
 
     @action(detail=True)

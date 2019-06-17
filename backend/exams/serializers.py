@@ -129,6 +129,12 @@ class CreateExamSerializer(serializers.ModelSerializer):
             )
         
         return new_ujian
+
+class EditExamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exam
+        fields = ('tanggal', 'sesi', 'ruang')
+
 class RecapExamSerializer(serializers.ModelSerializer):
     sesi = serializers.StringRelatedField()
     ruang = serializers.StringRelatedField()
