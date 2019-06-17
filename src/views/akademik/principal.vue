@@ -43,7 +43,7 @@ export default {
         async fetchUser() {
             this.loading = true
             try {
-                const response = await axios.get('/users/', this.$store.getters.authHeaders)
+                const response = await this.$thesa.getAllUsers()
                 this.getDosen(response.data.results)
                 this.loading = false
             } catch (error) {

@@ -105,9 +105,9 @@ export default {
 
         async fetchExams() {
             try {
-                const r = await axios.get('/me/exams/', this.$store.getters.authHeaders)
+                const r = await this.$thesa.getMyExams()
                 this.exams.push.apply(this.exams, r.data.results)
-                const history = await axios.get('/me/exams/history/', this.$store.getters.authHeaders)
+                const history = await this.$thesa.getMyExamsHistory()
                 this.exams.push.apply(this.exams, history.data.results)
             } catch (error) {
                 this.exams = []

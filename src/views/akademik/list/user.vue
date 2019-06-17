@@ -57,12 +57,6 @@
                                         ></v-select>
                                 </v-flex>
                             </template>
-                            <v-flex xs12>
-                                <v-text-field :disabled="creating" v-model="editedItem.password" label="Password" type="password"></v-text-field>
-                            </v-flex>
-                            <v-flex xs12>
-                                <v-text-field :disabled="creating" v-model="editedItem.confirmPassword" :error-messages="matchPassword()" label="Konfirmasi Password" type="password"></v-text-field>
-                            </v-flex>
                             </v-layout>
                             </v-form>
                         </v-container>
@@ -186,8 +180,6 @@ export default {
                 email: '',
                 role: '',
                 nip: '',
-                password: '',
-                confirmPassword: ''
             },
             defaultItem: {
                 name: '',
@@ -196,8 +188,6 @@ export default {
                 konsentrasi: '',
                 role: '',
                 nip: '',
-                password: '',
-                confirmPassword: ''
             },
             perPage: [ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ],
             deleting: false
@@ -231,7 +221,7 @@ export default {
         async initialize () {
             this.loading = true
             try {
-                const response = await axios.get('/users/', this.$store.getters.authHeaders)
+                const response = await this.$thesa.getAllUsers()
                 this.users = response.data.results
                 this.loading = false
             } catch (error) {
@@ -241,10 +231,6 @@ export default {
                 })
                 this.loading = false
             }
-        },
-
-        matchPassword () {
-            return (this.editedItem.password == this.editedItem.confirmPassword) ? '' : 'Password doesn\'t match'
         },
 
         showDeleteDialog(item) {
@@ -257,14 +243,12 @@ export default {
 
         editItem (props) {
             this.dialog = true
-            const { nama, prodi, konsentrasi, email, is_admin, nip, password, confirmPassword } = props.item
+            const { nama, prodi, konsentrasi, email, is_admin, nip } = props.item
             this.editedItem = {
                 name: nama,
                 email,
                 role: is_admin ? 'Akademik' : 'Dosen',
-                nip,
-                password,
-                confirmPassword
+                nip
             }
 
             if (!is_admin) {
@@ -276,7 +260,7 @@ export default {
         async deleteUser () {
             if (this.deleteItem.id) {
                 try {
-                    await axios.delete(`/users/${this.deleteItem.id}/`, this.$store.getters.authHeaders)
+                    await this.$thesa.deleteUser(this.deleteItem.id)
                     this.deleteItem.show = false
                     this.showSnackbar({
                         message: 'Berhasil menghapus dosen',
@@ -303,11 +287,10 @@ export default {
         save () {
             const valid = this.$refs.form.validate()
             if (valid) {
-                const { name, email, role, prodi, nip, konsentrasi, password } = this.editedItem
+                const { name, email, role, prodi, nip, konsentrasi } = this.editedItem
                 let user = {
                     nama: name,
                     email,
-                    password,
                     nip,
                 }
                 if (role == this.roles[0]) {
@@ -322,13 +305,14 @@ export default {
         async postUserData(role, user) {
             this.creating = true
             try {
-                const response = await axios.post(`/users/${role.toLowerCase()}/`, user, this.$store.getters.authHeaders)
+                const response = await this.$thesa.createNewUser(role, user)
                 this.users.push(response.data.users)
                 this.showSnackbar({
                     message: response.data.message,
                     type: 'success'
                 })
                 this.creating = false
+                this.valid = true
                 this.close()
             } catch (error) {
                 this.showSnackbar(error)

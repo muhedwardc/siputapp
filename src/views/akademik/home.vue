@@ -183,7 +183,7 @@ export default {
             const startDate = moment(startOfWeek).format('YYYY-MM-DD')
             const endDate = moment(startOfWeek).add(2, 'week').format('YYYY-MM-DD')
             try {
-                const response = await axios.get(`/exams/?mulai=${startDate}&selesai=${endDate}`, this.$store.getters.authHeaders)
+                const response = await this.$thesa.getExamsBetweenDate(startDate, endDate)
                 this.classifyExamsByDate(response.data.results)
                 this.$store.state.loadViewContent = false
             } catch (error) {

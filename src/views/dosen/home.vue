@@ -58,7 +58,7 @@ export default {
         async getExams() {
             this.$store.state.loadViewContent = true
             try {
-                const response = await axios.get('/me/exams/', this.$store.getters.authHeaders)
+                const response = await this.$thesa.getMyExams()
                 this.exams = response.data.results
                 this.exams.length > 0 ? this.filterUjian() : null
                 const message = this.todayExams.length > 0 ? 'Hari ini ada ' + this.todayExams.length + ' ujian' : 'Hari ini tidak ada ujian'

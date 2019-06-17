@@ -50,6 +50,7 @@ export default {
     methods: {
         async signInWithGoogle() {
             this.message = ''
+            if (this.googleAuth) this.googleAuth.disconnect()
             try {
                 this.googleAuth.signIn().then(() => {
                     const token = this.googleAuth.currentUser.get().getAuthResponse().id_token
@@ -64,14 +65,15 @@ export default {
             this.message = ''
             this.submitting = true
             try {
-                const res = await axios.post('/auth/login-google/', {token: id_token})
+                const res = await this.$thesa.login(id_token)
                 this.$store.dispatch('logUserIn', res.data)
                 this.submitting = false
                 this.$router.push('/')
             } catch (error) {
+                const res = error.response
                 this.submitting = false
                 this.$store.dispatch('logUserOut')
-                this.$store.dispatch('showSnackbar', error.message ? error.message : 'Terjadi kesalahan dalam proses autentikasi')
+                this.message = res.status == 404 ? res.data.message : 'Terjadi kesalahan dalam proses autentikasi'
             }
         }
     }

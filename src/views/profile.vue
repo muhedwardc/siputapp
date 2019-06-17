@@ -1,5 +1,5 @@
 <template>
-    <v-layout justify-center row>
+    <v-layout justify-center row v-if="user">
         <v-layout column class="profile-wrap">
             <v-form v-model="valid" ref="edit-profile">
             <v-layout row wrap align-center class="mb-3">
@@ -115,7 +115,7 @@ export default {
             if (this.valid) {
                 this.loading = true
                 try {
-                    const res = await axios.put('/me/profile/', this.user, this.$store.getters.authHeaders)
+                    const res = await this.$thesa.updateMyProfile(this.user)
                     this.loading = false
                     this.$store.dispatch('updateUser', res.data.user)
                     this.$store.dispatch('showSnackbar', {message: 'Berhasil mengubah profil', type: 'success'})

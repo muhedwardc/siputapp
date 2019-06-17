@@ -103,8 +103,8 @@
                 </template>
                 <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
                     <v-layout column>
-                        <b>{{ socs[gradeTemp.so].name }}</b>
-                        <p class="mb-1">{{ socs[gradeTemp.so].description }}</p>
+                        <b>{{ socs[gradeTemp.so_id].name }}</b>
+                        <p class="mb-1">{{ socs[gradeTemp.so_id].description }}</p>
                         <v-form v-model="validGrades">
                         <table class="mt-2 grade-list">
                             <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
@@ -137,24 +137,25 @@
             </v-layout>
             <v-layout column v-if="step == 2" class="pa-4">
                 <h3>Apakah ada revisi judul?</h3>
-                <v-radio-group v-model="hasRevision" :mandatory="false">
+                <v-radio-group v-model="revisionTemp.revisi" :mandatory="false">
                     <v-radio color="primary" label="Tidak Ada" :value="false"></v-radio>
                     <v-radio color="primary" label="Ada" :value="true"></v-radio>
                 </v-radio-group>
-                <template v-if="hasRevision">
+                <template v-if="revisionTemp.revisi">
                     <p>Masukkan revisi judul</p>
-                    <v-textarea box label="revisi judul" v-model="revision"></v-textarea>
+                    <v-textarea box label="revisi judul" v-model="revisionTemp.konten"></v-textarea>
                 </template>
                 <v-layout>
                     <v-spacer></v-spacer>
-                    <v-btn class="primary ma-0">simpan revisi</v-btn>
+                    <v-btn class="default ma-0 mr-2" :disabled="saving" v-if="revisionHasChanged" @click="resetRevision">hapus perubahan</v-btn>
+                    <v-btn class="success ma-0" :loading="saving" @click="addRevision" v-if="revisionHasChanged">simpan revisi</v-btn>
                 </v-layout>
             </v-layout>
             <v-layout row class="pr-4">
                 <v-spacer></v-spacer>
                 <v-btn v-if="!creating && !addingGrade && step !== 0" color="primary" class="ma-0 ml-2" @click="step = 0">Komentar</v-btn>
                 <v-btn v-if="!creating && !addingGrade && step !== 1" color="primary" class="ma-0 ml-2" @click="step = 1">Penilaian</v-btn>
-                <v-btn v-if="!creating && !addingGrade && step !== 2" color="primary" class="ma-0 ml-2" @click="step = 2">Revisi Judul</v-btn>
+                <v-btn v-if="!creating && !addingGrade && step !== 2 && isLeader" color="primary" class="ma-0 ml-2" @click="step = 2">Revisi Judul</v-btn>
                 <v-btn v-if="!creating && !addingGrade" color="primary" class="ma-0 ml-2" @click="fetchRecap">Rekap</v-btn>
             </v-layout>
         </v-navigation-drawer>
@@ -174,9 +175,9 @@
             </v-card>
         </v-dialog>
         <v-content id="exam-content">
-            <!-- <embed :src="'https://drive.google.com/viewerng/viewer?embedded=true&url=' + exam.ujian.skripsi.naskah" id="exam-content-view"> -->
-            <embed :src="'https://drive.google.com/viewerng/viewer?embedded=true&url=https://www.otago.ac.nz/library/pdf/Google_searching.pdf'" id="exam-content-view">
-            <!-- <iframe :src="this.exam.ujian.skripsi.naskah" id="exam-content-view"></iframe> -->
+            <embed :src="'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'" id="exam-content-view">
+            <!-- <embed :src="'https://drive.google.com/viewerng/viewer?embedded=true&url=https://www.otago.ac.nz/library/pdf/Google_searching.pdf'" id="exam-content-view"> -->
+            <!-- <iframe :src="this.exam.ujian.skripsi.naskah.replace('/media/', '/uploads/')" id="exam-content-view"></iframe> -->
             <v-layout v-if="!drawer" row class="toggle-button">
                 <v-btn @click="toggleCorrectionSection()" class="pa-2 flat primary text-capitalize">
                     Tambah Komentar
@@ -191,7 +192,7 @@
                 <v-toolbar-title>Rekap</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-toolbar-items>
-                    <v-btn flat>
+                    <v-btn flat @click="syncRecap">
                         <v-icon left :class="{rotating: sync}">sync</v-icon>
                         <span class="text-capitalize">Sinkronkan Rekap</span>
                     </v-btn>
@@ -202,7 +203,7 @@
                     <h3>Intro</h3>
                     <p class="mb-4">Rekap ujian tugas akhir yang berjudul <b>{{exam.ujian.skripsi.judul}}</b> pada <b>{{ today }}</b> di <b>{{ room }}</b> dengan mahasiswa <b>{{ mahasiswa }}</b>.</p>
                     <h3>Rekap Penilaian</h3>
-                    <v-layout style="overflow-x: scroll">
+                    <!-- <v-layout style="overflow-x: scroll">
                         <table class="recap-table">
                             <tr class="text-xs-center">
                                 <td rowspan="2">Dosen</td>
@@ -230,7 +231,7 @@
                                 <td>89</td>
                             </tr>
                         </table>
-                    </v-layout>
+                    </v-layout> -->
                     <h3 class="mt-4">Rekap Komentar</h3>
                     <table class="recap-table">
 
@@ -252,9 +253,16 @@ export default {
             sync: false,
             selectedSO: 0,
             hasRevision: false,
-            revision: '',
+            revisionTemp: {
+                revisi: false,
+                konten: null
+            },
+            revision: {
+                revisi: false,
+                konten: null
+            },
             gradeTemp: {
-                so: 0,
+                so_id: 0,
                 grades: []
             },
             grades: [],
@@ -311,8 +319,16 @@ export default {
     },
 
     computed: {
+        isLeader() {
+            return this.$store.state.auth.user.nama == this.exam.ujian.skripsi.pembimbing_satu
+        },
+
         mobileAndShow() {
             return Number(this.windowWidth <= 1000) && this.drawer
+        },
+
+        revisionHasChanged() {
+            return this.revision.revisi !== this.revisionTemp.revisi || this.revision.konten !== this.revisionTemp.konten
         },
 
         title() {
@@ -366,10 +382,23 @@ export default {
     methods: {
         ...mapActions(['showSnackbar']),
 
+        async syncRecap() {
+            this.sync = true
+            try {
+                const response = await this.$thesa.getExamRecap(this.$router.currentRoute.params.id)
+                this.recap = response.data
+                this.sync = false
+                console.log(this.recap)
+            } catch (error) {
+                this.showSnackbar(error)
+                this.sync = false
+            }
+        },
+
         async fetchRecap() {
             this.showRecap = true
             try {
-                this.recap = {}
+                await this.syncRecap()
             } catch (error) {
                 this.showSnackbar(error)
             }
@@ -385,7 +414,7 @@ export default {
             this.grades.forEach((mhs,i) => mhs.grades[index] && mhs.grades[index].nilai ? grades.splice(i, 1, mhs.grades[index].nilai) : null)
             this.addingGrade = true
             this.gradeTemp = {
-                so: index,
+                so_id: index,
                 grades
             }
         },
@@ -393,7 +422,7 @@ export default {
         discardGrades() {
             this.addingGrade = false
             this.gradeTemp = {
-                so: 0,
+                so_id: 0,
                 grades: []
             }
             this.validGrades = true
@@ -418,16 +447,15 @@ export default {
         },
 
         async saveGrades() {
-            const { so, grades } = this.gradeTemp
+            const { so_id, grades } = this.gradeTemp
             this.saving = true
             let tempGrades = JSON.parse(JSON.stringify(this.grades))
             this.exam.ujian.skripsi.mahasiswa.forEach((mahasiswa, i) => {
-                tempGrades[i].grades.splice(so, 1, {so, nilai: grades[i]})
+                tempGrades[i].grades.splice(so_id, 1, {so_id, nilai: grades[i]})
             })
             try {
-                const response = await axios.post(`/me/exams/${this.$router.currentRoute.params.id}/grades/`, tempGrades, this.$store.getters.authHeaders)
-                console.log(response)
-                this.grades.push.apply(this.grades, tempGrades);
+                const response = await this.$thesa.getExamGrades(this.$router.currentRoute.params.id)
+                this.grades = response.data.result
                 this.saving = false
             } catch (error) {
                 this.showSnackbar(error)
@@ -440,7 +468,7 @@ export default {
             let grades = this.exam.ujian.skripsi.mahasiswa.map(({ id }) => {
                 return {
                     mahasiswa: id,
-                    grades: Array.from(Array(this.socs.length), (_, index) => {return {so: index, nilai: null}})
+                    grades: Array.from(Array(this.socs.length), (_, index) => {return {so_id: index, nilai: null}})
                 }
             })
             this.grades = grades
@@ -448,7 +476,7 @@ export default {
 
         async fetchExam() {
             try {
-                const res = await axios.get(`/me/exams/${this.$router.currentRoute.params.id}/`, this.$store.getters.authHeaders)
+                const res = await this.$thesa.getExamById(this.$router.currentRoute.params.id)
                 this.exam = res.data
                 this.generateGrades()
             } catch (error) {
@@ -491,7 +519,7 @@ export default {
                 this.saving = true
                 try {
                     const {id, halaman, komentar, bab} = this.newCorrection
-                    const comments = await axios.put(`/me/exams/${this.$router.currentRoute.params.id}/comments/`, {id, bab, komentar, halaman}, this.$store.getters.authHeaders)
+                    const comments = await this.$thesa.getExamComments(this.$router.currentRoute.params.id)
                     this.constructComment(comments.data)
                     this.resetNewCorrection()
                     this.saving = false
@@ -556,11 +584,7 @@ export default {
                 this.saving = true
                 try {
                     const { halaman, komentar, index } = this.newCorrection
-                    const comments = await axios.post(`/me/exams/${this.$router.currentRoute.params.id}/comments/`, {
-                        bab: index,
-                        halaman,
-                        komentar
-                    }, this.$store.getters.authHeaders)
+                    const comments = await this.$thesa.sumbitComments(this.$router.currentRoute.params.id, {bab: index, halaman, komentar})
                     this.constructComment(comments.data)
                     this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
                     this.updateLocalStorage()
@@ -570,6 +594,28 @@ export default {
                     this.showSnackbar(error)
                     this.saving = false
                 }
+            }
+        },
+
+        async addRevision() {
+            this.saving = true
+            try {
+                const response = await this.$thesa.submitRevision(this.$router.currentRoute.params.id, {revisi: this.revisionTemp.revisi, konten: this.revisionTemp.revisi ? this.revisionTemp.konten : ''})
+                const result = response.data.result
+                this.revision = result
+                this.revisionTemp = result
+                this.saving = false
+            } catch (error) {
+                this.showSnackbar(error)
+                this.saving = false
+            }
+        },
+
+        resetRevision() {
+            const {revisi, konten} = this.revision
+            this.revisionTemp = {
+                revisi,
+                konten
             }
         },
 
@@ -586,7 +632,7 @@ export default {
         async fetchComments() {
             this.fetchingComments = true
             try {
-                const comments = await axios.get(`/me/exams/${this.$router.currentRoute.params.id}/comments/`, this.$store.getters.authHeaders)
+                const comments = await this.$thesa.getExamComments(this.$router.currentRoute.params.id)
                 this.fetchingComments = false
                 this.errorFetchingComments = false
                 this.constructComment(comments.data)

@@ -91,7 +91,7 @@ export default {
         async initialize () {
             this.loading = true
             try {
-                const response = await axios.get('/exams/', this.$store.getters.authHeaders)
+                const response = await this.$thesa.getAllExams()
                 this.exams = response.data.results
                 this.loading = false
                 this.loaded = true

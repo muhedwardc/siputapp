@@ -648,7 +648,7 @@ export default {
         async fetchDosen() {
             this.loadingDosen = true
             try {
-                const response = await axios.get(`/users/dosen/?page=${this.pagination.page}`, this.$store.getters.authHeaders)
+                const response = await this.$thesa.getAllDosen()
                 this.dosen = response.data.results
                 this.totalItems = response.data.count
                 this.pagination.links = response.data.links
@@ -662,7 +662,7 @@ export default {
             this.loadingRoomSessions = true
             this.errorFetchRoomSessions = false
             try {
-                const response = await axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
+                const response = await this.$thesa.getRoomsAndSessions()
                 this.rooms = response.data.Ruang
                 this.sessions = response.data.Sesi
                 this.loadingRoomSessions = false
@@ -676,7 +676,7 @@ export default {
             this.loadingThisDayExams = true
             this.errorFetchingSpecificExams = false
             try {
-                const response = await axios.get('/exams/?tanggal=' + date, this.$store.getters.authHeaders)
+                const response = await this.$thesa.getExamsByDate(date)
                 this.thisDayExams = response.data.results
             } catch (error) {
                 this.errorFetchingSpecificExams = true
@@ -708,7 +708,7 @@ export default {
         async createExam() {
             this.submitting = true
             try {
-                await axios.post('/exams/', this.exam, this.$store.getters.authHeaders)
+                await this.$thesa.createNewExam(this.exam)
                 this.showSnackbar({
                     message: 'Ujian Telah berhasi dibuat',
                     type: 'success'
@@ -720,17 +720,12 @@ export default {
             }
         },
         async uploadFile() {
-            const config = {
-                onUploadProgress: (progressEvent) => {
-                    this.uploadingScriptProgress = Math.round( (progressEvent.loaded * 100) / progressEvent.total )
-                }
-            }
             this.uploadingScript = true
             const formData = new FormData()
             formData.append('file', this.pdfFile)
             try {
                 const name = + new Date() + '_' + this.pdfName
-                const res = await axios.post('/exams/upload-skripsi/' + name, formData, {...this.$store.getters.authHeaders, ...config})
+                const res = await this.$thesa.addThesis(name, formData)
                 this.exam.skripsi.naskah = res.data.file
                 this.uploadingScript = false
                 this.uploadingScriptProgress = null
