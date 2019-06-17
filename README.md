@@ -279,6 +279,7 @@ Endpoint untuk umum:
 ```
 
 1. **GET** /api/me/exams/\<id>\/recap/ : get exam recap data
+1. **GET** /api/exams/\<id>\/recap/ : get full exam recap data (kebutuhan cetak berkas hasil pendadaran)
 
 1. **GET** /api/me/profile/ 
 1. **PUT** /api/me/profile/

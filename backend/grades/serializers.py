@@ -18,3 +18,9 @@ class CreateGradeSerializer(serializers.ModelSerializer):
 
     def save(self, penguji):
         pass
+
+class RecapGradeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Grade
+        fields = ('so', 'nilai')

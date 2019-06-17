@@ -1,15 +1,19 @@
 import datetime
+
 from django.core.files.storage import FileSystemStorage
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Avg, Count, Min, Sum, FloatField
 from django.conf import settings
+
 from rest_framework import viewsets, views, permissions, status, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser, FileUploadParser
 
 from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer, UploadEssaySerializer
+from backend.grades.serializers import RecapGradeSerializer
 from .models import Exam, Penguji, Room, Session
 from backend.pagination import CustomPagination
+
 
 
 class ExamViewSet(viewsets.ModelViewSet):
@@ -84,6 +88,60 @@ class ExamViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         pass
+
+    @action(detail=True)
+    def recap(self, request, *args, **kwargs):
+        result = dict()
+        # Data Ujian
+        ujian = self.get_object()
+
+        # Data Nilai
+        students = ujian.skripsi.students.all()
+        grades = []
+        for student in students:
+            grade = {
+                "mahasiswa": student.nama,
+                "nilai": []
+            }
+            for penguji in ujian.penguji.all():
+                list_nilai = penguji.grades.filter(mahasiswa=student)
+                rerata = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
+                grade['nilai'].append({
+                    "penguji": penguji.dosen.nama,
+                    "detail": RecapGradeSerializer(list_nilai, many=True).data,
+                    "rerata": rerata.get('rerata', 0)
+                })
+            grades.append(grade)
+        result.update({"rekap_nilai": grades})
+
+        # Data Komentar
+        comments = []
+        for bab in range(0, 7):
+            comment = {
+                "bab": bab,
+                "komentar": []
+            }
+            for penguji in ujian.penguji.all():
+                for komentar in penguji.comments.filter(bab=bab):
+                    comment['komentar'].append({
+                        "penguji": penguji.dosen.nama,
+                        "komentar": komentar.komentar
+                    })
+            comments.append(comment)
+        result.update({'rekap_komentar': comments})
+
+        # Data Revisi Judul
+        if hasattr(ujian.skripsi, 'revision'):
+            revisi = ujian.skripsi.revision
+            result.update({'revisi_judul': revisi.revisi})
+        else:
+            result.update({'revisi_judul': None})
+
+        return Response({
+            "ujian": self.get_serializer(ujian).data,
+            "result": result
+            
+        })
 
 class RoomSessionAPI(views.APIView):
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)

@@ -161,7 +161,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             return Response(response, status=201)
 
     @action(methods=['POST'], detail=True)
-    def add_revision(self, request, *args, **kwargs):
+    def revision(self, request, *args, **kwargs):
         response = {"status": "Gagal"}
         json_data = request.data
         if self.get_object().is_leader == False:
@@ -181,11 +181,43 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         response['status'] = "Sukses"
         response['result'] = json_data
         return Response(response, status=201)
+    
+    @revision.mapping.put
+    def edit_revision(self, request, *args, **kargs):
+        response = {"status": "Gagal"}
+        json_data = request.data
+        if self.get_object().is_leader == False:
+            return Response({
+                "message": "Anda tidak memiliki authoritas untuk menambah revisi judul."
+            }, status=403)
+    
+        skripsi = self.get_object().ujian.skripsi
+        try:
+            revisi = TitleRevision.objects.get(skripsi=skripsi)
+        except TitleRevision.DoesNotExist:
+            return Response({
+                "message": "Belum ada revisi judul untuk skripsi: %s" % skripsi.judul
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        if json_data.get('revisi') == False:
+            revisi.delete()
+            return Response({
+                "message": "revisi judul berhasil dihapus."
+            }, status=status.HTTP_204_NO_CONTENT)
+        else:
+            revisi.revisi = json_data.get('revisi')
+            revisi.save()
+            response['status'] = "Sukses"
+            response['result'] = json_data
+            return Response(response, status=status.HTTP_200_OK)
+        
         
     @action(detail=True)
     def recap(self, request, *args, **kwargs):
-        response = {"Status": "Gagal"}
+        response = dict()
         ujian = self.get_object().ujian
+        response.update({'ujian': RecapExamSerializer(ujian).data})
+
         students = self.get_object().ujian.skripsi.students.all()
         grades = []
         for student in students:
@@ -194,11 +226,13 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                 "nilai": []
             }
             for penguji in ujian.penguji.all():
+                nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
                 grade['nilai'].append({
                     "penguji": penguji.dosen.nama,
-                    "rerata": penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
+                    "rerata": nilai.get('rerata', 0)
                 })
             grades.append(grade)
+        response.update({'nilai': grades})
 
         comments = []
         for bab in range(0, 7):
@@ -213,13 +247,13 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                         "komentar": komentar.komentar
                     })
             comments.append(comment)
+        response.update({'komentar': comments})
 
-        return Response({
-            "message": "Sukses",
-            "ujian": RecapExamSerializer(ujian).data,
-            "nilai": grades,
-            "komentar": comments
-        }, status=200)
+        if hasattr(ujian.skripsi, 'revision'):
+            revisi = ujian.skripsi.revision
+            response.update({'revisi': revisi.revisi})
+
+        return Response(response, status=200)
 
 class SiputProfileViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
