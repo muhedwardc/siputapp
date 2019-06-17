@@ -38,6 +38,19 @@ class EssaySerializer(serializers.ModelSerializer):
 class CreateEssaySerializer(serializers.ModelSerializer):
     mahasiswa = CreateStudentSerializer(many=True)
 
+    def update(self, instance, validated_data):
+        instance.judul = validated_data.get('judul', instance.judul)
+        instance.intisari = validated_data.get('intisari', instance.intisari)
+        instance.is_capstone = validated_data.get('is_capstone', instance.is_capstone)
+        instance.save()
+
+        if validated_data.get('mahasiswa'):
+            for mahasiswa, student in zip(validated_data.pop('mahasiswa'), instance.students.all()):
+                student.__dict__.update(mahasiswa)
+                student.save()
+
+        return instance
+
     class Meta:
         model = Essay
         fields = ('judul', 'intisari', 'naskah', 'pembimbing_satu', 'pembimbing_dua', 'is_capstone', 'mahasiswa')

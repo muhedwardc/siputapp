@@ -11,6 +11,7 @@ from rest_framework.parsers import JSONParser, FormParser, MultiPartParser, File
 
 from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer, UploadEssaySerializer, EditExamSerializer
 from backend.grades.serializers import RecapGradeSerializer
+from backend.essays.serializers import CreateEssaySerializer, EssaySerializer
 from .models import Exam, Penguji, Room, Session
 from backend.pagination import CustomPagination
 
@@ -98,8 +99,17 @@ class ExamViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(methods=['PUT'], detail=True)
     def edit_essay(self, request, *args, **kwargs):
-        pass
+        essay = self.get_object().skripsi
+        serializer = CreateEssaySerializer(essay, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Data skripsi berhasil diubah.",
+                "ujian": EssaySerializer(essay).data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True)
     def recap(self, request, *args, **kwargs):
