@@ -43,10 +43,25 @@ function generateDoc(data, i) {
                         { text: 'Perubahan Judul *', margin: [0, 10, 0, 0]},
                         { text: ':', margin: [0, 10, 0, 0]},
                         { 
-                            text: [
-                                { text: `Ya, Revisi Judul:\n`, lineHeight: 1.25 },
-                                { text: judul.toUpperCase(), lineHeight: 1.25 }
-                            ],
+                            table: {
+                                widths: ['*'],
+                                body: [
+                                    ['Ya'],
+                                    [
+                                        {
+                                            table: {
+                                                width: ['*'],
+                                                body: [ [''] ]
+                                            }
+                                        }
+                                    ]
+                                ]
+                            },
+                            // layout: 'noBorders',
+                            // text: [
+                            //     { text: `Ya, Revisi Judul:\n`, lineHeight: 1.25 },
+                            //     { text: judul.toUpperCase(), lineHeight: 1.25 }
+                            // ],
                             margin: [0, 10, 0, 10]
                         }
                     ],

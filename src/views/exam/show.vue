@@ -563,7 +563,7 @@ export default {
         async fetchRoomSessions() {
             this.loading = true
             try {
-                const response = await axios.get('/exams/get_room_session/', {headers: { 'Authorization': this.$store.getters.authToken}})
+                const response = await this.$thesa.getRoomsAndSessions()
                 this.ruang = response.data.Ruang
                 this.sesi = response.data.Sesi
                 this.loading = false
@@ -585,7 +585,7 @@ export default {
         async getExam() {
             this.isAdmin ? this.fetchRoomSessions() : null
             try {
-                const exam = await axios.get(`/${this.isAdmin ? '' : 'me/'}exams/${this.$router.currentRoute.params.id}/`, this.$store.getters.authHeaders)
+                const exam = await this.$thesa.getExamById(this.$router.currentRoute.params.id)
                 this.exam = this.isAdmin ? exam.data : exam.data.ujian
             } catch (error) {
                 this.$store.dispatch('showSnackbar', error.message)
@@ -615,7 +615,7 @@ export default {
         async fetchDosen() {
             this.loadingDosen = true
             try {
-                const response = await axios.get('/users/dosen/', this.$store.getters.authHeaders)
+                const response = await this.$thesa.getAllDosen()
                 this.dosen = response.data.results
                 this.loadingDosen = false
             } catch (error) {

@@ -120,7 +120,7 @@ export default {
 
 		async logout() {
 			try {
-				await axios.post('/auth/logout/', {}, this.$store.getters.authHeaders)
+				await this.$thesa.logout()
 				await this.logUserOut()
 				await this.$router.replace('/login')
 			} catch (error) {

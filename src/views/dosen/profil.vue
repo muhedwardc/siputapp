@@ -13,7 +13,7 @@ export default {
     methods: {
         async fetchUserProfile() {
             try {
-                const r = await axios.get('/me/profile/', this.$store.getters.authHeaders)
+                const r = await this.$thesa.getMyProfile()
                 this.user = r.data
             } catch (error) {
                 this.$store.dispatch('showSnackbar', {message: error.message, type: 'error'})
