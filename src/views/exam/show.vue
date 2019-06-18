@@ -540,7 +540,7 @@ export default {
                         lineHeight: 1
                     },
                     pageSize: 'A4',
-                    pageMargins: [ 20, 20, 20, 20 ]
+                    pageMargins: [ 30, 20, 30, 20 ]
                 }
     
                 this.pdfDocGenerator = pdfMake.createPdf(docDefinition);
