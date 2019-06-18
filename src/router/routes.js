@@ -19,13 +19,22 @@ export default [
         component: () => import('@/views/akademik/home.vue')
     },
     {
-        path: '/daftar-pengguna',
-        name: 'Daftar Pengguna',
+        path: '/daftar-dosen',
+        name: 'Daftar Dosen',
         meta: {
             requiresAuth: true,
             akademikRoute: true,
         },
-        component: () => import('@/views/akademik/list/user.vue')
+        component: () => import('@/views/akademik/list/dosen.vue')
+    },
+    {
+        path: '/daftar-akademik',
+        name: 'Daftar Akademik',
+        meta: {
+            requiresAuth: true,
+            akademikRoute: true,
+        },
+        component: () => import('@/views/akademik/list/akademik.vue')
     },
     {
         path: '/ruang-sesi',
