@@ -12,9 +12,17 @@ let instance = axios.create(config)
 instance.interceptors.request.use(
     function(config) {
         const token = store.state.auth.token
-        const asyncLoading = store.state.asyncLoading
         if (token) config.headers['Authorization'] = `Token ${token}`
-        if (asyncLoading) config.onUploadProgress = (progressEvent) => this.uploadingScriptProgress = Math.round( (progressEvent.loaded * 100) / progressEvent.total )
+        if (store.state.useUploadProgress) {
+            const CancelToken = axios.CancelToken
+            store.state.cancelTokenSource = CancelToken.source()
+            store.state.asyncProgress = 0
+            config['cancelToken'] = store.state.cancelTokenSource.token
+            config.onUploadProgress = (progressEvent) => { 
+                store.state.asyncProgress = Math.round( (progressEvent.loaded * 100) / progressEvent.total)
+                console.log(store.state.asyncProgress)
+            }
+        }
         return config
     },
     function(error) {
