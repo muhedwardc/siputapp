@@ -8,6 +8,9 @@ const state = {
         google: null,
         isSignIn: null
     },
+    asyncProgress: null,
+    useUploadProgress: false,
+    cancelTokenSource: null,
     snackbar: {
         show: false,
         message: '',
