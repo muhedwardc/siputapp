@@ -20,7 +20,6 @@ instance.interceptors.request.use(
             config['cancelToken'] = store.state.cancelTokenSource.token
             config.onUploadProgress = (progressEvent) => { 
                 store.state.asyncProgress = Math.round( (progressEvent.loaded * 100) / progressEvent.total)
-                console.log(store.state.asyncProgress)
             }
         }
         return config
