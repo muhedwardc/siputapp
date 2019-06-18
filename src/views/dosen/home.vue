@@ -1,28 +1,26 @@
 <template>
     <div class="dosen-home">
         <app-loading></app-loading>
-        <v-container v-if="!$store.state.loadViewContent" grid-list-lg class="no-padding">
-            <v-layout row wrap>
-                <v-flex xs12 sm6 column>
-                    <h3 class="mb-1">UJIAN HARI INI</h3>
-                    <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
-                    <v-layout row wrap v-else>
-                        <v-flex xs12 v-for="e in todayExams.slice(0, 3)" :key="e.id">
-                            <app-exam-card :item="e"/>
-                        </v-flex>
-                    </v-layout>
-                </v-flex>
-                <v-flex xs12 sm6 column>
-                    <h3 class="mb-1">UJIAN LAIN</h3>
-                    <span v-if="nextExams.length === 0">Tidak ada ujian yang belum direspon</span>
-                    <v-layout row wrap v-else>
-                        <v-flex xs12 v-for="e in nextExams" :key="e.id">
-                            <app-exam-card :item="e"/>
-                        </v-flex>
-                    </v-layout>
-                </v-flex>
-            </v-layout>
-        </v-container>
+        <v-layout column v-if="!$store.state.loadViewContent">
+            <h3 class="mb-1">UJIAN HARI INI</h3>
+            <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
+            <v-container v-else grid-list-lg class="no-padding mt-2">
+                <v-layout row wrap>
+                    <v-flex xs6 v-for="e in todayExams.slice(0, 3)" :key="e.id">
+                        <app-exam-card :item="e"/>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+            <h3 class="mb-1 mt-4">UJIAN LAIN</h3>
+            <span v-if="nextExams.length === 0">Tidak ada ujian lagi</span>
+            <v-container v-else grid-list-lg class="no-padding mt-2">
+                <v-layout row wrap>
+                    <v-flex xs6 v-for="e in nextExams" :key="e.id">
+                        <app-exam-card :item="e"/>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </v-layout>
     </div>
 </template>
 

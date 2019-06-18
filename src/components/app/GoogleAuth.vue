@@ -1,6 +1,6 @@
 <template>
     <v-layout column>
-        <button v-show="!isSignIn && googleAuth" @click="signInWithGoogle" class="google-button">
+        <button @click="signInWithGoogle" class="google-button">
             <template v-if="submitting">
                 <v-progress-circular
                     class="google-button__icon"
@@ -37,20 +37,24 @@ export default {
     }),
 
     mounted() {
-        window.gapi.load('client:auth2', () => {
-            window.gapi.client.init({
-                clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-                scope: 'email profile'
-            }).then(() => {
-                this.$store.dispatch('setAuthInstance', window.gapi.auth2.getAuthInstance())
-            })
-        })
+        this.loadGapi()
     },
 
     methods: {
+        loadGapi() {
+            window.gapi.load('client:auth2', () => {
+                window.gapi.client.init({
+                    clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+                    scope: 'email profile'
+                }).then(() => {
+                    this.$store.dispatch('setAuthInstance', window.gapi.auth2.getAuthInstance())
+                })
+            })
+        },
+
         async signInWithGoogle() {
-            this.message = ''
-            if (this.googleAuth) this.googleAuth.disconnect()
+            this.message = '' 
+            this.googleAuth ? this.googleAuth.disconnect() : await this.loadGapi()
             try {
                 this.googleAuth.signIn().then(() => {
                     const token = this.googleAuth.currentUser.get().getAuthResponse().id_token

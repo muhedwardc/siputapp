@@ -136,6 +136,8 @@ export default {
     .profile-wrap
         border: none
         padding: 8px
+        background: #fff
+        border-radius: 4px
     
     @media (min-width: 600px)
         .profile-wrap

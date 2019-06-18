@@ -177,45 +177,71 @@
         </v-layout>
         <v-container grid-list-xl class="no-h-paddings tables">
             <v-layout row wrap>
-                <v-flex xs12 sm6 class="pt-0">
-                    <v-layout class="ma-0" row justify-space-between align-center>
-                        <h3 class="font-weight-regular">Daftar Ruangan</h3>
-                        <v-btn color="primary text-capitalize" dark class="mb-2" @click="showDialog(0)">Tambah Ruangan</v-btn>
-                    </v-layout>
-                    <v-data-table
-                        hide-actions
-                        :headers="roomsHeader"
-                        :items="rooms">
-                        <template v-slot:items="props">
-                            <td v-text="props.index + 1"></td>
-                            <td v-text="props.item.nama"></td>
-                            <td class="justify-center layout pa-0 ma-0">
-                                <v-icon small class="mr-2" @click="editRoomData(0, props.item.id, props.item.nama)">edit</v-icon>
-                                <v-icon small @click="editRoomData(1, props.item.id, props.item.nama)">delete</v-icon>
-                            </td>
+                <v-flex xs12 sm6>
+                    <app-list-container class="pa-0">
+                        <template v-slot:header class="ma-0">
+                            <v-layout wrap class="pl-4 pr-4" align-center>
+                                <h3 class="font-weight-bold">Daftar Ruangan</h3>
+                                <v-spacer></v-spacer>
+                                <v-btn color="primary text-capitalize" dark class="ma-0" @click="showDialog(0)">Tambah Ruangan</v-btn>
+                            </v-layout>
                         </template>
-                    </v-data-table>
+                        <template v-slot:list>
+                            <v-data-table
+                                hide-actions
+                                class="solid-container zebra-column"
+                                :headers="roomsHeader"
+                                :items="rooms">
+                                <template slot="headerCell" slot-scope="props">
+                                    <span class="black--text font-weight-bold" style="font-size: 13px">
+                                        {{ props.header.text }}
+                                    </span>
+                                </template>
+                                <template v-slot:items="props">
+                                    <td v-text="props.index + 1"></td>
+                                    <td v-text="props.item.nama"></td>
+                                    <td class="justify-center layout pa-0 ma-0">
+                                        <v-icon small class="mr-2" @click="editRoomData(0, props.item.id, props.item.nama)">edit</v-icon>
+                                        <v-icon small @click="editRoomData(1, props.item.id, props.item.nama)">delete</v-icon>
+                                    </td>
+                                </template>
+                            </v-data-table>
+                        </template>
+                    </app-list-container>                    
                 </v-flex>
-                <v-flex xs12 sm6 class="pt-0">
-                    <v-layout class="ma-0" row justify-space-between align-center>
-                        <h3 class="font-weight-regular">Daftar Ruangan</h3>
-                        <v-btn color="primary" dark class="mb-2 text-capitalize" @click="showDialog(1)">Tambah Sesi</v-btn>
-                    </v-layout>
-                    <v-data-table
-                        hide-actions
-                        :headers="sessionsHeader"
-                        :items="sessions">
-                        <template v-slot:items="props">
-                            <td v-text="props.index + 1"></td>
-                            <td v-text="props.item.nama"></td>
-                            <td v-text="props.item.mulai"></td>
-                            <td v-text="props.item.selesai"></td>
-                            <td class="justify-center layout pa-0 ma-0">
-                                <v-icon small class="mr-2" @click="editSessionData(0, props.item)">edit</v-icon>
-                                <v-icon small @click="editSessionData(1, props.item)">delete</v-icon>
-                            </td>
+                <v-flex xs12 sm6>
+                    <app-list-container class="pa-0">
+                        <template v-slot:header class="ma-0">
+                            <v-layout wrap class="pl-4 pr-4" align-center>
+                                <h3 class="font-weight-bold">Daftar Ruangan</h3>
+                                <v-spacer></v-spacer>
+                                <v-btn color="primary" dark class="ma-0 text-capitalize" @click="showDialog(1)">Tambah Sesi</v-btn>
+                            </v-layout>
                         </template>
-                    </v-data-table>
+                        <template v-slot:list>
+                            <v-data-table
+                                hide-actions
+                                class="solid-container zebra-column"
+                                :headers="sessionsHeader"
+                                :items="sessions">
+                                <template slot="headerCell" slot-scope="props">
+                                    <span class="black--text font-weight-bold" style="font-size: 13px">
+                                        {{ props.header.text }}
+                                    </span>
+                                </template>
+                                <template v-slot:items="props">
+                                    <td v-text="props.index + 1"></td>
+                                    <td v-text="props.item.nama"></td>
+                                    <td v-text="props.item.mulai"></td>
+                                    <td v-text="props.item.selesai"></td>
+                                    <td class="justify-center layout pa-0 ma-0">
+                                        <v-icon small class="mr-2" @click="editSessionData(0, props.item)">edit</v-icon>
+                                        <v-icon small @click="editSessionData(1, props.item)">delete</v-icon>
+                                    </td>
+                                </template>
+                            </v-data-table>
+                        </template>
+                    </app-list-container>
                 </v-flex>
             </v-layout>
         </v-container>
@@ -430,35 +456,3 @@ export default {
     }
 }
 </script>
-
-<style lang="sass">
-    .no-h-paddings
-        padding-top: 0
-        padding-bottom: 0
-
-    .tables
-        padding-left: 0 !important
-        padding-right: 0 !important
-
-        .v-table__overflow
-            border: 1px solid #c5c5c5
-            margin-top: 8px
-            
-
-        table.v-table 
-            thead tr
-                height: 40px
-
-                th
-                    color: rgba(0, 0, 0, 1) !important
-
-            th:first-of-type, td:first-of-type
-                text-align: center
-                
-            th, td 
-                padding: 0 8px !important
-            
-            tr td:not(:last-of-type),
-            tr th:not(:last-of-type)
-                border-right: 1px solid #c5c5c5
-</style>

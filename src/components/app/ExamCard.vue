@@ -18,8 +18,23 @@
                         </v-tooltip>
                     </v-layout>
                 </v-card-title>
-                <v-card-text class="pt-0">
-                    <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi }} - Ruang {{ item.ujian.ruang }}</span>
+                <v-card-text class="pt-2 pl-4">
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>access_time</v-icon>
+                        <span>
+                            <span class="mr-2"><b>{{ isToday ? 'Hari ini' : dateUjian }}</b></span>
+                            <span v-text="item.ujian.sesi"></span>
+                        </span>
+                    </v-layout>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>location_on</v-icon>
+                        <span v-text="item.ujian.ruang"></span>
+                    </v-layout>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>person</v-icon>
+                        <span>{{ readableString(item.ujian.skripsi.mahasiswa, 'nama') }}</span>
+                    </v-layout>
+                    <!-- <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi }} - Ruang {{ item.ujian.ruang }}</span> -->
                 </v-card-text>
                 <v-spacer></v-spacer>
             </v-layout>
