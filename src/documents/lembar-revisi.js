@@ -1,32 +1,11 @@
-import UGMLogo from './partials/ugm-logo'
+import KOP from './partials/kop'
 
 function generateDoc(data, i) {
     let doc = []
     const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa } = data
+    let kopVertical = KOP.portrait()
     doc.push(
-        { text: '', pageBreak: 'before', pageOrientation: 'portrait' },
-        {
-            image: UGMLogo,
-            fit: [30, 30],
-            alignment: 'center',
-            margin: [0, 0, 0, 2]
-        },
-        {
-            text: [
-                'DEPARTEMEN TEKNIK ELEKTRO DAN TEKNOLOGI INFORMASI\n',
-                'FAKULTAS TEKNIK UNIVERSITAS GADJAH MADA',
-            ],
-            alignment: 'center'
-        },
-        {
-            text: 'Jl. Grafika No. 2, Fakultas Teknik UGM, Yogyakarta 55281 telp.(0274) 6492201,6492201 fax. (0274) 552305, http://jteti.ugm.ac.id, email:akademikjteti@gm.ac.id', 
-            fontSize: 9,
-            italics: true,
-            margin: [10, 2, 10, 0],
-            alignment: 'center'
-        },
-        { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
-        { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
+        kopVertical,
         {
             text: 'LEMBAR REVISI JUDUL SKRIPSI',
             alignment: 'center',
@@ -44,27 +23,45 @@ function generateDoc(data, i) {
                         { text: ':', margin: [0, 10, 0, 0]},
                         { 
                             table: {
-                                widths: ['*'],
+                                widths: ['auto', '*'],
                                 body: [
-                                    ['Ya'],
                                     [
-                                        {
-                                            table: {
-                                                width: ['*'],
-                                                body: [ [''] ]
-                                            }
-                                        }
-                                    ]
+                                        { 
+                                            canvas: [
+                                                {
+                                                    type: 'rect',
+                                                    x: 0, y: 0,
+                                                    w: 11,
+                                                    h: 11,
+                                                }
+                                            ] 
+                                        },
+                                        'Tidak' 
+                                    ],
+                                    [
+                                        { 
+                                            canvas: [
+                                                {
+                                                    type: 'rect',
+                                                    x: 0, y: 0,
+                                                    w: 11,
+                                                    h: 11,
+                                                },
+                                                {
+                                                    type: 'polyline',
+                                                    points: []
+                                                },
+                                            ] 
+                                        },
+                                        'Ya, Revisi Judul:' 
+                                    ],
                                 ]
                             },
-                            // layout: 'noBorders',
-                            // text: [
-                            //     { text: `Ya, Revisi Judul:\n`, lineHeight: 1.25 },
-                            //     { text: judul.toUpperCase(), lineHeight: 1.25 }
-                            // ],
-                            margin: [0, 10, 0, 10]
-                        }
+                            layout: 'noBorders',
+                            margin: [0, 8, 0, 0]
+                        },
                     ],
+                    [ '', '', { table: { widths: ['*'], heights: [50], body: [['']] }, margin: [0, 0, 0, 10]} ],
                     [ 'Nama Mahasiswa', ':', mahasiswa[i].nama ],
                     [ 'NIM', ':', mahasiswa[i].nim ],
                     [ 'Program Studi', ':', mahasiswa[i].prodi ],

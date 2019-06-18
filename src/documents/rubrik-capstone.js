@@ -404,7 +404,7 @@ export default function (data) {
         mhsGrade = []
     })
     const doc = [
-        { text: '', pageBreak: 'before', pageOrientation: 'landscape', margin: [0, 0, 0, 50], pageSize: 'A4' },
+        { text: '', pageBreak: 'before', pageOrientation: 'landscape', margin: [0, 0, 0, 20], pageSize: 'A4' },
         {
             text: 'Rubrik Penilaian Sidang Skripsi',
             alignment: 'center',

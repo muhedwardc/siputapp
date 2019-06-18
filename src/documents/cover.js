@@ -1,5 +1,3 @@
-import UGMLogo from './partials/ugm-logo'
-
 function generateDoc(data) {
     const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa } = data
     const mahasiswaList = mahasiswa.map(mhs => { return [{text: mhs.nama + '\n' + mhs.nim, alignment: 'center', fontSize: 20, margin: [0, 0, 0, 10]}] })
@@ -41,7 +39,7 @@ function generateDoc(data) {
                     ]
                 ]
             },
-            margin: [40, 40, 40, 40],
+            margin: [20, 40, 20, 40],
         }
     ]
 

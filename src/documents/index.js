@@ -1,7 +1,7 @@
 import SB from './partials/score-board'
 import SOCS from './partials/socs'
 import SOCS_HEADER from './partials/socs-header'
-import DOC_HEADER from './partials/head'
+// import DOC_HEADER from './partials/head'
 
 import COVER from './cover'
 import BERITA_ACARA from './berita-acara'
@@ -18,7 +18,7 @@ export default function index(data) {
     
     var doc = [
         ...COVER(data),
-        ...BERITA_ACARA(data, DOC_HEADER.vertical, SB),
+        ...BERITA_ACARA(data, SB),
         ...DAFTAR_HADIR(data),
         ...RUBRIK,
         ...REKAP_PENILAIAN(data),
