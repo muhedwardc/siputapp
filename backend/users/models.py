@@ -54,6 +54,8 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     last_login = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'

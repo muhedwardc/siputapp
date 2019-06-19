@@ -29,7 +29,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        return self.request.user.exams.all()
+        return self.request.user.exams.filter(ujian__deleted_at__isnull=True)
 
     def get_serializer_class(self):
         if self.action == 'list':

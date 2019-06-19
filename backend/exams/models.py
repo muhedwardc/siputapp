@@ -28,7 +28,9 @@ class Exam(models.Model):
     sesi = models.ForeignKey(Session, related_name='exams', on_delete=models.DO_NOTHING)
     ruang = models.ForeignKey(Room, related_name='exams', on_delete=models.DO_NOTHING)
     status = models.IntegerField(choices=STATUS_CHOICES, default=1, blank=True, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.skripsi.judul
@@ -44,7 +46,9 @@ class Penguji(models.Model):
     ujian = models.ForeignKey(Exam, related_name='penguji', on_delete=models.CASCADE)
     is_leader = models.BooleanField(default=False)
     is_present = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.dosen.nama
