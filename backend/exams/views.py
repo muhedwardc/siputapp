@@ -70,7 +70,7 @@ class ExamViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @penguji.mapping.post
-    def create_penguji(self, request):
+    def create_penguji(self, request, *args, **kwargs):
         exam = self.get_object()
         serializer = CreatePengujiSerializer(data=request.data)
         if serializer.is_valid():
