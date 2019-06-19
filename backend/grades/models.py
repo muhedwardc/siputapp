@@ -12,7 +12,7 @@ class StudentOutcome(models.Model):
 
 class Grade(models.Model):
     mahasiswa = models.ForeignKey(Student, related_name='grades', on_delete=models.CASCADE)
-    penguji = models.ForeignKey(Penguji, related_name='grades', on_delete=models.DO_NOTHING)
+    penguji = models.ForeignKey(Penguji, related_name='grades', on_delete=models.CASCADE)
     so = models.ForeignKey(StudentOutcome, on_delete=models.DO_NOTHING, blank=True, null=True)
     nilai = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, default=0)
 
