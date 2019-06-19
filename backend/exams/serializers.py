@@ -139,10 +139,11 @@ class RecapExamSerializer(serializers.ModelSerializer):
     sesi = serializers.StringRelatedField()
     ruang = serializers.StringRelatedField()
     skripsi = SimpleEssaySerializer()
+    penguji = PengujiSerializer(many=True, required=False)
 
     class Meta:
         model = Exam
-        fields = ('sesi', 'ruang', 'skripsi')
+        fields = ('sesi', 'ruang', 'skripsi', 'penguji')
 
 class UploadEssaySerializer(serializers.Serializer):
     file = serializers.FileField()

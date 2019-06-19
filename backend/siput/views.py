@@ -11,7 +11,7 @@ from .serializers import SiputPengujiSerializer, ListSiputPengujiSerializer
 from backend.essays.serializers import EssaySerializer, StudentSerializer
 from backend.exams.serializers import RecapExamSerializer
 from backend.comments.serializers import CommentSerializer, CreateCommentSerializer
-from backend.grades.serializers import GradeSerializer, CreateGradeSerializer
+from backend.grades.serializers import GradeSerializer, CreateGradeSerializer, RecapGradeSerializer
 from backend.users.serializers import ProfileSerializer
 
 from backend.exams.models import Penguji, Exam
@@ -226,9 +226,11 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                 "nilai": []
             }
             for penguji in ujian.penguji.all():
+                list_nilai = penguji.grades.filter(mahasiswa=student)
                 nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
                 grade['nilai'].append({
-                    "penguji": penguji.dosen.nama,
+                    "penguji": penguji.dosen.nama if penguji.dosen.nama else 'Anonymous',
+                    "detail": RecapGradeSerializer(list_nilai, many=True).data,
                     "rerata": nilai.get('rerata', 0)
                 })
             grades.append(grade)
@@ -243,7 +245,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             for penguji in ujian.penguji.all():
                 for komentar in penguji.comments.filter(bab=bab):
                     comment['komentar'].append({
-                        "penguji": penguji.dosen.nama,
+                        "penguji": penguji.dosen.nama if penguji.dosen.nama else 'Anonymous',
                         "komentar": komentar.komentar
                     })
             comments.append(comment)

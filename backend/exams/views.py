@@ -129,7 +129,7 @@ class ExamViewSet(viewsets.ModelViewSet):
                 list_nilai = penguji.grades.filter(mahasiswa=student)
                 rerata = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
                 grade['nilai'].append({
-                    "penguji": penguji.dosen.nama,
+                    "penguji": penguji.dosen.nama if penguji.dosen.nama else 'Anonymous',
                     "detail": RecapGradeSerializer(list_nilai, many=True).data,
                     "rerata": rerata.get('rerata', 0)
                 })
@@ -146,7 +146,7 @@ class ExamViewSet(viewsets.ModelViewSet):
             for penguji in ujian.penguji.all():
                 for komentar in penguji.comments.filter(bab=bab):
                     comment['komentar'].append({
-                        "penguji": penguji.dosen.nama,
+                        "penguji": penguji.dosen.nama if penguji.dosen.nama else 'Anonymous',
                         "komentar": komentar.komentar
                     })
             comments.append(comment)
