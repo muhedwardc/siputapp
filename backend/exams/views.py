@@ -33,7 +33,7 @@ class ExamViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
-
+ 
     def list(self, request, *args, **kwargs):
         if 'mulai' in request.GET and 'selesai' in request.GET:
             mulai = request.GET.get('mulai')
@@ -61,13 +61,6 @@ class ExamViewSet(viewsets.ModelViewSet):
             new_ujian = serializer.save()
             return Response(ExamSerializer(new_ujian).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, *args, **kwargs):
-        exam = self.get_object()
-        exam.deleted_at = datetime.datetime.now()
-        exam.save()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True)
     def penguji(self, request, *args, **kwargs):
