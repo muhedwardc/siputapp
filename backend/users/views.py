@@ -103,10 +103,16 @@ class LoginGoogle(views.APIView):
             traceback.print_exc()
         
         email = user_data.get('email', None)
+        picture = user_data.get('picture', None)
         if email:
             try:
                 user = User.objects.get(email=email)
                 instance, token = AuthToken.objects.create(user)
+
+                # save picture from google to user
+                user.foto = picture
+                user.save()
+
                 return Response({
                     "user": FullUserSerializer(user).data,
                     "token": token
