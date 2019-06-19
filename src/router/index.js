@@ -25,7 +25,7 @@ const router = new Router({
 Vue.use(Meta)
 
 router.beforeEach((to, from, next) => {
-  document.title = to.name || 'Thesa';
+  document.title = to.name || 'thessa';
   const user = Cookie.getJSON('_usr')
 
   const authRequired = to.matched.some(record => record.meta.requiresAuth)
