@@ -14,7 +14,7 @@ class Session(models.Model):
     selesai = models.TimeField()
 
     def __str__(self):
-        return '{} : {} - {} WIB'.format(self.nama, self.mulai, self.selesai)
+        return '{} - {} WIB'.format(self.mulai.strftime('%H:%M'), self.selesai.strftime('%H:%M'))
 
 class Exam(models.Model):
     STATUS_CHOICES = {
