@@ -9,8 +9,8 @@ class FullUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'nama', 'email', 'prodi', 'konsentrasi', 'nip', 'is_admin')
-        read_only_fields = ('is_admin',)
+        fields = ('id', 'nama', 'email', 'prodi', 'konsentrasi', 'nip', 'foto', 'is_admin')
+        read_only_fields = ('is_admin', 'foto')
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
@@ -71,4 +71,4 @@ class PasswordSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('nama', 'prodi', 'konsentrasi', 'nip')
+        fields = ('nama', 'prodi', 'konsentrasi', 'nip', 'foto')
