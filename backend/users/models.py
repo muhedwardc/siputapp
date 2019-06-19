@@ -50,6 +50,7 @@ class User(AbstractBaseUser):
         max_length=20, verbose_name='Nomor Induk Pegawai', blank=True)
     prodi = models.CharField(max_length=20, choices=PRODI_CHOICES, blank=True, null=True)
     konsentrasi = models.CharField(max_length=50, blank=True, null=True)
+    foto = models.CharField(max_length=250, null=True, blank=True)
     is_admin = models.BooleanField(default=False)
     last_login = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
