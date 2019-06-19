@@ -69,7 +69,7 @@ export default {
             this.message = ''
             this.submitting = true
             try {
-                const res = await this.$thesa.login(id_token)
+                const res = await this.$thessa.login(id_token)
                 this.$store.dispatch('logUserIn', res.data)
                 this.submitting = false
                 this.$router.push('/')

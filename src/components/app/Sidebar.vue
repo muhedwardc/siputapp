@@ -125,7 +125,7 @@ export default {
 
 		async logout() {
 			try {
-				await this.$thesa.logout()
+				await this.$thessa.logout()
 				await this.logUserOut()
 				await this.$router.replace('/login')
 			} catch (error) {
