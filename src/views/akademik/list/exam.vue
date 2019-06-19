@@ -88,7 +88,7 @@ export default {
         async initialize () {
             this.loading = true
             try {
-                const response = await this.$thesa.getAllExams()
+                const response = await this.$thessa.getAllExams()
                 this.exams = response.data.results
                 this.loading = false
                 this.loaded = true

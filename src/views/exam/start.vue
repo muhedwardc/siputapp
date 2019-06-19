@@ -81,7 +81,7 @@
             </v-layout>
             <v-layout column v-if="step == 1" class="pa-2 pl-4 pr-4" style="position: relative;">
                 <template v-show="!addingGrade">
-                    <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 1">
+                    <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 0">
                         <p class="mb-0"><b>Mahasiswa</b></p>
                         <ol class="mb-3">
                             <li v-for="mhs in exam.ujian.skripsi.mahasiswa" :key="mhs.nim" v-text="mhs.nama"></li>
@@ -320,7 +320,7 @@ export default {
 
     computed: {
         isLeader() {
-            return this.$store.state.auth.user.nama == this.exam.ujian.skripsi.pembimbing_satu
+            return this.$store.state.auth.user.id == this.exam.ujian.skripsi.pembimbing_satu
         },
 
         mobileAndShow() {
@@ -332,9 +332,9 @@ export default {
         },
 
         title() {
-            return this.step == 0
-                ? 'Lembar Koreksi'
-                : 'Lembar Penilaian SO'
+            return this.step == 0 ? 'Lembar Koreksi'
+                : this.step == 1 ? 'Lembar Penilaian SO'
+                : 'Lembar Revisi'
         },
 
         correctionFilled() {
@@ -385,10 +385,9 @@ export default {
         async syncRecap() {
             this.sync = true
             try {
-                const response = await this.$thesa.getExamRecap(this.$router.currentRoute.params.id)
+                const response = await this.$thessa.getExamRecap(this.$router.currentRoute.params.id)
                 this.recap = response.data
                 this.sync = false
-                console.log(this.recap)
             } catch (error) {
                 this.showSnackbar(error)
                 this.sync = false
@@ -454,7 +453,7 @@ export default {
                 tempGrades[i].grades.splice(so_id, 1, {so_id, nilai: grades[i]})
             })
             try {
-                const response = await this.$thesa.getExamGrades(this.$router.currentRoute.params.id)
+                const response = await this.$thessa.submitGrades(this.$router.currentRoute.params.id, tempGrades)
                 this.grades = response.data.result
                 this.saving = false
             } catch (error) {
@@ -476,7 +475,7 @@ export default {
 
         async fetchExam() {
             try {
-                const res = await this.$thesa.getExamById(this.$router.currentRoute.params.id)
+                const res = await this.$thessa.getExamById(this.$router.currentRoute.params.id)
                 this.exam = res.data
                 this.generateGrades()
             } catch (error) {
@@ -519,7 +518,7 @@ export default {
                 this.saving = true
                 try {
                     const {id, halaman, komentar, bab} = this.newCorrection
-                    const comments = await this.$thesa.getExamComments(this.$router.currentRoute.params.id)
+                    const comments = await this.$thessa.getExamComments(this.$router.currentRoute.params.id)
                     this.constructComment(comments.data)
                     this.resetNewCorrection()
                     this.saving = false
@@ -584,7 +583,7 @@ export default {
                 this.saving = true
                 try {
                     const { halaman, komentar, index } = this.newCorrection
-                    const comments = await this.$thesa.sumbitComments(this.$router.currentRoute.params.id, {bab: index, halaman, komentar})
+                    const comments = await this.$thessa.submitComments(this.$router.currentRoute.params.id, {bab: index, halaman, komentar})
                     this.constructComment(comments.data)
                     this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
                     this.updateLocalStorage()
@@ -600,7 +599,7 @@ export default {
         async addRevision() {
             this.saving = true
             try {
-                const response = await this.$thesa.submitRevision(this.$router.currentRoute.params.id, {revisi: this.revisionTemp.revisi, konten: this.revisionTemp.revisi ? this.revisionTemp.konten : ''})
+                const response = await this.$thessa.submitRevision(this.$router.currentRoute.params.id, {revisi: this.revisionTemp.revisi, konten: this.revisionTemp.revisi ? this.revisionTemp.konten : ''})
                 const result = response.data.result
                 this.revision = result
                 this.revisionTemp = result
@@ -632,7 +631,7 @@ export default {
         async fetchComments() {
             this.fetchingComments = true
             try {
-                const comments = await this.$thesa.getExamComments(this.$router.currentRoute.params.id)
+                const comments = await this.$thessa.getExamComments(this.$router.currentRoute.params.id)
                 this.fetchingComments = false
                 this.errorFetchingComments = false
                 this.constructComment(comments.data)

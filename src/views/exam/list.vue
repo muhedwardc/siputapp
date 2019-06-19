@@ -108,9 +108,9 @@ export default {
 
         async fetchExams() {
             try {
-                const r = await this.$thesa.getMyExams()
+                const r = await this.$thessa.getMyExams()
                 this.exams.push.apply(this.exams, r.data.results)
-                const history = await this.$thesa.getMyExamsHistory()
+                const history = await this.$thessa.getMyExamsHistory()
                 this.exams.push.apply(this.exams, history.data.results)
             } catch (error) {
                 this.exams = []

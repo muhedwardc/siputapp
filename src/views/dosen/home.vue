@@ -6,7 +6,7 @@
             <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
             <v-container v-else grid-list-lg class="no-padding mt-2">
                 <v-layout row wrap>
-                    <v-flex xs6 v-for="e in todayExams.slice(0, 3)" :key="e.id">
+                    <v-flex xs12 sm6 v-for="e in todayExams.slice(0, 3)" :key="e.id">
                         <app-exam-card :item="e"/>
                     </v-flex>
                 </v-layout>
@@ -15,7 +15,7 @@
             <span v-if="nextExams.length === 0">Tidak ada ujian lagi</span>
             <v-container v-else grid-list-lg class="no-padding mt-2">
                 <v-layout row wrap>
-                    <v-flex xs6 v-for="e in nextExams" :key="e.id">
+                    <v-flex xs12 sm6 v-for="e in nextExams" :key="e.id">
                         <app-exam-card :item="e"/>
                     </v-flex>
                 </v-layout>
@@ -56,7 +56,7 @@ export default {
         async getExams() {
             this.$store.state.loadViewContent = true
             try {
-                const response = await this.$thesa.getMyExams()
+                const response = await this.$thessa.getMyExams()
                 this.exams = response.data.results
                 this.exams.length > 0 ? this.filterUjian() : null
                 const message = this.todayExams.length > 0 ? 'Hari ini ada ' + this.todayExams.length + ' ujian' : 'Hari ini tidak ada ujian'

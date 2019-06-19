@@ -213,7 +213,7 @@ export default {
         async initialize () {
             this.loading = true
             try {
-                const response = await this.$thesa.getAllDosen()
+                const response = await this.$thessa.getAllDosen()
                 this.users = response.data.results
                 this.loading = false
             } catch (error) {
@@ -249,7 +249,7 @@ export default {
         async deleteUser () {
             if (this.deleteItem.id) {
                 try {
-                    await this.$thesa.deleteUser(this.deleteItem.id)
+                    await this.$thessa.deleteUser(this.deleteItem.id)
                     this.deleteItem.show = false
                     this.showSnackbar({
                         message: 'Berhasil menghapus dosen',
@@ -293,7 +293,7 @@ export default {
             const valid = this.$refs.form.validate()
             if (valid) {
                 try {
-                    const response = await this.$thesa.updateUser(this.editTemp.id, this.editedItem)
+                    const response = await this.$thessa.updateUser(this.editTemp.id, this.editedItem)
                     this.updateList(response.data)
                     this.showSnackbar({
                         message: 'Berhasil mengubah data pengguna',
@@ -312,7 +312,7 @@ export default {
         async postUserData(user) {
             this.creating = true
             try {
-                const response = await this.$thesa.createNewUser('dosen', user)
+                const response = await this.$thessa.createNewUser('dosen', user)
                 this.users.push(response.data.users)
                 this.showSnackbar({
                     message: response.data.message,

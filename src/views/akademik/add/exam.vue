@@ -517,7 +517,8 @@ export default {
             'showSnackbar'
         ]),
         validateExamInfo() {
-            return this.$refs.form1.validate() && this.pdfName && this.pdfUrl && this.pdfUrl
+            // this.showSnackbar(this.pdfName)
+            return this.$refs.form1.validate()
         },
         validateRoomSession() {
             return this.$refs.form2.validate()
@@ -680,7 +681,7 @@ export default {
         async fetchDosen() {
             this.loadingDosen = true
             try {
-                const response = await this.$thesa.getAllDosen()
+                const response = await this.$thessa.getAllDosen()
                 this.dosen = response.data.results
                 this.totalItems = response.data.count
                 this.pagination.links = response.data.links
@@ -694,7 +695,7 @@ export default {
             this.loadingRoomSessions = true
             this.errorFetchRoomSessions = false
             try {
-                const response = await this.$thesa.getRoomsAndSessions()
+                const response = await this.$thessa.getRoomsAndSessions()
                 this.rooms = response.data.Ruang
                 this.sessions = response.data.Sesi
                 this.loadingRoomSessions = false
@@ -708,7 +709,7 @@ export default {
             this.loadingThisDayExams = true
             this.errorFetchingSpecificExams = false
             try {
-                const response = await this.$thesa.getExamsByDate(date)
+                const response = await this.$thessa.getExamsByDate(date)
                 this.thisDayExams = response.data.results
             } catch (error) {
                 this.errorFetchingSpecificExams = true
@@ -740,7 +741,7 @@ export default {
         async createExam() {
             this.submitting = true
             try {
-                await this.$thesa.createNewExam(this.exam)
+                await this.$thessa.createNewExam(this.exam)
                 this.showSnackbar({
                     message: 'Ujian Telah berhasi dibuat',
                     type: 'success'
@@ -758,7 +759,7 @@ export default {
             formData.append('file', this.pdfFile)
             try {
                 const name = + new Date() + '_' + this.pdfName
-                const res = await this.$thesa.addThesis(name, formData)
+                const res = await this.$thessa.addThesis(name, formData)
                 this.exam.skripsi.naskah = res.data.file
                 this.uploadingScript = false
                 this.uploadingScriptProgress = null

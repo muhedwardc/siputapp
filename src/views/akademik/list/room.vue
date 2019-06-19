@@ -318,7 +318,7 @@ export default {
 
         async fetchRoomsAndSessions() {
             try {
-                const res = await this.$thesa.getRoomsAndSessions()
+                const res = await this.$thessa.getRoomsAndSessions()
                 this.rooms = res.data.Ruang
                 this.sessions = res.data.Sesi
             } catch (error) {
@@ -331,7 +331,7 @@ export default {
             let data = {}
             type == 0 ? data = {nama: this.roomName.trim()} : data = {nama: this.sessionName, mulai: this.sessionStart, selesai: this.sessionEnd}
             try {
-                const res = type == 0 ? await this.$thesa.createNewRoom(data) : await this.$thesa.createNewSession(data)
+                const res = type == 0 ? await this.$thessa.createNewRoom(data) : await this.$thessa.createNewSession(data)
                 this[this.types[type]] = res.data
                 this.showSnackbar({message: 'Berhasil membuat ' + type == 0 ? 'Ruangan' : 'Sesi' + ' baru', type: 'success'})
                 this.creating = false
@@ -405,7 +405,7 @@ export default {
         async saveEditedRoom() {
             this.editing = true
             try {
-                const res = await this.$thesa.updateRoom(this.editRoom.id, {nama: this.editRoom.value})
+                const res = await this.$thessa.updateRoom(this.editRoom.id, {nama: this.editRoom.value})
                 this.showSnackbar({message: 'Berhasil mengubah ruangan', type: 'success'})
                 this.rooms = res.data
                 this.reset()
@@ -419,7 +419,7 @@ export default {
             this.editing = true
             let str = type == 0 ? 'Ruangan' : 'Sesi'
             try {
-                await type == 0 ? this.$thesa.deleteRoom(id) : this.$thesa.deleteSession(id)
+                await type == 0 ? this.$thessa.deleteRoom(id) : this.$thessa.deleteSession(id)
                 this.showSnackbar({message: 'Berhasil menghapus ' + str, type: 'success'})
                 this[this.types[type]].splice(this[this.types[type]].findIndex(item => item.id == id))
                 this.editing = false
@@ -443,7 +443,7 @@ export default {
         async saveEditedSession() {
             this.editing = true
             try {
-                const res = await this.$thesa.updateSession(this.editSession.id, {nama: this.editSession.sessionName, mulai: this.editSession.sessionStart, selesai: this.editSession.sessionEnd})
+                const res = await this.$thessa.updateSession(this.editSession.id, {nama: this.editSession.sessionName, mulai: this.editSession.sessionStart, selesai: this.editSession.sessionEnd})
                 this.showSnackbar({message: 'Berhasil mengubah ruangan', type: 'success'})
                 this.sessions = res.data
                 this.reset()

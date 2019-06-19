@@ -115,7 +115,7 @@ export default {
             if (this.valid) {
                 this.loading = true
                 try {
-                    const res = await this.$thesa.updateMyProfile(this.user)
+                    const res = await this.$thessa.updateMyProfile(this.user)
                     this.loading = false
                     this.$store.dispatch('updateUser', res.data.user)
                     this.$store.dispatch('showSnackbar', {message: 'Berhasil mengubah profil', type: 'success'})
