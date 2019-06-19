@@ -1,6 +1,4 @@
-// import head from './partials/head.js'
-import UGMLogo from './partials/ugm-logo'
-import scoreBoard from './partials/score-board'
+import KOP from './partials/kop'
 
 export default function (data) {
     let doc = []
@@ -55,42 +53,9 @@ export default function (data) {
     dosen.forEach((dosen, i) => {
         dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen, margin: [0, 10, 0, 10]}, { text: (i == 0 ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
     })
+    let kopLandscape = KOP.landscape()
     doc.push(
-        {
-            columns: [
-                {
-                    width: 'auto',
-                    image: UGMLogo,
-                    fit: [40, 40],
-                    alignment: 'center',
-                    margin: [0, 0, 0, 2],
-                    pageOrientation: 'landscape'    
-                },
-                [
-                    {
-                        text: [
-                            'DEPARTEMEN TEKNIK ELEKTRO DAN TEKNOLOGI INFORMASI\n',
-                            'FAKULTAS TEKNIK UNIVERSITAS GADJAH MADA',
-                        ],
-                        alignment: 'center',
-                        pageOrientation: 'landscape'
-                    },
-                    {
-                        text: 'Jl. Grafika No. 2, Fakultas Teknik UGM, Yogyakarta 55281 telp.(0274) 6492201,6492201 fax. (0274) 552305, http://jteti.ugm.ac.id, email:akademikjteti@gm.ac.id', 
-                        fontSize: 9,
-                        italics: true,
-                        margin: [10, 2, 10, 0],
-                        alignment: 'center',
-                        pageOrientation: 'landscape'
-                    },
-                ]
-            ],
-            pageBreak: 'before', 
-            pageOrientation: 'landscape',
-            pageSize: 'A4'
-        },
-        { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 802, y2: 0, lineWidth: 1 } ], margin: [0, 5, 0, 0], pageOrientation: 'landscape' },
-        { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 802, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 0], pageOrientation: 'landscape' },
+        kopLandscape,
         {
             text: 'REKAP PENILAIAN UJIAN PENDADARAN',
             alignment: 'center',

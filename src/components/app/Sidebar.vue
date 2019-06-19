@@ -79,9 +79,14 @@ export default {
 					path: '/ujian'
 				},
 				{
-					title: 'Daftar Pengguna',
+					title: 'Daftar Dosen',
 					icon: 'group',
-					path: '/daftar-pengguna'
+					path: '/daftar-dosen'
+				},
+				{
+					title: 'Daftar Akademik',
+					icon: 'group',
+					path: '/daftar-akademik'
 				},
 				{
 					title: 'Ruang dan Sesi',
@@ -120,7 +125,7 @@ export default {
 
 		async logout() {
 			try {
-				await this.$thesa.logout()
+				await this.$thessa.logout()
 				await this.logUserOut()
 				await this.$router.replace('/login')
 			} catch (error) {
@@ -138,7 +143,6 @@ export default {
 <style lang="sass">
 	.sidebar .v-list__tile--active 
 		background: rgba(0, 0, 0, .02) !important
-		color: #3f51b5 !important
 		font-weight: bold !important
 
 	.sidebar 

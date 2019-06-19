@@ -1,4 +1,3 @@
-import UGMLogo from './partials/ugm-logo'
 import socsHeader from './partials/socs-header';
 import socs from './partials/socs'
 

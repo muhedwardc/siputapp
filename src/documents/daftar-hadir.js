@@ -1,5 +1,4 @@
-// import head from './partials/head.js'
-import UGMLogo from './partials/ugm-logo'
+import KOP from './partials/kop'
 
 function generateDoc(data, i) {
     let doc = []
@@ -15,30 +14,32 @@ function generateDoc(data, i) {
     dosen.forEach((dosen, i) => {
         dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen, margin: [0, 10, 0, 10]}, { text: (i == 0 ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
     })
+    let kopVertical = KOP.portrait()
     doc.push(
-        {
-            image: UGMLogo,
-            fit: [30, 30],
-            alignment: 'center',
-            margin: [0, 0, 0, 2],
-            pageBreak: 'before'
-        },
-        {
-            text: [
-                'DEPARTEMEN TEKNIK ELEKTRO DAN TEKNOLOGI INFORMASI\n',
-                'FAKULTAS TEKNIK UNIVERSITAS GADJAH MADA',
-            ],
-            alignment: 'center'
-        },
-        {
-            text: 'Jl. Grafika No. 2, Fakultas Teknik UGM, Yogyakarta 55281 telp.(0274) 6492201,6492201 fax. (0274) 552305, http://jteti.ugm.ac.id, email:akademikjteti@gm.ac.id', 
-            fontSize: 9,
-            italics: true,
-            margin: [10, 2, 10, 0],
-            alignment: 'center'
-        },
-        { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
-        { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
+        // {
+        //     image: UGMLogo,
+        //     fit: [30, 30],
+        //     alignment: 'center',
+        //     margin: [0, 0, 0, 2],
+        //     pageBreak: 'before'
+        // },
+        // {
+        //     text: [
+        //         'DEPARTEMEN TEKNIK ELEKTRO DAN TEKNOLOGI INFORMASI\n',
+        //         'FAKULTAS TEKNIK UNIVERSITAS GADJAH MADA',
+        //     ],
+        //     alignment: 'center'
+        // },
+        // {
+        //     text: 'Jl. Grafika No. 2, Fakultas Teknik UGM, Yogyakarta 55281 telp.(0274) 6492201,6492201 fax. (0274) 552305, http://jteti.ugm.ac.id, email:akademikjteti@gm.ac.id', 
+        //     fontSize: 9,
+        //     italics: true,
+        //     margin: [10, 2, 10, 0],
+        //     alignment: 'center'
+        // },
+        // { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
+        // { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
+        kopVertical,
         {
             text: 'DAFTAR HADIR PENDADARAN',
             alignment: 'center',

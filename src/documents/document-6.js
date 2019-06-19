@@ -1,4 +1,4 @@
-import UGMLogo from './partials/ugm-logo'
+// import UGMLogo from './partials/ugm-logo'
 
 export default function (data) {
     let doc = []
@@ -6,7 +6,7 @@ export default function (data) {
     doc.push(
         { text: '', pageBreak: 'before', pageOrientation: 'portrait' },
         {
-            image: UGMLogo,
+            // image: UGMLogo,
             fit: [30, 30],
             alignment: 'center',
             margin: [0, 0, 0, 2]

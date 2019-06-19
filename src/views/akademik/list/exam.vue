@@ -1,50 +1,47 @@
 <template>
-    <div>
-        <v-layout row flat color="white" align-center>
-            <v-toolbar-title>Daftar Ujian</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" dark class="mb-2" @click="$router.push('/ujian/tambah')">Tambah ujian</v-btn>
-        </v-layout>
-        <v-layout>
+    <app-list-container>
+        <template v-slot:header>
+            <v-btn color="primary" class="ma-0" dark @click="$router.push('/ujian/tambah')">Tambah ujian</v-btn>
             <v-spacer></v-spacer>
             <v-spacer></v-spacer>
             <v-text-field
+                solo
                 v-model="search"
                 append-icon="search"
                 label="Cari Ujian"
                 :disabled="loading"
-                single-line
-                hide-details
-                class="pt-0"
+                class="no-message solid-input"
             ></v-text-field>
-        </v-layout>
-        <v-data-table
-            class="no-v-borders"
-            :search="search"
-            :headers="headers"
-            :items="exams"
-            :rows-per-page-items="perPage"
-            :loading="loading">
-            <template slot="headerCell" slot-scope="props">
-                <span class="grey--text font-weight-medium" style="font-size: 13px">
-                    {{ props.header.text }}
-                </span>
-            </template>
-            <template v-slot:no-data>
-                <v-layout :value="loaded" class="pa-2" column align-center>
-                    Tidak ada ujian untuk ditampilkan.
-                    <v-btn color="primary" @click="initialize">Muat ulang</v-btn>
-                </v-layout>
-            </template>
-            <template v-slot:items="props">
-                <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;" class="text-xs-left">{{ props.item.skripsi.judul }}</td>
-                <td class="text-xs-left">{{ readableDate(props.item.tanggal) }}</td>
-                <td class="text-xs-left">{{ props.item.sesi }}</td>
-                <td class="text-xs-left">{{ props.item.ruang }}</td>
-                <td class="text-xs-left">{{ props.item.status ? status[props.item.status] : status[0] }}</td>
-            </template>
-        </v-data-table>
-    </div>
+        </template>
+        <template v-slot:list>
+            <v-data-table
+                class="solid-container zebra-column"
+                :search="search"
+                :headers="headers"
+                :items="exams"
+                :rows-per-page-items="perPage"
+                :loading="loading">
+                <template slot="headerCell" slot-scope="props">
+                    <span class="black--text font-weight-bold" style="font-size: 13px">
+                        {{ props.header.text }}
+                    </span>
+                </template>
+                <template v-slot:no-data>
+                    <v-layout :value="loaded" class="pa-2" column align-center>
+                        Tidak ada ujian untuk ditampilkan.
+                        <v-btn color="primary" @click="initialize">Muat ulang</v-btn>
+                    </v-layout>
+                </template>
+                <template v-slot:items="props">
+                    <td class="text-xs-left">{{ readableDate(props.item.tanggal) }}</td>
+                    <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;" class="text-xs-left">{{ props.item.skripsi.judul }}</td>
+                    <td class="text-xs-left">{{ props.item.sesi }}</td>
+                    <td class="text-xs-left">{{ props.item.ruang }}</td>
+                    <td class="text-xs-left">{{ props.item.status ? status[props.item.status] : status[0] }}</td>
+                </template>
+            </v-data-table>
+        </template>
+    </app-list-container>
 </template>
 
 <script>
@@ -57,8 +54,8 @@ export default {
             loading: false,
             search: '',
             headers: [
+                { text: 'Tanggal', value: 'tanggal', sortable: true, width: '150' },
                 { text: 'Judul', align: 'left', sortable: false, value: 'skripsi.judul' },
-                { text: 'Tanggal', value: 'tanggal', sortable: false },
                 { text: 'Jam', value: 'sesi.start_time', sortable: false },
                 { text: 'Ruangan', value: 'ruang.nama', sortable: false },
                 { text: 'Status', value: 'status', sortable: false },
@@ -91,7 +88,7 @@ export default {
         async initialize () {
             this.loading = true
             try {
-                const response = await this.$thesa.getAllExams()
+                const response = await this.$thessa.getAllExams()
                 this.exams = response.data.results
                 this.loading = false
                 this.loaded = true
@@ -104,20 +101,3 @@ export default {
     }
 }
 </script>
-
-<style lang="sass">
-    .no-v-borders
-        .v-datatable 
-            tbody 
-                tr 
-                    td:first-of-type
-                        padding-left: 0
-                    td:last-of-type
-                        padding-right: 0
-            thead 
-                tr 
-                    th:first-of-type
-                        padding-left: 0
-                    th:last-of-type
-                        padding-right: 0
-</style>

@@ -251,10 +251,15 @@
                 </v-dialog>
                 <v-card>
                     <v-card-text v-if="exam">
-                        <h3 class="headline font-weight-regular mt-1 text-capitalize">
-                            {{ exam.skripsi.judul }}
-                            <span @click="edit('skripsi.judul', 'text', 'Judul Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span>
-                        </h3>
+                        <v-layout row>
+                            <v-layout column>
+                                <h3 class="headline font-weight-regular mt-1 text-capitalize">
+                                    {{ exam.skripsi.judul }}
+                                    <span @click="edit('skripsi.judul', 'text', 'Judul Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span>
+                                </h3>
+                            </v-layout>
+                            <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2" @click="startUjian(exam.id)"><v-icon left>send</v-icon> masuk ujian</v-btn>
+                        </v-layout>
                         <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }} <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span></span>
                         <v-layout class="mt-3">
                             <v-btn @click="generateReadyDocument('download')" class="ma-0 mr-2" color="primary">
@@ -266,12 +271,12 @@
                                 Cetak
                             </v-btn>
                         </v-layout>
-                        <v-layout align-center wrap class="mt-0">
-                            <template>
+                        <!-- <v-layout align-center wrap class="mt-0"> -->
+                            <!-- <template> -->
                                 <!-- <v-btn v-if="isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startUjian(exam.id)"><v-icon left>edit</v-icon> edit ujian</v-btn> -->
-                                <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startUjian(exam.id)"><v-icon left>send</v-icon> masuk ujian</v-btn>
-                            </template>
-                        </v-layout>
+                                <!-- <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startUjian(exam.id)"><v-icon left>send</v-icon> masuk ujian</v-btn> -->
+                            <!-- </template> -->
+                        <!-- </v-layout> -->
                         <hr class="mt-3 mb-3">
                         <v-layout row justify-start align-center wrap>
                             <v-chip v-if="isLeader && !isAdmin" color="warning" class="white--text ml-0">
@@ -313,6 +318,11 @@
                                 :items="exam.skripsi.mahasiswa"
                                 hide-actions
                                 class="elevation-1 mt-2">
+                                <template slot="headerCell" slot-scope="props">
+                                    <span class="black--text" style="font-size: 13px">
+                                        {{ props.header.text }}
+                                    </span>
+                                </template>
                                 <template v-slot:items="props">
                                     <td>{{ props.item.nama }}</td>
                                     <td>{{ props.item.nim }}</td>
@@ -330,6 +340,11 @@
                                 :items="exam.penguji"
                                 hide-actions
                                 class="elevation-1 mt-2">
+                                <template slot="headerCell" slot-scope="props">
+                                    <span class="black--text" style="font-size: 13px">
+                                        {{ props.header.text }}
+                                    </span>
+                                </template>
                                 <template v-slot:items="props">
                                     <td>{{ props.item.dosen }}</td>
                                     <td>{{ props.item.is_leader ? 'Ketua Penguji' : props.index == 1 ? 'Pembimbing 2' : 'Penguji' }}</td>
@@ -540,7 +555,7 @@ export default {
                         lineHeight: 1
                     },
                     pageSize: 'A4',
-                    pageMargins: [ 20, 20, 20, 20 ]
+                    pageMargins: [ 30, 20, 30, 20 ]
                 }
     
                 this.pdfDocGenerator = pdfMake.createPdf(docDefinition);
@@ -563,7 +578,7 @@ export default {
         async fetchRoomSessions() {
             this.loading = true
             try {
-                const response = await this.$thesa.getRoomsAndSessions()
+                const response = await this.$thessa.getRoomsAndSessions()
                 this.ruang = response.data.Ruang
                 this.sesi = response.data.Sesi
                 this.loading = false
@@ -574,7 +589,12 @@ export default {
         },
 
         saveEdit() {
-
+            if (this.editTemp.key == 'penguji') return console.log('penguji')
+            const val = /skripsi\..+/.test(this.editTemp.key)
+            console.log(val)
+            console.log('key:', this.editTemp.key)
+            console.log('new val:', this.editTemp.value)
+            console.log('val:', this.getValue(this.editTemp.key))
         },
 
         navigateKonsentrasi(index) {
@@ -585,7 +605,7 @@ export default {
         async getExam() {
             this.isAdmin ? this.fetchRoomSessions() : null
             try {
-                const exam = await this.$thesa.getExamById(this.$router.currentRoute.params.id)
+                const exam = await this.$thessa.getExamById(this.$router.currentRoute.params.id)
                 this.exam = this.isAdmin ? exam.data : exam.data.ujian
             } catch (error) {
                 this.$store.dispatch('showSnackbar', error.message)
@@ -615,7 +635,7 @@ export default {
         async fetchDosen() {
             this.loadingDosen = true
             try {
-                const response = await this.$thesa.getAllDosen()
+                const response = await this.$thessa.getAllDosen()
                 this.dosen = response.data.results
                 this.loadingDosen = false
             } catch (error) {
@@ -676,6 +696,7 @@ export default {
                 this.editTemp.oldValue = value
             }
             this.editTemp.label = label
+            this.editTemp.key = key
             this.editTemp.type = type
             this.editDialog = true
         },

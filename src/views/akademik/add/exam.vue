@@ -1,16 +1,19 @@
 <template>
     <v-layout column>
-        <v-card flat class="pa-2 pl-3 pr-3">
+        <v-card flat class="pa-2 pl-3 pr-3 solid-container">
             <form-wizard
                 @on-complete="onComplete"
-                color="blue">
+                class="form-wizard"
+                stepSize="sm"
+                errorColor="#FF6666"
+                color="#1996F5">
                 <tab-content title="Informasi Ujian" :before-change="validateExamInfo">
                     <v-form
                         lazy-validation
                         ref="form1"
                         v-model="valid[0]">
                         <label>Tipe Ujian</label>
-                        <v-radio-group :rules="rules.isBool" :disabled="submitting" v-model="exam.skripsi.is_capstone">
+                        <v-radio-group class="exam-type" :rules="rules.isBool" :disabled="submitting" v-model="exam.skripsi.is_capstone">
                             <v-radio :value="false" label="Individu" color="primary"></v-radio>
                             <v-radio :value="true" label="Capstone" color="primary"></v-radio>
                         </v-radio-group>
@@ -36,14 +39,43 @@
                             ></v-textarea>
                         
                         <label>Tambahkan Naskah</label>
-                        <v-text-field :disabled="submitting" placeholder="pilih naskah" readonly @click='pickFile' v-model='pdfName' prepend-icon='attach_file' class="pa-0"></v-text-field>
+                        <v-layout row align-center wrap>
+                            <v-btn
+                                :disabled="uploadingScript"
+                                :loading="uploadingScript"
+                                @click='pickFile'
+                                class="ma-0"
+                                color="primary"
+                            >
+                                <v-icon left dark>attach_file</v-icon>
+                                {{ pdfName ? 'Ubah Naskah' : 'Unggah Naskah'}}
+                            </v-btn>
+                            <template v-if="pdfName || uploadingScript">
+                                <template v-if="uploadingScript">
+                                    <v-progress-circular
+                                        :value="$store.state.asyncProgress"
+                                        :rotate="-90"
+                                        color="primary"
+                                        class="ml-2 mr-2"
+                                        :size="30"
+                                        >
+                                        {{ $store.state.asyncProgress }}
+                                    </v-progress-circular>
+                                    <span>Sedang mengunggah ...</span>
+                                </template>
+                                <span v-else v-line-clamp:20="1" v-text="pdfName" class="pl-2"></span>
+                                <v-btn @click="cancelUpload" class="ma-0" flat icon color="black">
+                                    <v-icon>close</v-icon>
+                                </v-btn>
+                            </template>
+                        </v-layout>
+                        <span v-if="!pdfFile" class="error--text" style="font-size: 12px">Naskah tidak boleh kosong</span>
                         <input
                             type="file"
                             style="display: none"
                             ref="pdf"
                             readonly
                             :disabled="submitting"
-                            :loading="uploadingScriptProgress"
                             solo
                             accept="application/pdf,application/vnd.ms-excel"
                             @change="onFilePicked"
@@ -485,6 +517,7 @@ export default {
             'showSnackbar'
         ]),
         validateExamInfo() {
+            // this.showSnackbar(this.pdfName)
             return this.$refs.form1.validate()
         },
         validateRoomSession() {
@@ -648,7 +681,7 @@ export default {
         async fetchDosen() {
             this.loadingDosen = true
             try {
-                const response = await this.$thesa.getAllDosen()
+                const response = await this.$thessa.getAllDosen()
                 this.dosen = response.data.results
                 this.totalItems = response.data.count
                 this.pagination.links = response.data.links
@@ -662,7 +695,7 @@ export default {
             this.loadingRoomSessions = true
             this.errorFetchRoomSessions = false
             try {
-                const response = await this.$thesa.getRoomsAndSessions()
+                const response = await this.$thessa.getRoomsAndSessions()
                 this.rooms = response.data.Ruang
                 this.sessions = response.data.Sesi
                 this.loadingRoomSessions = false
@@ -676,7 +709,7 @@ export default {
             this.loadingThisDayExams = true
             this.errorFetchingSpecificExams = false
             try {
-                const response = await this.$thesa.getExamsByDate(date)
+                const response = await this.$thessa.getExamsByDate(date)
                 this.thisDayExams = response.data.results
             } catch (error) {
                 this.errorFetchingSpecificExams = true
@@ -708,7 +741,7 @@ export default {
         async createExam() {
             this.submitting = true
             try {
-                await this.$thesa.createNewExam(this.exam)
+                await this.$thessa.createNewExam(this.exam)
                 this.showSnackbar({
                     message: 'Ujian Telah berhasi dibuat',
                     type: 'success'
@@ -721,14 +754,17 @@ export default {
         },
         async uploadFile() {
             this.uploadingScript = true
+            this.$store.state.useUploadProgress = true
             const formData = new FormData()
             formData.append('file', this.pdfFile)
             try {
                 const name = + new Date() + '_' + this.pdfName
-                const res = await this.$thesa.addThesis(name, formData)
+                const res = await this.$thessa.addThesis(name, formData)
                 this.exam.skripsi.naskah = res.data.file
                 this.uploadingScript = false
                 this.uploadingScriptProgress = null
+                this.$store.state.useUploadProgress = false
+                this.$store.state.asyncProgress = 0
             } catch (error) {
                 this.showSnackbar(error.message)
                 this.exam.skripsi.naskah = ''
@@ -737,7 +773,16 @@ export default {
                 this.pdfUrl = ''
                 this.uploadingScript = false
                 this.uploadingScriptProgress = null
+                this.$store.state.useUploadProgress = false
+                this.$store.state.asyncProgress = 0
             }
+        },
+        async cancelUpload() {
+            this.$store.state.cancelTokenSource.cancel('Pengunggahan naskah dibatalkan.')
+            this.exam.skripsi.naskah = ''
+            this.pdfName = ''
+            this.pdfFile = ''
+            this.pdfUrl = ''
         }
     },
 
@@ -794,7 +839,10 @@ export default {
     .wizard-icon
         font-style: normal
     
-    .v-text-field.v-text-field--solo:not(.v-text-field--solo-flat) > .v-input__control > .v-input__slot
+    .form-wizard .v-text-field.v-text-field--solo:not(.v-text-field--solo-flat) > .v-input__control > .v-input__slot
         box-shadow: none
         border: 1px solid #aaa
+
+    .exam-type .v-label 
+        color: black
 </style>

@@ -1,21 +1,20 @@
 <template>
     <v-layout column>
-        <p class="font-weight-bold pb-2 mb-0" style="color: #365075">Daftar Ujian Anda</p>
-        <v-layout>
+        <v-layout align-center wrap>
+            <h3>DAFTAR UJIAN ANDA</h3>
             <v-spacer></v-spacer>
             <v-spacer></v-spacer>
             <v-text-field
                 v-model="search"
+                label="Cari ujian"
                 append-icon="search"
-                label="Cari Ujian"
-                single-line
-                hide-details
-                class="pt-0"
+                class="no-message solid-input"
+                solo
             ></v-text-field>
         </v-layout>
-        <div>
+        <div class="mt-4">
             <v-data-table
-                class="no-barrier"
+                class="zebra-column solid-container"
                 :headers="headers"
                 :search="search"
                 :items="exams"
@@ -23,7 +22,7 @@
                 :loading="loading"
             >
             <template slot="headerCell" slot-scope="props">
-                <span class="grey--text font-weight-medium" style="font-size: 13px">
+                <span class="black--text font-weight-bold" style="font-size: 13px">
                     {{ props.header.text }}
                 </span>
             </template>
@@ -57,28 +56,32 @@ export default {
                 {
                     text: 'Tanggal',
                     value: 'ujian.tanggal',
-                    sortable: true
+                    sortable: true,
+                    align: 'center'
                 },
                 {
                     text: 'Nama Ujian',
                     value: 'ujian.skripsi.judul',
-                    sortable: true,
-                    align: 'left'
+                    sortable: false,
+                    align: 'center'
                 },
                 {
                     text: 'Jam',
                     value: 'ujian.jam',
-                    sortable: false
+                    sortable: false,
+                    align: 'center'
                 },
                 {
                     text: 'Ruangan',
                     value: 'ujian.ruang',
-                    sortable: true
+                    sortable: true,
+                    align: 'center'
                 },
                 {
                     text: 'Ketua',
                     value: 'is_ketua',
-                    sortable: true
+                    sortable: false,
+                    align: 'center'
                 },
             ],
             exams: [],
@@ -105,9 +108,9 @@ export default {
 
         async fetchExams() {
             try {
-                const r = await this.$thesa.getMyExams()
+                const r = await this.$thessa.getMyExams()
                 this.exams.push.apply(this.exams, r.data.results)
-                const history = await this.$thesa.getMyExamsHistory()
+                const history = await this.$thessa.getMyExamsHistory()
                 this.exams.push.apply(this.exams, history.data.results)
             } catch (error) {
                 this.exams = []
@@ -125,19 +128,3 @@ export default {
     }
 }
 </script>
-
-<style lang="sass">
-    .no-barrier .v-datatable 
-        tbody 
-            tr 
-                td:first-of-type
-                    padding-left: 0
-                td:last-of-type
-                    padding-right: 0
-        thead 
-            tr 
-                th:first-of-type
-                    padding-left: 0
-                th:last-of-type
-                    padding-right: 0
-</style>

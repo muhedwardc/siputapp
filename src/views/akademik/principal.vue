@@ -43,7 +43,7 @@ export default {
         async fetchUser() {
             this.loading = true
             try {
-                const response = await this.$thesa.getAllUsers()
+                const response = await this.$thessa.getAllUsers()
                 this.getDosen(response.data.results)
                 this.loading = false
             } catch (error) {
