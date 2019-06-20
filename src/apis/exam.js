@@ -1,6 +1,5 @@
 import axios from './instance'
 import store from '../store'
-import { async } from 'q';
 
 export default {
     getAllExams: async () => await axios.get('/exams/'),
