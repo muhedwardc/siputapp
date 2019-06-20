@@ -229,7 +229,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                 list_nilai = penguji.grades.filter(mahasiswa=student)
                 nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
                 grade['nilai'].append({
-                    "penguji": penguji.dosen.nama if penguji.dosen.nama else 'Anonymous',
+                    "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
                     "detail": RecapGradeSerializer(list_nilai, many=True).data,
                     "rerata": nilai.get('rerata', 0)
                 })
@@ -245,7 +245,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             for penguji in ujian.penguji.all():
                 for komentar in penguji.comments.filter(bab=bab):
                     comment['komentar'].append({
-                        "penguji": penguji.dosen.nama if penguji.dosen.nama else 'Anonymous',
+                        "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
                         "komentar": komentar.komentar
                     })
             comments.append(comment)
