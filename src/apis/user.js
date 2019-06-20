@@ -1,10 +1,9 @@
 import axios from './instance'
-import store from '../store'
 
 export default {
-    getAllUsers: async () => await axios.get('/users/'),
-    getAllDosen: async () => await axios.get('/users/dosen/'),
-    getAllAkademik: async () => await axios.get('/users/akademik/'),
+    getAllUsers: async (qs) => await axios.get(`/users/${qs ? '?' + qs : ''}`),
+    getAllDosen: async (qs) => await axios.get(`/users/dosen/${qs ? '?' + qs : ''}`),
+    getAllAkademik: async (qs) => await axios.get(`/users/akademik/${qs ? '?' + qs : ''}`),
     getMyProfile: async () => await axios.get('/me/profile/'),
 
     createNewUser: async (role, payload) => await axios.post(`/users/${role.toLowerCase()}/`, payload),
