@@ -16,6 +16,7 @@
         <template v-slot:list>
             <v-data-table
                 class="solid-container zebra-column"
+                hide-actions
                 :search="search"
                 :headers="headers"
                 :items="exams"
@@ -29,7 +30,7 @@
                 <template v-slot:no-data>
                     <v-layout :value="loaded" class="pa-2" column align-center>
                         Tidak ada ujian untuk ditampilkan.
-                        <v-btn color="primary" @click="initialize">Muat ulang</v-btn>
+                        <v-btn color="primary" @click="getExam()">Muat ulang</v-btn>
                     </v-layout>
                 </template>
                 <template v-slot:items="props">
@@ -38,6 +39,9 @@
                     <td class="text-xs-left">{{ props.item.sesi }}</td>
                     <td class="text-xs-left">{{ props.item.ruang }}</td>
                     <td class="text-xs-left">{{ props.item.status ? status[props.item.status] : status[0] }}</td>
+                </template>
+                <template v-slot:footer>
+                    <app-pagination-footer :totalItems="totalItems" :td="headers.length" @on-page-change="getExam($event)"></app-pagination-footer>
                 </template>
             </v-data-table>
         </template>
@@ -62,13 +66,14 @@ export default {
             ],
             status: ['belum mulai', 'sedang berlangsung', 'selesai'],
             exams: [],
-            perPage: [ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]
+            perPage: [ 10 ],
+            totalItems: 0,
         }
     },
 
     created () {
         this.loaded = false
-        this.$store.state.auth.token ? this.initialize() : null
+        this.$store.state.auth.token ? this.getExam() : null
     },
 
     methods: {
@@ -85,10 +90,11 @@ export default {
             return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
         },
         
-        async initialize () {
+        async getExam(page = 1) {
             this.loading = true
             try {
-                const response = await this.$thessa.getAllExams()
+                const response = await this.$thessa.getAllExams('page='+page)
+                this.totalItems = response.data.count
                 this.exams = response.data.results
                 this.loading = false
                 this.loaded = true
