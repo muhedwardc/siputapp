@@ -5,7 +5,7 @@
             <v-layout row wrap align-center class="mb-3">
                 <v-flex xs12 sm4>
                     <v-avatar>
-                        <img v-if="user.image" :src="user.image" :alt="user.name">
+                        <img v-if="user.foto" :src="user.foto" :alt="user.name">
                         <div v-else style="background-color: #eee; width: 100%; height: 100%; border-radius: 50%;"></div>
                     </v-avatar>
                 </v-flex>

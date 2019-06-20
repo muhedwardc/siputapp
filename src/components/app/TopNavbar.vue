@@ -5,7 +5,7 @@
         <v-toolbar-items class="hidden-xs-and-down toolbar-item">
             <v-btn @click="$router.replace(`/profil`)" flat slot="activator" class="pl-4 pr-4 profile">
                 <v-avatar tile class="profile-picture mr-2" size="32">
-                    <img :src="$store.state.auth.user.image || ''" alt="">
+                    <img :src="$store.state.auth.user.foto || ''" alt="">
                 </v-avatar>
                 <span>{{ $store.state.auth.user.nama }}</span>
             </v-btn>
