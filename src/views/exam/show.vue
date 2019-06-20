@@ -226,7 +226,7 @@
                                                         <v-list-tile-title v-else-if="i === 0">
                                                             <v-layout align-center>
                                                                 {{ type }}
-                                                                <span class="ml-2 success white--text" style="display: flex; justify-content: center; align-items: center; width: 22px; height: 22px; border-radius: 50%;">{{ selectedPenguji.length - 2 }}</span>
+                                                                <span class="ml-2 success white--text" style="display: flex; justify-content: center; align-items: center; width: 22px; height: 22px; border-radius: 50%;"></span>
                                                             </v-layout>
                                                         </v-list-tile-title>
                                                     </v-list-tile>
@@ -249,6 +249,31 @@
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
+                <v-dialog
+                    v-model="dialogDelete"
+                    max-width="500">
+                    <v-card>
+                        <v-card-text>
+                        Anda ingin menghapus ujian untuk skripsi: <br><b>{{ exam.skripsi.judul }}</b>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                v-show="!deleting"
+                                class="secondary"
+                                @click="dialogDelete = false">
+                                Batal
+                            </v-btn>
+
+                            <v-btn
+                                :loading="deleting"
+                                class="error"
+                                @click="deleteExam">
+                                Hapus
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
                 <v-card>
                     <v-card-text v-if="exam">
                         <v-layout row>
@@ -258,7 +283,8 @@
                                     <span @click="edit('skripsi.judul', 'text', 'Judul Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span>
                                 </h3>
                             </v-layout>
-                            <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2" @click="startUjian(exam.id)"><v-icon left>send</v-icon> masuk ujian</v-btn>
+                            <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2" @click="startExam(exam.id)"><v-icon left>send</v-icon>masuk ujian</v-btn>
+                            <v-btn v-if="isAdmin" depressed color="error" class="ma-0 mt-2" @click="dialogDelete = true"><v-icon left>delete</v-icon>hapus ujian</v-btn>
                         </v-layout>
                         <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }} <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span></span>
                         <v-layout class="mt-3">
@@ -273,8 +299,8 @@
                         </v-layout>
                         <!-- <v-layout align-center wrap class="mt-0"> -->
                             <!-- <template> -->
-                                <!-- <v-btn v-if="isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startUjian(exam.id)"><v-icon left>edit</v-icon> edit ujian</v-btn> -->
-                                <!-- <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startUjian(exam.id)"><v-icon left>send</v-icon> masuk ujian</v-btn> -->
+                                <!-- <v-btn v-if="isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startExam(exam.id)"><v-icon left>edit</v-icon> edit ujian</v-btn> -->
+                                <!-- <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startExam(exam.id)"><v-icon left>send</v-icon> masuk ujian</v-btn> -->
                             <!-- </template> -->
                         <!-- </v-layout> -->
                         <hr class="mt-3 mb-3">
@@ -368,8 +394,11 @@ export default {
     data() {
         return {
             exam: null,
+            examId: null,
             search: '',
             editDialog: '',
+            dialogDelete: false,
+            deleting: false,
             dosen: null,
             loading: false,
             menu: false,
@@ -440,7 +469,7 @@ export default {
             options: [],
             ruang: [],
             sesi: [],
-            selectedPenguji: [null, null],
+            selectedPenguji: null,
             dosenTypes: [
                 'Penguji',
                 'Hapus'
@@ -490,6 +519,20 @@ export default {
         ...mapActions([
             'showSnackbar'
         ]),
+
+        async deleteExam() {
+            this.deleting = true
+            try {
+                await this.$thessa.deleteExam(this.examId)
+                this.showSnackbar({type: 'success', message: 'Berhasil menghapus ujian'})
+                this.deleting = false
+                this.dialogDelete = false
+                this.$router.push('/ujian')
+            } catch (error) {
+                this.deleting = false
+                this.showSnackbar(error)
+            }
+        },
 
         async fetchReport() {
             try {
@@ -588,13 +631,47 @@ export default {
             }
         },
 
-        saveEdit() {
-            if (this.editTemp.key == 'penguji') return console.log('penguji')
-            const val = /skripsi\..+/.test(this.editTemp.key)
-            console.log(val)
-            console.log('key:', this.editTemp.key)
-            console.log('new val:', this.editTemp.value)
-            console.log('val:', this.getValue(this.editTemp.key))
+        async saveEditedSkripsiItem(fullKey, newVal) {
+            const key = fullKey.replace('skripsi.', '')
+            try {
+                let data = {}
+                data[key] = newVal
+                const response = await this.$thessa.editEssayItem(this.examId, data)
+                this.exam.skripsi[key] = newVal
+                this.discard()
+            } catch (error) {
+                this.showSnackbar(error.message ? error.message : error)
+            }   
+        },
+
+        async saveEditedExamItem(key, newVal) {
+            try {
+                let data = {}
+                data[key] = newVal
+                const response = await this.$thessa.editExamItem(this.examId, data)
+                this.exam[key] = response.data.ujian[key]
+                this.discard()
+            } catch (error) {
+                this.showSnackbar(error.message ? error.message : error)
+            } 
+        },
+
+        async assignNewDosen(penguji) {
+            try {
+                const response = await this.$thessa.assignNewDosen(this.examId, penguji)
+                console.log(response.data)
+            } catch (error) {
+                this.showSnackbar(error)
+            }
+        },
+
+        async saveEdit() {
+            if (this.editTemp.key == 'penguji') this.assignNewDosen(this.selectedPenguji)
+            else {
+                const isSkripsi = /skripsi\..+/.test(this.editTemp.key)
+                if (isSkripsi) this.saveEditedSkripsiItem(this.editTemp.key, this.editTemp.value)
+                else this.saveEditedExamItem(this.editTemp.key, this.editTemp.value)
+            }
         },
 
         navigateKonsentrasi(index) {
@@ -605,7 +682,7 @@ export default {
         async getExam() {
             this.isAdmin ? this.fetchRoomSessions() : null
             try {
-                const exam = await this.$thessa.getExamById(this.$router.currentRoute.params.id)
+                const exam = await this.$thessa.getExamById(this.examId)
                 this.exam = this.isAdmin ? exam.data : exam.data.ujian
             } catch (error) {
                 this.$store.dispatch('showSnackbar', error.message)
@@ -616,8 +693,8 @@ export default {
             window.open('http://www.africau.edu/images/default/sample.pdf', '_blank')
         },
 
-        startUjian() {
-            this.$router.push(`/ujian/${this.$router.currentRoute.params.id}/mulai`)
+        startExam() {
+            this.$router.push(`/ujian/${this.examId}/mulai`)
         },
 
         getValue(key) {
@@ -678,7 +755,7 @@ export default {
             } else if (type == 'sesi') {
                 this.fetchRoomSessions()
                     .then(() => {
-                        let id = this[type][this[type].findIndex(item => item.nama + ' : ' + item.mulai + ' - ' + item.selesai + ' WIB' == value)].id
+                        let id = this[type][this[type].findIndex(item => item.mulai + ' - ' + item.selesai + ' WIB' == value)].id
                         this.editTemp.value = id
                         this.editTemp.oldValue = id
                     })
@@ -727,7 +804,7 @@ export default {
             return this.selectedPenguji = cleanedArr
         },
         deleteRole(id) {
-            this.selectedPenguji[this.selectedPenguji.indexOf(id)] = null
+            this.selectedPenguji = null
             const index = this.dosen.findIndex(dosen => id == dosen.id)
             const { email, nama } = this.dosen[index]
             delete this.dosen[index].selectedType
@@ -742,54 +819,24 @@ export default {
                 this.deleteRole(dosenId)
             }
             else if (i == 0) {
-                const foundIndex = this.selectedPenguji.indexOf(dosenId)
-                const selectedIndex = this.dosen.findIndex(dosen => dosenId == dosen.id)
-                if (foundIndex !== -1) {
-                    const foundId = this.selectedPenguji[foundIndex]
-                    const index = this.dosen.findIndex(dosen => foundId == dosen.id)
-                    this.selectedPenguji[foundIndex] = null
-                    const { email, nama } = this.dosen[index]
-                    delete this.dosen[index].selectedType
-                    this.selectedPenguji.push(dosenId)
-                    this.dosen[index].selectedType = this.dosenTypes[i]
-                    this.dosen[index]['email'] = 'updating' 
-                    this.dosen[index]['nama'] = 'updating'
-                    this.dosen[index]['email'] = email
-                    this.dosen[index]['nama'] = nama
-                } else {
-                    this.selectedPenguji.push(dosenId)
-                    const index = this.dosen.findIndex(dosen => dosenId == dosen.id)
-                    const { email, nama } = this.dosen[index]
-                    if (index !== -1) {
-                        this.dosen[index]['selectedType'] = this.dosenTypes[i]
-                        this.dosen[index]['email'] = 'updating'
-                        this.dosen[index]['nama'] = 'updating'
-                        this.dosen[index]['email'] = email
-                        this.dosen[index]['nama'] = nama
-                    }
+                if (this.selectedPenguji) {
+                    const lastIndex = this.dosen.findIndex(dosen => this.selectedPenguji.dosen == dosen.id)
+                    delete this.dosen[lastIndex].selectedType
                 }
-            } else {
-                const index = this.dosen.findIndex(dosen => this.selectedPenguji[i] == dosen.id)
-                this.selectedPenguji[this.selectedPenguji.indexOf(dosenId)] = null
-                if (index !== -1) {
-                    this.selectedPenguji[i] = null
-                    delete this.dosen[index].selectedType
-                }
-                const id = this.dosen.findIndex(dosen => dosen.id == dosenId)
-                const { email, nama } = this.dosen[id]
-                this.selectedPenguji[i] = dosenId
-                this.dosen[id].selectedType = this.dosenTypes[i]
-                this.dosen[id]['email'] = 'updating'
-                this.dosen[id]['nama'] = 'updating'
-                this.dosen[id]['email'] = email
-                this.dosen[id]['nama'] = nama
-                this.selectedPenguji[i] = dosenId
+                this.selectedPenguji = {dosen: dosenId}
+                const newIndex = this.dosen.findIndex(dosen => dosenId == dosen.id)
+                const { email, nama } = this.dosen[newIndex]
+                this.dosen[newIndex].selectedType = 'penguji baru'
+                this.dosen[newIndex]['email'] = 'updating' 
+                this.dosen[newIndex]['nama'] = 'updating'
+                this.dosen[newIndex]['email'] = email
+                this.dosen[newIndex]['nama'] = nama
             }
-            this.cleanArr()
         },
     },
 
     created() {
+        this.examId = this.$router.currentRoute.params.id
         this.$store.state.auth.token ? this.getExam() : null
     }
 }
