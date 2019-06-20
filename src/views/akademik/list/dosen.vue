@@ -72,6 +72,7 @@
         <template v-slot:list>
             <v-data-table
                 class="solid-container zebra-column"
+                hide-actions
                 :headers="headers"
                 :search="search"
                 :items="users"
@@ -85,7 +86,7 @@
                 <template v-slot:no-data>
                     <v-layout :value="!users" class="pa-2" column align-center>
                         Tidak ada pengguna untuk ditampilkan.
-                        <v-btn color="primary" @click="initialize">Muat ulang</v-btn>
+                        <v-btn color="primary" @click="getDosen(page)">Muat ulang</v-btn>
                     </v-layout>
                 </template>
                 <template v-slot:items="props">
@@ -97,6 +98,20 @@
                     <td class="justify-center layout px-0">
                         <v-icon small class="mr-2" @click="editItem(props)">edit</v-icon>
                         <v-icon small @click="showDeleteDialog(props.item)">delete</v-icon>
+                    </td>
+                </template>
+                <template v-slot:footer>
+                    <td :colspan="headers.length">
+                        <v-layout row align-center>
+                            <v-spacer></v-spacer>
+                            <span v-text="pageInfo"></span>
+                            <v-btn :disabled="isFirstPage" @click="page -= 1" flat icon color="primary">
+                                <v-icon>chevron_left</v-icon>
+                            </v-btn>
+                            <v-btn :disabled="isLastPage" @click="page += 1" flat icon color="primary">
+                                <v-icon>chevron_right</v-icon>
+                            </v-btn>
+                        </v-layout>
                     </td>
                 </template>
             </v-data-table>
@@ -179,7 +194,10 @@ export default {
                 nip: '',
             },
             perPage: [ 10 ],
-            deleting: false
+            deleting: false,
+            page: 1,
+            rowsPerPage: 10,
+            totalItems: 0,
         }
     },
 
@@ -192,17 +210,35 @@ export default {
         },
         hasChanged() {
             return this.editTemp.nama.trim() !== this.editedItem.nama.trim() || this.editTemp.email.trim() !== this.editedItem.email.trim() || this.editTemp.nip.trim() !== this.editedItem.nip.trim() || this.editTemp.prodi.trim() !== this.editedItem.prodi.trim() || this.editTemp.konsentrasi.trim() !== this.editedItem.konsentrasi.trim()
-        }
+        },
+        pageInfo () {
+            const {page, rowsPerPage, totalItems} = this
+            const first = (page-1)*rowsPerPage + 1
+            const isLastPage = page*rowsPerPage > totalItems
+            const last = isLastPage ? totalItems : page*rowsPerPage
+            return `${first} - ${last} dari ${totalItems}`
+        },
+        isLastPage() {
+            const {page, rowsPerPage, totalItems} = this
+            return page*rowsPerPage >= totalItems
+        },
+        isFirstPage() {
+            return this.page == 1
+        },
     },
 
     watch: {
         dialog (val) {
             val || this.close()
+        },
+        
+        page: function(val) {
+            this.getDosen(val)
         }
     },
 
     created () {
-        this.$store.state.auth.token ? this.initialize() : null
+        this.$store.state.auth.token ? this.getDosen() : null
     },
 
     methods: {
@@ -210,15 +246,17 @@ export default {
 			'showSnackbar'
         ]),
         
-        async initialize () {
+        async getDosen (page = 1) {
             this.loading = true
             try {
-                const response = await this.$thessa.getAllDosen()
+                const response = await this.$thessa.getAllDosen('page=' + page)
+                this.totalItems = response.data.count
+                this.page = page
                 this.users = response.data.results
                 this.loading = false
-            } catch (error) {
+            } catch (error) { 
                 this.showSnackbar({
-                    message: err.message,
+                    message: error.message,
                     type: 'error'
                 })
                 this.loading = false
