@@ -3,10 +3,10 @@
         <v-layout row align-center>
             <v-spacer></v-spacer>
             <span v-text="pageInfo"></span>
-            <v-btn :disabled="isFirstPage" @click="page -= 1" flat icon color="primary">
+            <v-btn :disabled="isFirstPage" @click="changePage(-1)" flat icon color="primary">
                 <v-icon>chevron_left</v-icon>
             </v-btn>
-            <v-btn :disabled="isLastPage" @click="page += 1" flat icon color="primary">
+            <v-btn :disabled="isLastPage" @click="changePage(1)" flat icon color="primary">
                 <v-icon>chevron_right</v-icon>
             </v-btn>
         </v-layout>
@@ -20,6 +20,10 @@ export default {
             type: Number,
             required: true
         },
+        page: {
+            type: Number,
+            default: 1,
+        },
         totalItems: {
             type: Number,
             required: true,
@@ -29,14 +33,13 @@ export default {
 
     data() {
         return {
-            page: 1,
             rowsPerPage: 10,
         }
     },
 
-    watch: {
-        page: function(val) {
-            this.$emit('handle-page-change', val)
+    methods: {
+        changePage(val) {
+            this.$emit('on-page-change', this.page + val)
         }
     },
 
