@@ -13,151 +13,155 @@
             <v-toolbar dark color="primary">
                 <v-toolbar-side-icon @click="toggleCorrectionSection"></v-toolbar-side-icon>
                 <v-toolbar-title class="white--text" v-text="title"></v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn class="white red--text text-uppercase" @click="fetchRecap"><b>Selesai</b></v-btn>
             </v-toolbar>
-            <v-layout column v-if="step == 0">
-                <v-layout column class="pa-2 pt-4 pl-4 pr-4" style="position: relative;">
-                    <v-slide-y-reverse-transition>
-                        <v-layout column class="pa-4" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
-                            <v-form ref="add-correction-form" v-model="valid" lazy-validation>
-                            <v-layout row justify-space-between>
-                                <v-select
-                                    v-model="selectedBab"
-                                    :items="bab"
-                                    :rules="[v => !!v || 'Pilih salah satu']"
-                                    solo
-                                    placeholder="Pilih Bab"
-                                    class="mr-2"></v-select>
-                                <v-text-field :rules="[v => !!v || 'Harus diisi', v => !isNaN(v) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
+            <v-tabs
+                v-model="step"
+                color="white"
+                grow
+                class="outline-tab"
+                >
+                <v-tabs-slider color="primary"></v-tabs-slider>
+                <v-tab>Komentar</v-tab>
+                <v-tab>Penilaian</v-tab>
+                <v-tab>Revisi Judul</v-tab>
+            </v-tabs>
+            <v-tabs-items v-model="step">
+                <v-tab-item class="tab-container">
+                    <v-layout column style="position: relative;">
+                        <v-slide-y-reverse-transition>
+                            <v-layout column class="pt-2" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
+                                <v-form ref="add-correction-form" v-model="valid" lazy-validation>
+                                <v-layout row justify-space-between>
+                                    <v-select
+                                        v-model="selectedBab"
+                                        :items="bab"
+                                        :rules="[v => !!v || 'Pilih salah satu']"
+                                        solo
+                                        placeholder="Pilih Bab"
+                                        class="mr-2"></v-select>
+                                    <v-text-field :rules="[v => !!v || 'Harus diisi', v => !isNaN(v) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
+                                </v-layout>
+                                <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.komentar" placeholder="Masukkan komentar"></v-textarea>
+                                <v-layout>
+                                    <v-spacer></v-spacer>
+                                    <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection" :disabled="saving">Batal</v-btn>
+                                    <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges" :loading="saving">Edit</v-btn>
+                                    <v-btn v-else class="success ma-0 mb-2" @click="addCorrection" :loading="saving">Simpan</v-btn>
+                                </v-layout>
+                                </v-form>
                             </v-layout>
-                            <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.komentar" placeholder="Masukkan komentar"></v-textarea>
+                        </v-slide-y-reverse-transition>
+                        <v-layout column v-show="!creating">
+                            <app-loading :loadingState="fetchingComments"></app-loading>
+                            <v-layout align-center v-if="errorFetchingComments" column>
+                                <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat komentar</p>
+                                <v-btn flat class="primary--text" @click="fetchComments">
+                                    <v-icon left small>refresh</v-icon>
+                                    <span class="text-lowercase">muat ulang komentar</span>
+                                </v-btn>
+                            </v-layout>
+                            <template v-else-if="!fetchingComments">
+                                <v-layout column v-if="correctionFilled">
+                                    <v-layout column v-for="(correction, section) in corrections" :key="section">
+                                        <template v-if="correction.items.length > 0">
+                                            <h3 class="mb-1 grey--text" v-text="bab[section]"></h3>
+                                            <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
+                                                <p class="mb-0" v-text="item.komentar"></p>
+                                                <v-layout row align-center>
+                                                    <span class="font-weight-bold" style="color: #9C9C9C">Halaman {{item.halaman}}</span>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn icon flat :ripple="false" @click="editCorrection(section, index)">
+                                                        <v-icon class="seconday--text" small>edit</v-icon>
+                                                    </v-btn>
+                                                    <v-btn icon flat :ripple="false" @click="showDialog(section, index)">
+                                                        <v-icon class="secondary--text" small>delete</v-icon>
+                                                    </v-btn>
+                                                </v-layout>
+                                            </v-layout>
+                                        </template>
+                                    </v-layout>
+                                </v-layout>
+                                <v-layout justify-center v-else>
+                                    Anda belum memberikan komentar.
+                                </v-layout>
+                            </template>
+                        </v-layout>
+                        <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
+                    </v-layout>
+                </v-tab-item>
+                <v-tab-item class="tab-container">
+                    <template v-show="!addingGrade">
+                        <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 0">
+                            <p class="mb-0"><b>Mahasiswa</b></p>
+                            <ol class="mb-3">
+                                <li v-for="mhs in exam.ujian.skripsi.mahasiswa" :key="mhs.nim" v-text="mhs.nama"></li>
+                            </ol>
+                        </template>
+                        <v-layout column v-if="exam.ujian">
+                            <v-layout align-start v-for="(so, index) in socs" :key="index">
+                                <v-chip label class="mr-3">{{index + 1}}</v-chip>
+                                <v-layout row>
+                                    <v-layout column>
+                                        <b v-text="so.name"></b>
+                                        <b v-if="filledGrades(index)" class="success--text">Nilai: {{ filledGrades(index) }}</b>
+                                        <b v-else class="error--text">Nilai belum lengkap</b>
+                                    </v-layout>
+                                    <v-btn class="primary ml-3" @click="addGrades(index)">beri nilai</v-btn>
+                                </v-layout>
+                            </v-layout>
+                        </v-layout>
+                    </template>
+                    <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
+                        <v-layout column>
+                            <b>{{ socs[gradeTemp.so_id].name }}</b>
+                            <p class="mb-1">{{ socs[gradeTemp.so_id].description }}</p>
+                            <v-form v-model="validGrades">
+                            <table class="mt-2 grade-list">
+                                <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
+                                    <div :key="mahasiswa.nim">
+                                        <tr>
+                                            <td v-text="mahasiswa.nama" colspan="2"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><v-text-field :disabled="saving" :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
+                                            <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
+                                        </tr>
+                                    </div>
+                                </template>
+                            </table>
+                            </v-form>
                             <v-layout>
                                 <v-spacer></v-spacer>
-                                <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection" :disabled="saving">Batal</v-btn>
-                                <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges" :loading="saving">Edit</v-btn>
-                                <v-btn v-else class="success ma-0 mb-2" @click="addCorrection" :loading="saving">Simpan</v-btn>
-                            </v-layout>
-                            </v-form>
-                        </v-layout>
-                    </v-slide-y-reverse-transition>
-                    <v-layout column v-show="!creating">
-                        <app-loading :loadingState="fetchingComments"></app-loading>
-                        <v-layout align-center v-if="errorFetchingComments" column>
-                            <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat komentar</p>
-                            <v-btn flat class="primary--text" @click="fetchComments">
-                                <v-icon left small>refresh</v-icon>
-                                <span class="text-lowercase">muat ulang komentar</span>
-                            </v-btn>
-                        </v-layout>
-                        <template v-else-if="!fetchingComments">
-                            <v-layout column v-if="correctionFilled">
-                                <v-layout column v-for="(correction, section) in corrections" :key="section">
-                                    <template v-if="correction.items.length > 0">
-                                        <h3 class="mb-1" v-text="bab[section]"></h3>
-                                        <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
-                                            <p class="mb-0" v-text="item.komentar"></p>
-                                            <v-layout row align-center>
-                                                <span class="font-weight-bold">Halaman {{item.halaman}}</span>
-                                                <v-spacer></v-spacer>
-                                                <v-btn flat :ripple="false" @click="editCorrection(section, index)">
-                                                    <v-icon class="warning--text" small>edit</v-icon>
-                                                    <span class="primary--text ml-1">edit</span>
-                                                </v-btn>
-                                                <v-btn flat :ripple="false" @click="showDialog(section, index)">
-                                                    <v-icon class="error--text" small>delete</v-icon>
-                                                    <span class="primary--text ml-1">hapus</span>
-                                                </v-btn>
-                                            </v-layout>
-                                        </v-layout>
-                                    </template>
-                                </v-layout>
-                            </v-layout>
-                            <v-layout justify-center v-else>
-                                Anda belum memberikan komentar.
-                            </v-layout>
-                        </template>
-                    </v-layout>
-                    <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
-                </v-layout>
-            </v-layout>
-            <v-layout column v-if="step == 1" class="pa-2 pl-4 pr-4" style="position: relative;">
-                <template v-show="!addingGrade">
-                    <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 0">
-                        <p class="mb-0"><b>Mahasiswa</b></p>
-                        <ol class="mb-3">
-                            <li v-for="mhs in exam.ujian.skripsi.mahasiswa" :key="mhs.nim" v-text="mhs.nama"></li>
-                        </ol>
-                    </template>
-                    <v-layout column v-if="exam.ujian">
-                        <v-layout align-start v-for="(so, index) in socs" :key="index">
-                            <v-chip label class="mr-3">{{index + 1}}</v-chip>
-                            <v-layout row>
-                                <v-layout column>
-                                    <b v-text="so.name"></b>
-                                    <b v-if="filledGrades(index)" class="success--text">Nilai: {{ filledGrades(index) }}</b>
-                                    <b v-else class="error--text">Nilai belum lengkap</b>
-                                </v-layout>
-                                <v-btn class="primary ml-3" @click="addGrades(index)">beri nilai</v-btn>
+                                <v-btn class="error" @click="discardGrades" :disabled="saving">Batal</v-btn>
+                                <v-btn class="success" @click="saveGrades" :loading="saving">simpan</v-btn>
                             </v-layout>
                         </v-layout>
-                    </v-layout>
-                </template>
-                <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
-                    <v-layout column>
-                        <b>{{ socs[gradeTemp.so_id].name }}</b>
-                        <p class="mb-1">{{ socs[gradeTemp.so_id].description }}</p>
-                        <v-form v-model="validGrades">
-                        <table class="mt-2 grade-list">
-                            <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
-                                <div :key="mahasiswa.nim">
-                                    <tr>
-                                        <td v-text="mahasiswa.nama" colspan="2"></td>
-                                    </tr>
-                                    <tr>
-                                        <td><v-text-field :disabled="saving" :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
-                                        <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
-                                    </tr>
-                                </div>
-                            </template>
-                        </table>
-                        </v-form>
-                        <v-layout>
-                            <v-spacer></v-spacer>
-                            <v-btn class="error" @click="discardGrades" :disabled="saving">Batal</v-btn>
-                            <v-btn class="success" @click="saveGrades" :loading="saving">simpan</v-btn>
+                        <b class="mt-2">Indikator Penilaian</b>
+                        <v-layout column v-for="(list, i) in socs[selectedSO].indicators" :key="i">
+                            <b>{{ gradeIndicators[i] }}</b>
+                            <ul>
+                                <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
+                            </ul>
                         </v-layout>
                     </v-layout>
-                    <b class="mt-2">Indikator Penilaian</b>
-                    <v-layout column v-for="(list, i) in socs[selectedSO].indicators" :key="i">
-                        <b>{{ gradeIndicators[i] }}</b>
-                        <ul>
-                            <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
-                        </ul>
-                    </v-layout>
-                </v-layout>
-            </v-layout>
-            <v-layout column v-if="step == 2" class="pa-4">
-                <h3>Apakah ada revisi judul?</h3>
-                <v-radio-group v-model="revisionTemp.revisi" :mandatory="false">
-                    <v-radio color="primary" label="Tidak Ada" :value="false"></v-radio>
-                    <v-radio color="primary" label="Ada" :value="true"></v-radio>
-                </v-radio-group>
-                <template v-if="revisionTemp.revisi">
+                </v-tab-item>
+                <v-tab-item class="tab-container">
+                    <h3 class="font-weight-medium">Apakah ada revisi judul?</h3>
+                    <v-radio-group class="pa-0 mt-2" v-model="revisionTemp.revisi" :mandatory="false">
+                        <v-radio color="primary" label="Tidak ada revisi judul" :value="false"></v-radio>
+                        <v-radio color="primary" label="Ada, revisi judulnya:" :value="true"></v-radio>
+                    </v-radio-group>
                     <p>Masukkan revisi judul</p>
-                    <v-textarea box label="revisi judul" v-model="revisionTemp.konten"></v-textarea>
-                </template>
-                <v-layout>
-                    <v-spacer></v-spacer>
-                    <v-btn class="default ma-0 mr-2" :disabled="saving" v-if="revisionHasChanged" @click="resetRevision">hapus perubahan</v-btn>
-                    <v-btn class="success ma-0" :loading="saving" @click="addRevision" v-if="revisionHasChanged">simpan revisi</v-btn>
-                </v-layout>
-            </v-layout>
-            <v-layout row class="pr-4">
-                <v-spacer></v-spacer>
-                <v-btn v-if="!creating && !addingGrade && step !== 0" color="primary" class="ma-0 ml-2" @click="step = 0">Komentar</v-btn>
-                <v-btn v-if="!creating && !addingGrade && step !== 1" color="primary" class="ma-0 ml-2" @click="step = 1">Penilaian</v-btn>
-                <v-btn v-if="!creating && !addingGrade && step !== 2 && isLeader" color="primary" class="ma-0 ml-2" @click="step = 2">Revisi Judul</v-btn>
-                <v-btn v-if="!creating && !addingGrade" color="primary" class="ma-0 ml-2" @click="fetchRecap">Rekap</v-btn>
-            </v-layout>
+                    <v-textarea :disabled="!revisionTemp.revisi" box v-model="revisionTemp.konten"></v-textarea>
+                    <v-layout>
+                        <v-spacer></v-spacer>
+                        <v-btn v-show="revisionHasChanged" class="default ma-0 mr-2" :disabled="saving" @click="resetRevision">hapus perubahan</v-btn>
+                        <v-btn v-show="revisionHasChanged" class="success ma-0" :loading="saving" @click="addRevision">simpan revisi</v-btn>
+                    </v-layout>
+                </v-tab-item>
+            </v-tabs-items>
         </v-navigation-drawer>
         <v-dialog v-model="dialog.show" persistent max-width="600px">
             <v-card>
@@ -198,47 +202,61 @@
                     </v-btn>
                 </v-toolbar-items>
             </v-toolbar>
-            <v-content style="margin-top: 50px">
-                <v-layout column class="pa-4">
-                    <h3>Intro</h3>
-                    <p class="mb-4">Rekap ujian tugas akhir yang berjudul <b>{{exam.ujian.skripsi.judul}}</b> pada <b>{{ today }}</b> di <b>{{ room }}</b> dengan mahasiswa <b>{{ mahasiswa }}</b>.</p>
-                    <h3>Rekap Penilaian</h3>
-                    <!-- <v-layout style="overflow-x: scroll">
-                        <table class="recap-table">
+            <v-content style="margin-top: 50px; width: 100%;" class="pa-0">
+                <v-layout column class="pa-4" style="width: 100%;">
+                    <h3 class="mb-2">INFORMASI UJIAN</h3>
+                    <template v-if="recap">
+                        <p class="mb-0" v-text="recap.rekap_ujian.skripsi.judul"></p>
+                        <v-layout align-center class="mt-2"><v-icon class="mr-2">schedule</v-icon> {{today}}</v-layout>
+                        <v-layout align-center class="mt-2"><v-icon class="mr-2">event</v-icon> {{recap.rekap_ujian.sesi}}</v-layout>
+                        <v-layout align-center class="mt-2"><v-icon class="mr-2">location_on</v-icon> {{recap.rekap_ujian.ruang}}</v-layout>
+                        <v-layout align-center class="mt-2"><v-icon class="mr-2">person</v-icon> {{mahasiswa}}</v-layout>
+                    </template>
+                    <hr class="mt-4 mb-4">
+                    <h3 class="mb-2">REKAP PENILAIAN UJIAN TUGAS AKHIR</h3>
+                    <v-layout style="width: 100%;">
+                        <table class="recap-table" v-if="recap">
                             <tr class="text-xs-center">
                                 <td rowspan="2">Dosen</td>
-                                <td :colspan="exam.ujian.skripsi.mahasiswa.length">Nilai</td>
+                                <td :colspan="recap.rekap_ujian.skripsi.mahasiswa.length">Nilai</td>
+                                <td rowspan="2">Keterangan</td>
                             </tr>
                             <tr class="text-xs-center">
-                                <td v-for="mahasiswa in exam.ujian.skripsi.mahasiswa" :key="mahasiswa.nim" v-text="mahasiswa.nama"></td>
+                                <td class="mahasiswa-cell" v-for="(nilai, i) in recap.rekap_nilai" :key="i" v-text="nilai.mahasiswa"></td>
                             </tr>
-                            <tr v-for="dosen in exam.ujian.penguji" :key="dosen.nip">
-                                <td v-text="dosen.dosen"></td>
-                                <td>99</td>
-                                <td>97</td>
-                                <td>89</td>
+                            <tr v-for="(penguji, i) in recap.rekap_ujian.penguji" :key="i" :class="penguji.dosen == $store.state.auth.user.nama ? 'success lighten-4' : ''">
+                                <td class="dosen-cell" v-text="penguji.dosen"></td>
+                                <td v-for="(mahasiswa, j) in recap.rekap_nilai" :key="j">{{ mahasiswa.nilai[i].rerata ? mahasiswa.nilai[i].rerata : 0 }}</td>
+                                <td >Keterangan</td>
                             </tr>
                             <tr>
                                 <td><b>Total</b></td>
-                                <td>{{ 99 * 6}}</td>
-                                <td>{{ 87 * 6}}</td>
-                                <td>{{ 89 * 6}}</td>
+                                <td v-for="(total, i) in gradesTotal" :key="i" v-text="total"></td>
+                                <td></td>
                             </tr>
                             <tr>
                                 <td><b>Rerata</b></td>
-                                <td>99</td>
-                                <td>87</td>
-                                <td>89</td>
+                                <td class="font-weight-bold" v-for="(average, i) in gradesAverage" :key="i" v-text="average"></td>
+                                <td></td>
                             </tr>
                         </table>
-                    </v-layout> -->
-                    <h3 class="mt-4">Rekap Komentar</h3>
+                    </v-layout>
+                    <h3 class="mt-4">REKAP KOMENTAR</h3>
                     <table class="recap-table">
 
                     </table>
+                    <v-layout class="end-exam" wrap>
+                        <p class="red--text font-weight-bold ma-0"><i>Pastikan semua nilai dan komentar sudah benar, tepat, serta sudah disetujui oleh semua penguji.<br>Seluruh hasil ujian akan disimpan dan tidak dapat diubah ketika sudah menekan tombol SELESAI.</i></p>
+                        <v-spacer></v-spacer>
+                        <v-layout class="pa-0">
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary">SELESAI</v-btn>
+                        </v-layout>
+                    </v-layout>
                 </v-layout>
             </v-content>
         </v-dialog>
+        <v-dialog></v-dialog>
     </div>
 </template>
 
@@ -305,9 +323,15 @@ export default {
             validGrades: true,
             step: 0,
             showRecap: false,
-            recap: {},
+            recap: null,
             fetchingComments: false, 
             errorFetchingComments: false,
+            fetchingGrades: false,
+            errorFetchingGrades: false,
+            fetchingGrades: false,
+            errorFetchingGrades: false,
+            fetchingRevision: false,
+            errorFetchingRevision: false,
             saving: false
         }
     },
@@ -371,11 +395,40 @@ export default {
         },
 
         mahasiswa() {
-            if (this.exam.ujian) {
-                const listMahasiswa = this.exam.ujian.skripsi.mahasiswa.map(mhs => mhs.nama)
+            if (this.recap) {
+                const listMahasiswa = this.recap.rekap_ujian.skripsi.mahasiswa.map(mhs => mhs.nama)
                 return listMahasiswa.join(', ')
             } 
             return ''
+        },
+
+        gradesTotal() {
+            if (this.recap) {
+                return this.recap.rekap_nilai.map(mahasiswa => {
+                    return mahasiswa.nilai.reduce((a, b) => {
+                        let na = a.rerata ? a.rerata : 0
+                        let nb = b.rerata ? b.rerata : 0
+                        return na + nb
+                    })
+                })
+            }
+        },
+
+        gradesAverage() {
+            if (this.recap) {
+                return this.recap.rekap_nilai.map(mahasiswa => {
+                    let total = 0
+                    let assigned = 0
+                    mahasiswa.nilai.forEach(({rerata}) => {
+                        if (rerata) {
+                            total += rerata
+                            assigned += 1
+                        }
+                    })
+                    let result = assigned ? Number((total/assigned).toFixed(2)) : 0
+                    return result + ' (' + this.gradeIndicator(result) + ')'
+                })
+            }
         }
     },
 
@@ -401,6 +454,144 @@ export default {
             } catch (error) {
                 this.showSnackbar(error)
             }
+        },
+
+        async fetchComments() {
+            this.fetchingComments = true
+            try {
+                const comments = await this.$thessa.getExamComments(this.$router.currentRoute.params.id)
+                this.fetchingComments = false
+                this.errorFetchingComments = false
+                this.constructComment(comments.data)
+            } catch (error) {
+                this.errorFetchingComments = true
+                this.fetchingComments = false
+                this.showSnackbar(error)
+            }
+        },
+
+        async fetchGrades() {
+            this.fetchingGrades = true
+            try {
+                const response = await this.$thessa.getExamGrades(this.$router.currentRoute.params.id)
+                this.fetchingGrades = true
+                this.constructGrades(response.data)
+            } catch (error) {
+                this.errorFetchingGrades = true
+                this.fetchGrades = false
+                this.showSnackbar(error)
+            }
+        },
+
+        async fetchExam() {
+            try {
+                const res = await this.$thessa.getExamById(this.$router.currentRoute.params.id)
+                this.exam = res.data
+                this.generateGrades()
+            } catch (error) {
+                this.showSnackbar(error)
+                this.$router.go(-1)
+            }
+        },
+
+        async fetchRevision() {
+            this.errorFetchingRevision = false
+            try {
+                const res = await this.$thessa.getExamRevision(this.$router.currentRoute.params.id)
+                console.log(res)
+            } catch (error) {
+                this.errorFetchingRevision = true
+            }
+        },
+
+        async saveGrades() {
+            const { so_id, grades } = this.gradeTemp
+            this.saving = true
+            let tempGrades = JSON.parse(JSON.stringify(this.grades))
+            this.exam.ujian.skripsi.mahasiswa.forEach((mahasiswa, i) => {
+                tempGrades[i].grades.splice(so_id, 1, {so_id, nilai: grades[i]})
+            })
+            try {
+                const response = await this.$thessa.submitGrades(this.$router.currentRoute.params.id, tempGrades)
+                this.grades = response.data.result
+                this.saving = false
+            } catch (error) {
+                this.showSnackbar(error)
+                this.saving = false
+            }
+            this.discardGrades()
+        },
+        
+        async saveChanges() {
+            const validInput = this.$refs['add-correction-form'].validate()
+            if(validInput) {
+                this.saving = true
+                try {
+                    const {id, halaman, komentar, bab} = this.newCorrection
+                    const comments = await this.$thessa.getExamComments(this.$router.currentRoute.params.id)
+                    this.constructComment(comments.data)
+                    this.resetNewCorrection()
+                    this.saving = false
+                } catch (error) {
+                    this.showSnackbar(error)
+                    this.saving = false
+                }
+            }
+        },
+        
+        async addCorrection() {
+            const validInput = this.$refs['add-correction-form'].validate()
+            if (validInput) {
+                this.saving = true
+                try {
+                    const { halaman, komentar, index } = this.newCorrection
+                    const comments = await this.$thessa.submitComments(this.$router.currentRoute.params.id, {bab: index, halaman, komentar})
+                    this.constructComment(comments.data)
+                    this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
+                    this.updateLocalStorage()
+                    this.resetNewCorrection()
+                    this.saving = false
+                } catch (error) {
+                    this.showSnackbar(error)
+                    this.saving = false
+                }
+            }
+        },
+
+        async addRevision() {
+            this.saving = true
+            try {
+                const response = await this.$thessa.submitRevision(this.$router.currentRoute.params.id, {revisi: this.revisionTemp.revisi, konten: this.revisionTemp.revisi ? this.revisionTemp.konten : ''})
+                const result = response.data.result
+                this.revision = result
+                this.revisionTemp = result
+                this.saving = false
+            } catch (error) {
+                this.showSnackbar(error)
+                this.saving = false
+            }
+        },
+
+        constructComment(comments) {
+            if (!this.errorFetchingComments) {
+                this.corrections = []
+                this.generateCorrectionsTemplate()
+                comments.forEach(comment => {
+                    this.corrections[comment.bab].items.push(comment)
+                })
+            }
+        },
+
+        generateCorrectionsTemplate() {
+            this.bab.map(bab => {
+                this.corrections.push({
+                    items: []
+                })
+            })
+        },
+
+        constructGrades(grades) {
+
         },
 
         nextStep() {
@@ -445,24 +636,6 @@ export default {
             return filled
         },
 
-        async saveGrades() {
-            const { so_id, grades } = this.gradeTemp
-            this.saving = true
-            let tempGrades = JSON.parse(JSON.stringify(this.grades))
-            this.exam.ujian.skripsi.mahasiswa.forEach((mahasiswa, i) => {
-                tempGrades[i].grades.splice(so_id, 1, {so_id, nilai: grades[i]})
-            })
-            try {
-                const response = await this.$thessa.submitGrades(this.$router.currentRoute.params.id, tempGrades)
-                this.grades = response.data.result
-                this.saving = false
-            } catch (error) {
-                this.showSnackbar(error)
-                this.saving = false
-            }
-            this.discardGrades()
-        },
-
         generateGrades() {
             let grades = this.exam.ujian.skripsi.mahasiswa.map(({ id }) => {
                 return {
@@ -473,36 +646,6 @@ export default {
             this.grades = grades
         },
 
-        async fetchExam() {
-            try {
-                const res = await this.$thessa.getExamById(this.$router.currentRoute.params.id)
-                this.exam = res.data
-                this.generateGrades()
-            } catch (error) {
-                this.showSnackbar(error)
-                this.$router.go(-1)
-            }
-        },
-
-        generateCorrectionsTemplate() {
-            this.bab.map(bab => {
-                this.corrections.push({
-                    items: []
-                })
-            })
-        },
-
-        generateExamData() {
-            // const examData = JSON.parse(localStorage.getItem('exam-data'))
-            // if (examData && this.$router.currentRoute.params.id == examData.id) {
-            //     this.step = examData.step
-            //     this.corrections = examData.corrections
-            //     this.sortCorrections()
-            // } else {
-            //     this.updateLocalStorage()
-            // }
-        },
-
         editCorrection(section, index) {
             const { halaman, komentar, bab, id } = this.corrections[section].items[index]
             this.temp = {edit: true, text: komentar, page: halaman, index, selectedBab: this.bab[section], section}
@@ -510,23 +653,6 @@ export default {
             this.itemIndex = index
             this.selectedBab = this.bab[bab]
             this.creating = true
-        },
-
-        async saveChanges() {
-            const validInput = this.$refs['add-correction-form'].validate()
-            if(validInput) {
-                this.saving = true
-                try {
-                    const {id, halaman, komentar, bab} = this.newCorrection
-                    const comments = await this.$thessa.getExamComments(this.$router.currentRoute.params.id)
-                    this.constructComment(comments.data)
-                    this.resetNewCorrection()
-                    this.saving = false
-                } catch (error) {
-                    this.showSnackbar(error)
-                    this.saving = false
-                }
-            }
         },
 
         discardChanges() {
@@ -542,8 +668,8 @@ export default {
         },
 
         showDialog(section, index) {
-            const { text, page } = this.corrections[section].items[index]
-            this.dialog = { show: true, section, index, text,page }
+            const { halaman, komentar } = this.corrections[section].items[index]
+            this.dialog = { show: true, section, index, text:komentar, page:halaman }
         },
 
         closeDialog() {
@@ -577,68 +703,11 @@ export default {
             this.corrections.forEach(correction => correction.items.sort((a, b) => (a.page > b.page) ? 1 : -1)) 
         },
 
-        async addCorrection() {
-            const validInput = this.$refs['add-correction-form'].validate()
-            if (validInput) {
-                this.saving = true
-                try {
-                    const { halaman, komentar, index } = this.newCorrection
-                    const comments = await this.$thessa.submitComments(this.$router.currentRoute.params.id, {bab: index, halaman, komentar})
-                    this.constructComment(comments.data)
-                    this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
-                    this.updateLocalStorage()
-                    this.resetNewCorrection()
-                    this.saving = false
-                } catch (error) {
-                    this.showSnackbar(error)
-                    this.saving = false
-                }
-            }
-        },
-
-        async addRevision() {
-            this.saving = true
-            try {
-                const response = await this.$thessa.submitRevision(this.$router.currentRoute.params.id, {revisi: this.revisionTemp.revisi, konten: this.revisionTemp.revisi ? this.revisionTemp.konten : ''})
-                const result = response.data.result
-                this.revision = result
-                this.revisionTemp = result
-                this.saving = false
-            } catch (error) {
-                this.showSnackbar(error)
-                this.saving = false
-            }
-        },
-
         resetRevision() {
             const {revisi, konten} = this.revision
             this.revisionTemp = {
                 revisi,
                 konten
-            }
-        },
-
-        constructComment(comments) {
-            if (!this.errorFetchingComments) {
-                this.corrections = []
-                this.generateCorrectionsTemplate()
-                comments.forEach(comment => {
-                    this.corrections[comment.bab].items.push(comment)
-                })
-            }
-        },
-
-        async fetchComments() {
-            this.fetchingComments = true
-            try {
-                const comments = await this.$thessa.getExamComments(this.$router.currentRoute.params.id)
-                this.fetchingComments = false
-                this.errorFetchingComments = false
-                this.constructComment(comments.data)
-            } catch (error) {
-                this.errorFetchingComments = true
-                this.fetchingComments = false
-                this.showSnackbar(error)
             }
         },
 
@@ -660,9 +729,11 @@ export default {
         if (this.$store.state.auth.token) {
             this.fetchExam()
             this.fetchComments()
-            this.generateExamData()
+            this.fetchGrades()
+            this.fetchRevision()
             this.generateCorrectionsTemplate()
             this.getDrawerWidth()
+            this.syncRecap()
             this.windowWidth <= 991 ? this.drawer = false : true
             window.addEventListener('resize', this.getDrawerWidth)
         } else {
@@ -723,14 +794,6 @@ export default {
     .v-dialog--fullscreen
         background-color: white
     
-    .recap-table,.recap-table td
-            border: 1px solid black
-            border-collapse: collapse
-
-    .recap-table
-        td
-            padding: 4px
-    
     .grade-list
         tr 
             td:first-of-type
@@ -759,7 +822,48 @@ export default {
     #exam-content-view
         display: block
         height: 100vh
+
+    .outline-tab
+        .v-tabs__div
+            border: 1px solid #ececec
+            text-transform: capitalize
+
+            .v-tabs__item.v-tabs__item--active
+                color: #47ABF7
+
+    .tab-container
+        padding: 8px 12px 8px 12px
+
+        .theme--light.v-label
+            color: black
     
+    .end-exam
+        padding: 8px
+        border-radius: 4px
+        background: #EBEBEB
+    
+    .recap-table
+        border-radius: 8px
+        box-shadow: 1px 1px 20px 2px #dedede
+        border-collapse: collapse
+        width: 100%
+
+        tr
+            &:not(:last-of-type)
+                border-bottom: 1px solid #a7a7a7;
+
+            td
+                padding: 12px 8px
+                &:not(:first-of-type)
+                    border-left: 1px solid #a7a7a7
+                    // border-left: border-bottom: 1px solid #a7a7a7
+
+        tr:last-child td:first-child
+            border-bottom-left-radius: 10px
+
+        tr:last-child td:last-child
+            border-bottom-right-radius: 10px
+
     .correction-section
         background-color: white
 
