@@ -133,8 +133,8 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
     @action(detail=True)
     def grades(self, request, *args, **kwargs):
-        grades = self.get_object().grades
-        serializer = GradeSerializer(grades, many=True)
+        students = self.get_object().ujian.skripsi.students.all()
+        serializer = GradeSerializer(students, many=True)
         return Response(serializer.data)
 
     @grades.mapping.post
