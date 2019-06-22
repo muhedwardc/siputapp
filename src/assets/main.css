@@ -53,6 +53,14 @@
     background-color: #eee;
 }
 
+.zebra-row .theme--light.v-table thead tr:first-child {
+    border-bottom: 1px solid black
+}
+
+.zebra-row .v-datatable > tbody > tr:nth-of-type(odd) {
+    background-color: #eee;
+}
+
 .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
     background: #fafafa;
 }
