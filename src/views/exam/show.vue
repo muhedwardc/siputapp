@@ -1,11 +1,26 @@
 <template>
     <v-container>
-        <v-layout row wrap>
+        <v-layout v-if="exam" row wrap>
             <v-flex xs12>
                 <v-dialog persistent v-model="editDialog" max-width="600px">
                     <v-card>
                         <v-card-title class="title pb-0">Edit {{editTemp.label}}</v-card-title>
                         <v-card-text>
+                            <template v-if="editTemp.type == 'file'">
+                                <v-layout align-center>
+                                    <v-btn @click="$refs.pdf.click()">pilih naskah</v-btn>
+                                    <span v-line-clamp:20="1" v-text="editTemp.value.name"></span>
+                                </v-layout>
+                                <input
+                                    type="file"
+                                    style="display: none"
+                                    ref="pdf"
+                                    readonly
+                                    solo
+                                    accept="application/pdf,application/vnd.ms-excel"
+                                    @change="onFilePicked"
+                                >
+                            </template>
                             <v-textarea v-if="editTemp.type == 'text'" :label="editTemp.label" auto-grow v-model="editTemp.value"></v-textarea>
                             <v-menu
                                 v-if="editTemp.type == 'date'"
@@ -244,7 +259,7 @@
                         </v-card-text>
                         <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn class="font-weight-bold" color="red darken-1" flat @click="discard">Batal</v-btn>
+                        <v-btn class="font-weight-bold" color="red darken-1" flat @click="discard" :disabled="submitting">Batal</v-btn>
                         <v-btn class="font-weight-bold" color="green darken-1" v-if="hasChanged" :loading="submitting" @click="saveEdit" flat>Ya</v-btn>
                         </v-card-actions>
                     </v-card>
@@ -280,31 +295,22 @@
                             <v-layout column>
                                 <h3 class="headline font-weight-regular mt-1 text-capitalize">
                                     {{ exam.skripsi.judul }}
-                                    <span @click="edit('skripsi.judul', 'text', 'Judul Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span>
+                                    <span @click="edit('skripsi.judul', 'text', 'Judul Skripsi')" class="edit--text" v-if="isAdmin">[EDIT]</span>
                                 </h3>
                             </v-layout>
                             <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2" @click="startExam(exam.id)"><v-icon left>send</v-icon>masuk ujian</v-btn>
                             <v-btn v-if="isAdmin" depressed color="error" class="ma-0 mt-2" @click="dialogDelete = true"><v-icon left>delete</v-icon>hapus ujian</v-btn>
                         </v-layout>
-                        <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }} <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">(edit)</span></span>
-                        <v-layout class="mt-3">
-                            <v-btn @click="generateReadyDocument('download')" class="ma-0 mr-2" color="primary">
-                                <v-icon left>file_download</v-icon>
-                                Unduh
-                            </v-btn>
-                            <v-btn @click="generateReadyDocument('print')" class="ma-0" color="warning">
-                                <v-icon left>print</v-icon>
-                                Cetak
-                            </v-btn>
+                        <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }} <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">[EDIT]</span></span>
+                        <v-layout column class="mt-2">
+                            <span class="font-weight-bold">Naskah Skripsi</span>
+                            <v-layout class="mt-2" align-center>
+                                <v-icon flat>file_copy</v-icon>
+                                <span class="ml-2" v-line-clamp:20="1" v-text="naskahFileName"></span>
+                                <span @click="editedit('skripsi.naskah', 'file', 'Naskah')" class="edit--text text-capitalize" v-if="isAdmin">[EDIT]</span>
+                            </v-layout>
                         </v-layout>
-                        <!-- <v-layout align-center wrap class="mt-0"> -->
-                            <!-- <template> -->
-                                <!-- <v-btn v-if="isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startExam(exam.id)"><v-icon left>edit</v-icon> edit ujian</v-btn> -->
-                                <!-- <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2 mr-2" @click="startExam(exam.id)"><v-icon left>send</v-icon> masuk ujian</v-btn> -->
-                            <!-- </template> -->
-                        <!-- </v-layout> -->
-                        <hr class="mt-3 mb-3">
-                        <v-layout row justify-start align-center wrap>
+                        <v-layout class="mt-2" row justify-start align-center wrap>
                             <v-chip v-if="isLeader && !isAdmin" color="warning" class="white--text ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon>verified_user</v-icon>
@@ -316,34 +322,41 @@
                                     <v-icon class="subheading">calendar_today</v-icon>
                                 </v-avatar>
                                 {{ isToday ? date + ' (Hari Ini)' : date }}
-                                <span class="edit--text" @click="edit('tanggal', 'date', 'Tanggal Ujian')" v-if="isAdmin">(edit)</span>
+                                <span class="edit--text" @click="edit('tanggal', 'date', 'Tanggal Ujian')" v-if="isAdmin">[EDIT]</span>
                             </v-chip>
                             <v-chip class="ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon class="subheading">access_time</v-icon>
                                 </v-avatar>
                                 {{ exam.sesi }}
-                                <span class="edit--text" v-if="isAdmin" @click="edit('sesi', 'sesi', 'Sesi')">(edit)</span>
+                                <span class="edit--text" v-if="isAdmin" @click="edit('sesi', 'sesi', 'Sesi')">[EDIT]</span>
                             </v-chip>
                             <v-chip class="ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon class="subheading">place</v-icon>
                                 </v-avatar>
                                 {{ exam.ruang }}
-                                <span class="edit--text" v-if="isAdmin" @click="edit('ruang', 'ruang', 'Ruang')">(edit)</span>
+                                <span class="edit--text" v-if="isAdmin" @click="edit('ruang', 'ruang', 'Ruang')">[EDIT]</span>
                             </v-chip>
                         </v-layout>
+                        <hr>
+                        <v-layout class="mt-3" column>
+                            <span class="font-weight-bold">Berkas Hasil Ujian <template><v-icon small color="warning">error</v-icon><span class="ma-0 font-weight-regular">Ujian belum selesai</span></template></span>
+                            <app-exam-result class="mt-2" :examId="examId"></app-exam-result>
+                        </v-layout>
+                        <hr>
                         <v-layout column class="mt-4">
-                            <h6 class="title font-weight-regular mb-2">Intisari<span class="edit--text" v-if="isAdmin" @click="edit('skripsi.intisari', 'text', 'Intisari')">(edit)</span></h6>
+                            <h6 class="title font-weight-regular mb-2">Intisari<span class="edit--text" v-if="isAdmin" @click="edit('skripsi.intisari', 'text', 'Intisari')">[EDIT]</span></h6>
                             <p class="ma-0 mb-2">{{ exam.skripsi.intisari }}</p>
                         </v-layout>
+                        <hr>
                         <v-layout class="mt-3" column>
-                            <h6 class="title font-weight-regular">Informasi Mahasiswa<span class="edit--text" v-if="isAdmin" @click="edit('skripsi.mahasiswa', 'mahasiswa', 'Mahasiswa')">(edit)</span></h6>
+                            <h6 class="title font-weight-regular">Informasi Mahasiswa<span class="edit--text" v-if="isAdmin" @click="edit('skripsi.mahasiswa', 'mahasiswa', 'Mahasiswa')">[EDIT]</span></h6>
                             <v-data-table
                                 :headers="headers"
                                 :items="exam.skripsi.mahasiswa"
                                 hide-actions
-                                class="elevation-1 mt-2">
+                                class="elevation-1 mt-2 zebra-row solid-container">
                                 <template slot="headerCell" slot-scope="props">
                                     <span class="black--text" style="font-size: 13px">
                                         {{ props.header.text }}
@@ -359,13 +372,18 @@
                                 </template>
                             </v-data-table>
                         </v-layout>
+                        <hr>
                         <v-layout class="mt-3" column>
-                            <h6 class="title font-weight-regular">Informasi Penguji<span class="edit--text" v-if="isAdmin" @click="edit('penguji', 'dosen', 'Penguji')">(tambah penguji)</span></h6>
+                            <v-layout wrap align-center>
+                                <h6 class="title font-weight-regular">Informasi Penguji</h6>
+                                <v-spacer></v-spacer>
+                                <v-btn class="primary ma-0" v-if="isAdmin" @click="edit('penguji', 'dosen', 'Penguji')">Tambah Penguji</v-btn>
+                            </v-layout>
                             <v-data-table
                                 :headers="dosenHeaders"
                                 :items="exam.penguji"
                                 hide-actions
-                                class="elevation-1 mt-2">
+                                class="elevation-1 mt-2 zebra-row solid-container">
                                 <template slot="headerCell" slot-scope="props">
                                     <span class="black--text" style="font-size: 13px">
                                         {{ props.header.text }}
@@ -486,6 +504,13 @@ export default {
             return moment(this.exam.tanggal, 'DD/MM/YYYY').format('LL')
         },
 
+        naskahFileName() {
+            if (this.exam.skripsi) {
+                const arr = this.exam.skripsi.naskah.split('/')
+                return decodeURIComponent(arr[arr.length-1])
+            }
+        },
+
         isAdmin() {
             return this.$store.state.auth.user.is_admin
         },
@@ -500,11 +525,15 @@ export default {
         },
         hasChanged() {
             let changed = false
-            const { value, oldValue, type } = this.editTemp
+            let { value, oldValue, type } = this.editTemp
+            let file = null
+            type == 'file' ? file = JSON.parse(JSON.stringify(value)) : null
             type == 'text'
                 ? changed = value.trim() && value.trim() != oldValue
                 : type == 'mahasiswa' ? changed = JSON.stringify(value).trim() && JSON.stringify(value).trim() != JSON.stringify(this.exam.skripsi.mahasiswa)
+                : type == 'file' ? changed = !!file.name
                 : changed = oldValue && oldValue != value
+            
             return changed
         },
         readableDate() {
@@ -520,6 +549,23 @@ export default {
             'showSnackbar'
         ]),
 
+        onFilePicked (e) {
+            let newFile = {}
+			const files = e.target.files
+			if(files[0] !== undefined) {
+				newFile.name = files[0].name
+				if(newFile.name.lastIndexOf('.') <= 0) return
+				const fr = new FileReader()
+				fr.readAsDataURL(files[0])
+				fr.addEventListener('load', () => {
+					newFile.file = files[0]
+				})
+			} else {
+                newFile = {}
+            }
+            this.editTemp.value = newFile
+        },
+
         async deleteExam() {
             this.deleting = true
             try {
@@ -531,85 +577,6 @@ export default {
             } catch (error) {
                 this.deleting = false
                 this.showSnackbar(error)
-            }
-        },
-
-        async fetchReport() {
-            try {
-                return await {
-                    hari: 'SENIN',
-                    tanggal: '12 Mei 2019',
-                    waktu: '09.00 WIB',
-                    ruang: 'Ruang Sidang',
-                    mahasiswa: [
-                        {
-                            nama: 'Muhammad Edward Chakim',
-                            nim: '15/385407/TK/44069',
-                            tl: 'Batang',
-                            tgl: '4 Juni 1998',
-                            prodi: 'Teknologi Informasi',
-                            konsentrasi: 'Rekayasa Perangkat Lunak',
-                            nilai: 98,
-                        },
-                        {
-                            nama: 'Muhammad Edward Chakim Dua',
-                            nim: '15/385407/TK/44069',
-                            tl: 'Batang Dua',
-                            tgl: '4 Juni 1998',
-                            prodi: 'Teknologi Informasi',
-                            konsentrasi: 'Rekayasa Sistem Informasi',
-                            nilai: 99
-                        }
-                    ],
-                    judul: 'Pengembangan aplikasi ujian tugas akhir berbasis Outcome Based Assessment Test Dua Baris',
-                    dosen: ['Ridi Ferdiana', 'Rudi Hartanto', 'Selo', 'Markus', 'Silmi', 'Teguh Bharata Adji'],
-                    kadep: {
-                        nama: 'Sarjiya, S.T., M.T., Ph.D.',
-                        nip: '197307061999031005'
-                    },
-                    sekretaris: {
-                        nama: 'Hanung Adi  Nugroho, S.T., M.E., Ph.D.',
-                        nip: '197802242002121001'
-                    },
-                }
-            } catch (error) {
-                return false
-            }
-        },
-
-        async generateObjDocument() {
-            this.report = await this.fetchReport()
-            return this.report ? doc(this.report) : null
-        },
-
-        async generateReadyDocument(type) {
-            this.report = null
-            this.objDocument = await this.generateObjDocument()
-            if (this.objDocument) {
-                if (pdfMake.vfs == undefined) {
-                    pdfMake.vfs = pdfFonts.pdfMake.vfs
-                }
-    
-                const docDefinition = { 
-                    pageOrientation: 'portrait',
-                    content: this.objDocument,
-                    defaultStyle: {
-                        fontSize: 10,
-                        lineHeight: 1
-                    },
-                    pageSize: 'A4',
-                    pageMargins: [ 30, 20, 30, 20 ]
-                }
-    
-                this.pdfDocGenerator = pdfMake.createPdf(docDefinition);
-                if (type == 'open') {
-                    pdfMake.createPdf(docDefinition).open({}, window)
-                    this.generating = false
-                } else if (type == 'print') {
-                    this.pdfDocGenerator.print()
-                } else {
-                    this.pdfDocGenerator.download()
-                }
             }
         },
 
@@ -657,19 +624,38 @@ export default {
         },
 
         async assignNewDosen(penguji) {
+            this.submitting = true
             try {
                 const response = await this.$thessa.assignNewDosen(this.examId, penguji)
-                console.log(response.data)
+                this.exam.penguji.push(this.selectedPenguji)
+                this.selectedPenguji = null
+                this.editDialog = false
+                this.submitting = false
             } catch (error) {
                 this.showSnackbar(error)
+                this.submitting = false
             }
         },
 
         async saveEdit() {
-            if (this.editTemp.key == 'penguji') this.assignNewDosen(this.selectedPenguji)
+            if (this.editTemp.key == 'penguji') this.assignNewDosen({dosen: this.selectedPenguji.nama})
             else {
                 const isSkripsi = /skripsi\..+/.test(this.editTemp.key)
-                if (isSkripsi) this.saveEditedSkripsiItem(this.editTemp.key, this.editTemp.value)
+                if (isSkripsi) {
+                    if (this.editTemp.key == 'skripsi.naskah') {
+                        let formData = new FormData()
+                        formData.append('file', this.editTemp.value.file)
+                        try {
+                            const name = + new Date() + '_' + this.editTemp.value.name
+                            console.log(name, formData)
+                            return
+                            // const res = await this.$thessa.addThesis(name, formData)
+                        } catch (error) {
+                            this.showSnackbar(error)
+                        }
+                    }
+                    this.saveEditedSkripsiItem(this.editTemp.key, this.editTemp.value)
+                }
                 else this.saveEditedExamItem(this.editTemp.key, this.editTemp.value)
             }
         },
@@ -820,10 +806,11 @@ export default {
             }
             else if (i == 0) {
                 if (this.selectedPenguji) {
-                    const lastIndex = this.dosen.findIndex(dosen => this.selectedPenguji.dosen == dosen.id)
+                    const lastIndex = this.dosen.findIndex(dosen => this.selectedPenguji.id == dosen.id)
                     delete this.dosen[lastIndex].selectedType
                 }
-                this.selectedPenguji = {dosen: dosenId}
+                const dosen = this.dosen.filter(dosen => dosen.id == dosenId)[0]
+                this.selectedPenguji = {dosen: dosen.nama, is_leader: false, is_present: false, id: dosen.id}
                 const newIndex = this.dosen.findIndex(dosen => dosenId == dosen.id)
                 const { email, nama } = this.dosen[newIndex]
                 this.dosen[newIndex].selectedType = 'penguji baru'
@@ -845,13 +832,14 @@ export default {
 <style lang="sass" scoped>
     .container 
         padding: 0
+    
+    hr
+        margin: 20px 0
+        color: #A7A7A7
 
     .edit--text
         color: blue
         padding-left: 8px
         cursor: pointer
         font-size: 14px
-        text-transform: lowercase
 </style>
-
-
