@@ -85,8 +85,8 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
     @action(detail=False)
     def history(self, request, *args, **kwargs):
-        list_finished_exam = self.get_queryset().filter(ujian__status=3)
-        page = self.paginate_queryset(list_finished_exam)
+        list_all_exam = self.get_queryset()
+        page = self.paginate_queryset(list_all_exam)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
@@ -133,8 +133,8 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
     @action(detail=True)
     def grades(self, request, *args, **kwargs):
-        grades = self.get_object().grades
-        serializer = GradeSerializer(grades, many=True)
+        students = self.get_object().ujian.skripsi.students.all()
+        serializer = GradeSerializer(students, many=True)
         return Response(serializer.data)
 
     @grades.mapping.post
