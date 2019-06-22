@@ -77,7 +77,7 @@ export default {
                 const res = error.response
                 this.submitting = false
                 this.$store.dispatch('logUserOut')
-                this.message = res.status == 404 ? res.data.message : 'Terjadi kesalahan dalam proses autentikasi'
+                this.message = res && res.status == 404 ? res.data.message : 'Terjadi kesalahan dalam proses autentikasi'
             }
         }
     }
