@@ -107,14 +107,15 @@ export default {
         },
 
         async fetchExams() {
+            this.loading = true
             try {
-                const r = await this.$thessa.getMyExams()
-                this.exams.push.apply(this.exams, r.data.results)
                 const history = await this.$thessa.getMyExamsHistory()
                 this.exams.push.apply(this.exams, history.data.results)
+                this.loading = false
             } catch (error) {
                 this.exams = []
                 this.showSnackbar(error.message)                
+                this.loading = false
             }
         },
 
