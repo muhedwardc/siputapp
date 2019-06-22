@@ -28,12 +28,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def dosen(self, request, *args, **kwargs):
-        # if 'q' in request.GET:
-        #     query = request.GET.get('q')
-        #     list_dosen = self.get_queryset().filter(Q(role__pk=2, nama__icontains=query))
-        # else:
-        #     list_dosen = self.get_queryset().filter(role__pk=2)
         list_dosen = self.get_queryset().filter(is_admin=False)
+        if "search" in request.GET:
+            list_dosen = list_dosen.filter(nama__icontains=request.GET.get('search'))
+
+        if "ordering" in request.GET:
+            list_dosen = list_dosen.order_by(request.GET.get('ordering'))
+
         page = self.paginate_queryset(list_dosen)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
@@ -41,6 +42,12 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def akademik(self, request, *args, **kwargs):
         list_akademik = self.get_queryset().filter(is_admin=True)
+        if "search" in request.GET:
+            list_akademik = list_akademik.filter(nama__icontains=request.GET.get('search'))
+
+        if "ordering" in request.GET:
+            list_akademik = list_akademik.order_by(request.GET.get('ordering'))
+        
         page = self.paginate_queryset(list_akademik)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
