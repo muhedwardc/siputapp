@@ -36,16 +36,7 @@
             </v-dialog>
             <v-spacer></v-spacer>
             <v-spacer></v-spacer>
-            <v-text-field
-                v-model="search"
-                append-icon="search"
-                label="Cari Akademik"
-                :disabled="creating"
-                single-line
-                hide-details
-                solo
-                class="no-message solid-input"
-            ></v-text-field>
+            <app-search-box @on-search="onSearch($event)"></app-search-box>
         </template>
         <template v-slot:list>
             <v-data-table
@@ -57,7 +48,7 @@
                 :rows-per-page-items="perPage"
                 :loading="loading">
                 <template slot="headerCell" slot-scope="props">
-                    <span class="black--text font-weight-bold" style="font-size: 13px">
+                    <span @click="props.header.sortable ? sort(props.header.value) : null" class="black--text font-weight-bold" style="font-size: 13px">
                         {{ props.header.text }}
                     </span>
                 </template>
@@ -77,7 +68,7 @@
                     </td>
                 </template>
                 <template v-slot:footer>
-                    <app-pagination-footer :totalItems="totalItems" :td="headers.length" @on-page-change="getExam($event)"></app-pagination-footer>
+                    <app-pagination-footer :page="page" :totalItems="totalItems" :td="headers.length" @on-page-change="getExam($event)"></app-pagination-footer>
                 </template>
             </v-data-table>
             <v-dialog
@@ -147,7 +138,9 @@ export default {
             },
             perPage: [ 10 ],
             deleting: false,
-            totalItems: 0
+            page: 1,
+            totalItems: 0,
+            textSearch: ''
         }
     },
 
@@ -175,11 +168,40 @@ export default {
         ...mapActions([
 			'showSnackbar'
         ]),
+
+        async sort (key = '') {
+
+        },
+
+        async onSearch (text = '') {
+            this.page = 1
+            this.textSearch = text
+            if (this.$store.state.cancelTokenSource) this.$store.state.cancelTokenSource.cancel()
+            this.loading = true
+            this.$store.state.useUploadProgress = true
+            try {
+                const response = await this.$thessa.getAllAkademik('search=' + text)
+                this.totalItems = response.data.count
+                this.users = response.data.results
+                this.page = 1
+                this.loading = false
+                this.$store.state.useUploadProgress = false
+            } catch (error) {
+                this.showSnackbar({
+                    message: error.message,
+                    type: 'error'
+                })
+                this.loading = false
+                this.$store.state.useUploadProgress = false
+            }
+        },
         
         async getAkademik (page = 1) {
             this.loading = true
+            let qs = 'page=' + page
+            if (this.textSearch) qs += '&search=' + this.textSearch
             try {
-                const response = await this.$thessa.getAllAkademik('page=' + page)
+                const response = await this.$thessa.getAllAkademik(qs)
                 this.totalItems = response.data.count
                 this.users = response.data.results
                 this.page = page

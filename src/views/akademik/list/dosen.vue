@@ -58,16 +58,7 @@
             </v-dialog>
             <v-spacer></v-spacer>
             <v-spacer></v-spacer>
-            <v-text-field
-                v-model="search"
-                append-icon="search"
-                label="Cari Dosen"
-                :disabled="creating"
-                single-line
-                hide-details
-                solo
-                class="no-message solid-input"
-            ></v-text-field>
+            <app-search-box @on-search="onSearch($event)"></app-search-box>
         </template>
         <template v-slot:list>
             <v-data-table
@@ -101,7 +92,7 @@
                     </td>
                 </template>
                 <template v-slot:footer>
-                    <app-pagination-footer :totalItems="totalItems" :td="headers.length" @on-page-change="getDosen($event)"></app-pagination-footer>
+                    <app-pagination-footer :page="page" :totalItems="totalItems" :td="headers.length" @on-page-change="getDosen($event)"></app-pagination-footer>
                 </template>
             </v-data-table>
             <v-dialog
@@ -185,6 +176,8 @@ export default {
             perPage: [ 10 ],
             deleting: false,
             totalItems: 0,
+            page: 1,
+            textSearch: null
         }
     },
 
@@ -214,11 +207,37 @@ export default {
         ...mapActions([
 			'showSnackbar'
         ]),
+
+        async onSearch (text = '') {
+            this.page = 1
+            this.textSearch = text
+            if (this.$store.state.cancelTokenSource) this.$store.state.cancelTokenSource.cancel()
+            this.loading = true
+            this.$store.state.useUploadProgress = true
+            try {
+                const response = await this.$thessa.getAllDosen('search=' + text)
+                this.totalItems = response.data.count
+                this.users = response.data.results
+                this.page = 1
+                this.loading = false
+                this.$store.state.useUploadProgress = false
+            } catch (error) {
+                this.showSnackbar({
+                    message: error.message,
+                    type: 'error'
+                })
+                this.loading = false
+                this.$store.state.useUploadProgress = false
+            }
+        },
         
         async getDosen (page = 1) {
+            this.page = 1
             this.loading = true
+            let qs = 'page=' + page
+            if (this.textSearch) qs += '&search=' + this.textSearch
             try {
-                const response = await this.$thessa.getAllDosen('page=' + page)
+                const response = await this.$thessa.getAllDosen(qs)
                 this.totalItems = response.data.count
                 this.page = page
                 this.users = response.data.results

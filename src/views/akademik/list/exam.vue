@@ -4,14 +4,7 @@
             <v-btn color="primary" class="ma-0" dark @click="$router.push('/ujian/tambah')">Tambah ujian</v-btn>
             <v-spacer></v-spacer>
             <v-spacer></v-spacer>
-            <v-text-field
-                solo
-                v-model="search"
-                append-icon="search"
-                label="Cari Ujian"
-                :disabled="loading"
-                class="no-message solid-input"
-            ></v-text-field>
+            <app-search-box @on-search="onSearch($event)"></app-search-box>
         </template>
         <template v-slot:list>
             <v-data-table
@@ -41,7 +34,7 @@
                     <td class="text-xs-left">{{ props.item.status ? status[props.item.status] : status[0] }}</td>
                 </template>
                 <template v-slot:footer>
-                    <app-pagination-footer :totalItems="totalItems" :td="headers.length" @on-page-change="getExam($event)"></app-pagination-footer>
+                    <app-pagination-footer :page="page" :totalItems="totalItems" :td="headers.length" @on-page-change="getExam($event)"></app-pagination-footer>
                 </template>
             </v-data-table>
         </template>
@@ -66,8 +59,10 @@ export default {
             ],
             status: ['belum mulai', 'sedang berlangsung', 'selesai'],
             exams: [],
+            page: 1,
             perPage: [ 10 ],
             totalItems: 0,
+            textSearch: '',
         }
     },
 
@@ -89,13 +84,39 @@ export default {
             moment.locale('id')
             return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
         },
+
+        async onSearch (text = '') {
+            this.page = 1
+            this.textSearch = text
+            if (this.$store.state.cancelTokenSource) this.$store.state.cancelTokenSource.cancel()
+            this.loading = true
+            this.$store.state.useUploadProgress = true
+            try {
+                const response = await this.$thessa.getAllExams('search=' + text)
+                this.totalItems = response.data.count
+                this.exams = response.data.results
+                this.page = 1
+                this.loading = false
+                this.$store.state.useUploadProgress = false
+            } catch (error) {
+                this.showSnackbar({
+                    message: error.message,
+                    type: 'error'
+                })
+                this.loading = false
+                this.$store.state.useUploadProgress = false
+            }
+        },
         
         async getExam(page = 1) {
             this.loading = true
+            let qs = 'page=' + page
+            if (this.textSearch) qs += '&search=' + this.textSearch
             try {
-                const response = await this.$thessa.getAllExams('page='+page)
+                const response = await this.$thessa.getAllExams(qs)
                 this.totalItems = response.data.count
                 this.exams = response.data.results
+                this.page = page
                 this.loading = false
                 this.loaded = true
             } catch (error) {
