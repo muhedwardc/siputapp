@@ -244,20 +244,25 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             grade.update({"rerata_total": "%.2f" % rerata_total})
         response.update({'rekap_nilai': grades})
 
-        comments = []
-        for bab in range(0, 7):
-            comment = {
-                "bab": bab,
+        list_comment = []
+        for penguji in ujian.penguji.all():
+            comments = {
+                "penguji": penguji.dosen.nama if penguji.dosen.nama else "Anonymus",
                 "komentar": []
             }
-            for penguji in ujian.penguji.all():
+            for bab in range(0, 7):
+                comment = {
+                    "bab": bab,
+                    "daftar_komentar": []
+                }
                 for komentar in penguji.comments.filter(bab=bab):
-                    comment['komentar'].append({
-                        "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
-                        "komentar": komentar.komentar
+                    comment['daftar_komentar'].append({
+                        "halaman": komentar.halaman,
+                        "koreksi": komentar.komentar
                     })
-            comments.append(comment)
-        response.update({'rekap_komentar': comments})
+                comments['komentar'].append(comment)
+            list_comment.append(comments)
+        response.update({'rekap_komentar': list_comment})
 
         if hasattr(ujian.skripsi, 'revision'):
             revisi = ujian.skripsi.revision
