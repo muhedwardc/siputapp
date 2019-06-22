@@ -1,8 +1,18 @@
 import KOP from './partials/kop'
+import moment from 'moment'
 
-function generateDoc(data, i) {
+export default function (data, i) {
+    moment.locale('id')
     let doc = []
-    const { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa } = data
+    const { tanggal, sesi, penguji, ruang, skripsi } = data.ujian
+    const { mahasiswa } = skripsi
+    const sekretaris = {
+        nama: 'Hanung Adi  Nugroho, S.T., M.E., Ph.D.',
+        nip: '197802242002121001'
+    } 
+    const hari = moment(tanggal, 'DD/MM/YYYY').format('dddd')
+    const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
+
     let dosenTabel = [
         [
             { text: 'NO.', alignment: 'center' },
@@ -11,34 +21,11 @@ function generateDoc(data, i) {
             { text: 'TANDA TANGAN', alignment: 'center' },
         ],
     ]
-    dosen.forEach((dosen, i) => {
-        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen, margin: [0, 10, 0, 10]}, { text: (i == 0 ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
+    penguji.forEach((dosen, i) => {
+        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen.dosen, margin: [0, 10, 0, 10]}, { text: (dosen.is_leader ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
     })
     let kopVertical = KOP.portrait()
     doc.push(
-        // {
-        //     image: UGMLogo,
-        //     fit: [30, 30],
-        //     alignment: 'center',
-        //     margin: [0, 0, 0, 2],
-        //     pageBreak: 'before'
-        // },
-        // {
-        //     text: [
-        //         'DEPARTEMEN TEKNIK ELEKTRO DAN TEKNOLOGI INFORMASI\n',
-        //         'FAKULTAS TEKNIK UNIVERSITAS GADJAH MADA',
-        //     ],
-        //     alignment: 'center'
-        // },
-        // {
-        //     text: 'Jl. Grafika No. 2, Fakultas Teknik UGM, Yogyakarta 55281 telp.(0274) 6492201,6492201 fax. (0274) 552305, http://jteti.ugm.ac.id, email:akademikjteti@gm.ac.id', 
-        //     fontSize: 9,
-        //     italics: true,
-        //     margin: [10, 2, 10, 0],
-        //     alignment: 'center'
-        // },
-        // { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
-        // { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
         kopVertical,
         {
             text: 'DAFTAR HADIR PENDADARAN',
@@ -53,7 +40,7 @@ function generateDoc(data, i) {
                     [
                         'Hari, Tanggal',
                         ':',
-                        `${hari}, ${tanggal}`.toUpperCase()
+                        `${hari}, ${formatedDate}`.toUpperCase()
                     ],
                     [
                         'Tempat',
@@ -63,7 +50,7 @@ function generateDoc(data, i) {
                     [
                         'Jam',
                         ':',
-                        waktu.toUpperCase()
+                        sesi.slice(0, 5).toUpperCase()
                     ]
                 ]
             },
@@ -77,7 +64,7 @@ function generateDoc(data, i) {
             },
             margin: [ 0, 0, 0, 10 ]
         },
-        `Yogyakarta, ${tanggal}`,
+        `Yogyakarta, ${formatedDate}`,
         {
             text: 'Sekretaris DTETI',
             margin: [0, 15, 0, 0]
@@ -97,13 +84,5 @@ function generateDoc(data, i) {
         }
     )
 
-    return doc
-}
-
-export default function (data) {
-    let doc = []
-    data.mahasiswa.forEach((e, i) => {
-        doc.push(...generateDoc(data, i))
-    })
     return doc
 }

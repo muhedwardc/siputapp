@@ -13,18 +13,21 @@ import RUBRIK_INDIVIDU from './rubrik-individu'
 import RUBRIK_CAPSTONE from './rubrik-capstone'
 
 export default function index(data) {
-    var { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa, kadep } = data
-    const RUBRIK = mahasiswa.length ? RUBRIK_CAPSTONE(data) : RUBRIK_INDIVIDU(data, SOCS_HEADER, SOCS)
+    const mahasiswa = data.ujian.skripsi.mahasiswa.length
+    // var { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa, kadep } = data
+    // const RUBRIK = mahasiswa.length ? RUBRIK_CAPSTONE(data) : RUBRIK_INDIVIDU(data, SOCS_HEADER, SOCS)
     
-    var doc = [
-        ...COVER(data),
-        ...BERITA_ACARA(data, SB),
-        ...DAFTAR_HADIR(data),
-        ...RUBRIK,
-        ...REKAP_PENILAIAN(data),
-        ...LEMBAR_REVISI(data),
-        ...LEMBAR_KOREKSI(data)
-    ]
+    let doc = [...COVER(data.ujian)]
+    for (let i = 0; i < mahasiswa; i ++) {
+        doc.push(
+            ...BERITA_ACARA(data, i),
+            ...DAFTAR_HADIR(data, i),
+            // ...RUBRIK,
+            ...LEMBAR_REVISI(data, i),
+            ...REKAP_PENILAIAN(data),
+            // ...LEMBAR_KOREKSI(data, i)
+        )
+    }
 
     return doc
 }

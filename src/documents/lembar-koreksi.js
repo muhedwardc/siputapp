@@ -1,8 +1,12 @@
 import KOP from './partials/kop'
+import moment from 'moment'
+moment.locale('id')
 
 function documentByMahasiswa(data, dosenIndex, i) {
     let doc = []
     const { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa, judul } = data
+    // const { tanggal}
+    const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     const bab = ['ABSTRAK', 'BAB I\nPENDAHULUAN', 'BAB II\nDASAR TEORI', 'BAB III\nMETODE PENELITIAN', 'BAB IV\nHASIL DAN PEMBAHASAN', 'BAB V\nKESIMPULAN DAN SARAN', 'KOMENTAR UMUM/CATATAN']
     const comments = [
         [], [], [
@@ -71,29 +75,6 @@ function documentByMahasiswa(data, dosenIndex, i) {
     })
     let kopVertical = KOP.portrait()
     doc.push(
-        // { text: '', pageBreak: 'before' },
-        // {
-        //     image: UGMLogo,
-        //     fit: [30, 30],
-        //     alignment: 'center',
-        //     margin: [0, 0, 0, 2]
-        // },
-        // {
-        //     text: [
-        //         'DEPARTEMEN TEKNIK ELEKTRO DAN TEKNOLOGI INFORMASI\n',
-        //         'FAKULTAS TEKNIK UNIVERSITAS GADJAH MADA',
-        //     ],
-        //     alignment: 'center'
-        // },
-        // {
-        //     text: 'Jl. Grafika No. 2, Fakultas Teknik UGM, Yogyakarta 55281 telp.(0274) 6492201,6492201 fax. (0274) 552305, http://jteti.ugm.ac.id, email:akademikjteti@gm.ac.id', 
-        //     fontSize: 9,
-        //     italics: true,
-        //     margin: [10, 2, 10, 0],
-        //     alignment: 'center'
-        // },
-        // { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
-        // { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
         kopVertical,
         {
             text: 'LEMBAR KOREKSI PENDADARAN',
@@ -176,16 +157,10 @@ function documentByMahasiswa(data, dosenIndex, i) {
     return doc
 }
 
-function generateDoc(data, dosenIndex) {
+export default function (data, i) {
     let doc = []
-    data.mahasiswa.forEach((e, i) => doc.push(...documentByMahasiswa(data, dosenIndex, i)))
-    return doc
-}
-
-export default function (data) {
-    let doc = []
-    for (let i = 2; i < data.dosen.length; i ++) {
-        doc.push(...generateDoc(data, i))
+    for (let j = 0; j < data.ujian.penguji.length-1; j ++) {
+        doc.push(...documentByMahasiswa(data, j, i))
     }
     return doc
 }

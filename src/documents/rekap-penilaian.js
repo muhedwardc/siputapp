@@ -1,43 +1,29 @@
 import KOP from './partials/kop'
+import moment from 'moment'
 
 export default function (data) {
+    moment.locale('id')
     let doc = []
-    const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa } = data
-    const mahasiswaList = [
-        {
-            name: 'Muhammad Edward Chakim',
-            nim: '15/385407/TK/44069',
-            grade: [90, 91, 89, 92, 98, 89],
-            sum: 549,
-            average: 91.5,
-            pass: true
-        },
-        {
-            name: 'Muhammad Edward Chakim 2',
-            nim: '15/385407/TK/44069',
-            grade: [97, 92, 88, 82, 95, 80],
-            sum: 549,
-            average: 89.5,
-            pass: true
-        }
-    ]
+    const { tanggal, penguji, skripsi } = data.ujian
+    const { rekap_nilai } = data.result
+    const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     let emptyCol = []
     let romanian = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
     let gradeCol = []
     let gradeWidth = []
     let mahasiswaGrade = []
-    dosen.forEach((e, i) => {
+    penguji.forEach((e, i) => {
         emptyCol.push({})
         gradeWidth.push('*')
         gradeCol.push({ text: romanian[i], alignment: 'center' })
     })
-    mahasiswaList.forEach((e, i) => {
+    rekap_nilai.forEach((e, i) => {
         let row = new Array()
-        row.push(e.name)
-        row.push(e.nim)
-        e.grade.forEach(grade => row.push({ text: grade, alignment: 'center' }))
-        row.push({ text: e.sum, alignment: 'center' })
-        row.push({ text: e.average, alignment: 'center' })
+        row.push(e.mahasiswa)
+        row.push(skripsi.mahasiswa[i].nim)
+        e.nilai.forEach(grade => row.push({ text: grade.rerata ? Number(grade.rerata.toFixed(2)) : 0, alignment: 'center' }))
+        row.push({ text: e.sum ? e.sum : 0, alignment: 'center' })
+        row.push({ text: e.rerata ? e.rerata : 0, alignment: 'center' })
         row.push({ text: e.pass ? 'LULUS' : 'TIDAK LULUS', alignment: 'center' })
         mahasiswaGrade.push(row)
     })
@@ -50,8 +36,8 @@ export default function (data) {
             { text: 'TANDA TANGAN', alignment: 'center' },
         ],
     ]
-    dosen.forEach((dosen, i) => {
-        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen, margin: [0, 10, 0, 10]}, { text: (i == 0 ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
+    penguji.forEach((dosen, i) => {
+        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen.dosen, margin: [0, 10, 0, 10]}, { text: (i == 0 ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
     })
     let kopLandscape = KOP.landscape()
     doc.push(
@@ -66,12 +52,12 @@ export default function (data) {
         },
         {
             table: {
-                widths: [150, 100, ...gradeWidth, 70, 70, 80],
+                widths: [150, 100, '*','*','*','*','*','*', 70, 70, 80],
                 body: [
                     [
                         { text: 'NAMA', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
                         { text: 'NIM', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
-                        { text: 'SKOR PENILAIAN', alignment: 'center', colSpan: dosen.length},
+                        { text: 'SKOR PENILAIAN', alignment: 'center', colSpan: penguji.length},
                         ...emptyCol,
                         { text: 'JUMLAH', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
                         { text: 'RATA-RATA', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
@@ -155,8 +141,8 @@ export default function (data) {
                 {
                     width: 300,
                     text: [
-                        `Yogyakarta, ${tanggal}\nDosen Pembimbing I\n\n\n\n\n`,
-                        { text: dosen[0], bold: true }
+                        `Yogyakarta, ${formatedDate}\nDosen Pembimbing I\n\n\n\n\n`,
+                        { text: penguji[0].dosen, bold: true }
                     ],
                 }
             ],

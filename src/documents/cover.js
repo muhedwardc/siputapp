@@ -1,5 +1,6 @@
 function generateDoc(data) {
-    const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa } = data
+    const { ruang, sesi, tanggal } = data
+    const { mahasiswa } = data.skripsi
     const mahasiswaList = mahasiswa.map(mhs => { return [{text: mhs.nama + '\n' + mhs.nim, alignment: 'center', fontSize: 20, margin: [0, 0, 0, 10]}] })
     let doc = [
         {
@@ -18,9 +19,9 @@ function generateDoc(data) {
                                             table: {
                                                 widths: ['auto', 'auto', '*'],
                                                 body: [
-                                                    [ 'HARI', ':', hari ],
+                                                    // [ 'HARI', ':', hari ],
                                                     [ 'TANGGAL', ':', tanggal ],
-                                                    [ 'WAKTU', ':', waktu ],
+                                                    [ 'WAKTU', ':', sesi ],
                                                     [ 'RUANG', ':', ruang ],
                                                 ],
                                             },

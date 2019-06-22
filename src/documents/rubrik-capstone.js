@@ -1,18 +1,5 @@
-export default function (data) {
-    const mahasiswa = [
-        {
-            name: 'Muhammad Edward Chakim',
-            grade: [98, 96, 95, 89, 90, 97]
-        },
-        {
-            name: 'Muhammad Ashil Al Latief',
-            grade: [94, 98, 95, 87, 91, 91]
-        },
-        {
-            name: 'Muhammad Steven Amadeus Uyanto',
-            grade: [94, 92, 90, 92, 88, 92]
-        }
-    ]
+function generateRubrik(data, i) {
+    const rekap_nilai = data.result.rekap_nilai
     let socs = [
         [
             'SO(c): Engineering Design',
@@ -388,16 +375,16 @@ export default function (data) {
     ]
     let mhsGrade = []
     let averages = []
-    mahasiswa.forEach((e, i) => averages.push(
-        { text: 'Mhs ' + (i+1) + ': ' + (e.grade.reduce((total, num) => total + num)/e.grade.length).toFixed(2), margin: [0, 8, 0, 8], fontSize: 12, bold: true }
+    rekap_nilai.forEach((e, i) => averages.push(
+        { text: 'Mhs ' + (i+1) + ': ' + (e.rerata ? e.rerata : 0), margin: [0, 8, 0, 8], fontSize: 12, bold: true }
     ))
     for (let i = 0; i <= 7 - averages.length; i ++) averages.push('')
-    socs.forEach((s, i) => {
-        mahasiswa.forEach((m, j) => {
-            mhsGrade.push('Mhs ' + (j+1) + ':\n')
-            mhsGrade.push({text: m.grade[i] + '\n', bold: true, lineHeight: 1.5, decoration: 'underline'})
+    socs.forEach((s, j) => {
+        rekap_nilai.forEach((m, k) => {
+            mhsGrade.push('Mhs ' + (k+1) + ':\n')
+            mhsGrade.push({text: m.nilai[i][j] + '\n', bold: true, lineHeight: 1.5, decoration: 'underline'})
         })
-        socs[i].push({
+        socs[j].push({
             text: [...mhsGrade],
             fontSize: 10
         })
@@ -459,4 +446,10 @@ export default function (data) {
     ]
 
     return doc
+}
+
+export default function (data, i) {
+    let doc = []
+    const penguji = data.ujian.penguji
+    penguji.forEach((_, i) => doc.push(...generateRubrik(data, i)))
 }

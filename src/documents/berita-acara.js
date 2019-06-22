@@ -1,10 +1,15 @@
 import KOP from './partials/kop'
+import moment from 'moment'
 
-function generateObj(data, sb, i) {
+export default function (data, i) {
+    moment.locale('id')
     let doc = []
-    const { judul, hari, tanggal, waktu, ruang, mahasiswa, dosen, kadep } = data
+    const { result, ujian } = data
+    const { tanggal, ruang, sesi, penguji, skripsi } = ujian
+    const { mahasiswa, judul } = skripsi
+    const hari = moment(ujian.tanggal, 'DD/MM/YYYY').format('dddd')
     const p = [
-        `Pada hari ini ${hari}, ${tanggal} pukul ${waktu} bertempat di ${ruang} Departemen Teknik Elektro dan Teknologi Informasi, Fakultas Teknik UGM telah dilaksanakan ujian skripsi bagi mahasiswa:`
+        `Pada hari ini ${hari}, ${moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')} pukul ${sesi.slice(0,5)} WIB bertempat di ${ruang} Departemen Teknik Elektro dan Teknologi Informasi, Fakultas Teknik UGM telah dilaksanakan ujian skripsi bagi mahasiswa:`
     ]
     let dosenTabel = [
         [ 
@@ -14,18 +19,18 @@ function generateObj(data, sb, i) {
             { text: 'TANDA TANGAN', alignment: 'center' },
         ]
     ]
-    dosen.forEach((dosen, i) => {
-        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center' }, dosen, (i == 0 ? 'Ketua Tim *)' : 'Anggota'), `${i+1}.`])
+    penguji.forEach((dosen, i) => {
+        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center' }, dosen.dosen, (dosen.is_leader ? 'Ketua Tim *)' : 'Anggota'), `${i+1}.`])
     })
-    let result = []
+    let examresult = []
     if (mahasiswa[i].nilai < 54.6 ) {
-        result = [
+        examresult = [
             { text: 'LULUS', decoration: 'lineThrough' },
             ' / ',
             { text: 'TIDAK LULUS' },
         ]
     } else {
-        result = [
+        examresult = [
             { text: 'LULUS' },
             ' / ',
             { text: 'TIDAK LULUS', decoration: 'lineThrough' },
@@ -33,30 +38,6 @@ function generateObj(data, sb, i) {
     }
     let kopVertical = KOP.portrait()
     doc.push(
-        // {
-        //     image: UGMLogo,
-        //     fit: [30, 30],
-        //     alignment: 'center',
-        //     margin: [0, 0, 0, 2],
-		// 	pageBreak: 'before'
-        // },
-        // {
-        //     text: [
-        //         'DEPARTEMEN TEKNIK ELEKTRO DAN TEKNOLOGI INFORMASI\n',
-        //         'FAKULTAS TEKNIK UNIVERSITAS GADJAH MADA',
-        //     ],
-        //     alignment: 'center'
-        // },
-        // {
-        //     text: 'Jl. Grafika No. 2, Fakultas Teknik UGM, Yogyakarta 55281 telp.(0274) 6492201,6492201 fax. (0274) 552305, http://jteti.ugm.ac.id, email:akademikjteti@gm.ac.id', 
-        //     fontSize: 9,
-        //     italics: true,
-        //     margin: [10, 2, 10, 0],
-        //     alignment: 'center'
-        // },
-        // { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
-        // { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
-        // ...head,
         kopVertical,
         { text: 'BERITA ACARA PENDADARAN', bold: true, alignment: 'center', margin: [0, 5, 0, 5] },
         { text: p[0] },
@@ -66,7 +47,7 @@ function generateObj(data, sb, i) {
                 body: [
                     [ 'Nama', {text: ':', alignment: 'right'}, mahasiswa[i].nama ],
                     [ 'NIM', {text: ':', alignment: 'right'}, mahasiswa[i].nim ],
-                    [ 'Tempat, tanggal Lahir', {text: ':', alignment: 'right'}, `${mahasiswa[i].tl.toUpperCase()}, ${mahasiswa[i].tgl}` ],
+                    [ 'Tempat, tanggal Lahir', {text: ':', alignment: 'right'}, `${mahasiswa[i].tempat_lahir.toUpperCase()}, ${moment(mahasiswa[i].tanggal_lahir, 'DD/MM/YYYY').format('DD MMMM YYYY')}` ],
                     [ 'Judul Skripsi', {text: ':', alignment: 'right'}, '' ],
                 ]
             },
@@ -83,8 +64,8 @@ function generateObj(data, sb, i) {
             table: {
                 widths: [ 100, 15, 'auto' ],
                 body: [
-                    [ 'Pembimbing I', {text: ':', alignment: 'right'}, dosen[0]],
-                    [ 'Pembimbing II', {text: ':', alignment: 'right'}, dosen[1] ]
+                    [ 'Pembimbing I', {text: ':', alignment: 'right'}, penguji[0].dosen],
+                    [ 'Pembimbing II', {text: ':', alignment: 'right'}, penguji[1].dosen ]
                 ]
             },
             layout: 'noBorders',
@@ -115,14 +96,14 @@ function generateObj(data, sb, i) {
                                 { 
                                     text: [
                                         'NILAI ANGKA (0-100): ', 
-                                        { text: mahasiswa[i].nilai, bold: true }
+                                        { text: 0, bold: true }
                                     ],
                                     margin: [0, 5, 0, 0]
                                 }
                             ],
                             [ 
                                 {
-                                    text: result,
+                                    text: examresult,
                                     alignment: 'center',
                                     bold: true,
                                     margin: [0, 5, 0, 0]
@@ -189,7 +170,7 @@ function generateObj(data, sb, i) {
                     text: [
                         'Ketua Tim Penguji',
                         '\n\n\n\n',
-                        { text: dosen[0], bold: true }
+                        { text: penguji[0].dosen, bold: true }
                     ]
                 },
                 {
@@ -208,7 +189,7 @@ function generateObj(data, sb, i) {
             columns: [
                 [
                     'Ketua DTETI\nFakultas Teknik UGM',
-                    { text: kadep.nama + '\nNIP ' + kadep.nip, bold: true, margin: [0, 30, 0, 0] }
+                    { text: 'Sarjiya, S.T., M.T., Ph.D.' + '\nNIP ' + '197307061999031005', bold: true, margin: [0, 30, 0, 0] }
                 ]
             ],
             margin: [0, 8, 0, 10],
@@ -219,14 +200,5 @@ function generateObj(data, sb, i) {
         }
     )
 
-    return doc
-}
-
-export default function (data, sb) {
-    console.log(data)
-    let doc = []
-    data.mahasiswa.forEach((e, i) => {
-        doc.push(...generateObj(data, sb, i))
-    })
     return doc
 }

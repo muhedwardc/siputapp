@@ -1,8 +1,13 @@
 import KOP from './partials/kop'
+import moment from 'moment'
 
-function generateDoc(data, i) {
+export default function (data, i) {
+    moment.locale('id')
     let doc = []
-    const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa } = data
+    const { tanggal, skripsi, penguji } = data.ujian
+    const { revisi_judul } = data.result
+    const { mahasiswa, judul } = skripsi
+    const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     let kopVertical = KOP.portrait()
     doc.push(
         kopVertical,
@@ -33,7 +38,11 @@ function generateDoc(data, i) {
                                                     x: 0, y: 0,
                                                     w: 11,
                                                     h: 11,
-                                                }
+                                                },
+                                                {
+                                                    type: 'polyline',
+                                                    points: revisi_judul ? [] : [{x: 2, y: 6}, {x: 5, y: 9}, {x: 12, y: -2}]
+                                                },
                                             ] 
                                         },
                                         'Tidak' 
@@ -49,7 +58,7 @@ function generateDoc(data, i) {
                                                 },
                                                 {
                                                     type: 'polyline',
-                                                    points: []
+                                                    points: revisi_judul ? [{x: 2, y: 6}, {x: 5, y: 9}, {x: 12, y: -2}] : []
                                                 },
                                             ] 
                                         },
@@ -61,11 +70,11 @@ function generateDoc(data, i) {
                             margin: [0, 8, 0, 0]
                         },
                     ],
-                    [ '', '', { table: { widths: ['*'], heights: [50], body: [['']] }, margin: [0, 0, 0, 10]} ],
+                    [ '', '', { table: { widths: ['*'], heights: [50], body: [[revisi_judul ? revisi_judul : '']] }, margin: [0, 0, 0, 10]} ],
                     [ 'Nama Mahasiswa', ':', mahasiswa[i].nama ],
                     [ 'NIM', ':', mahasiswa[i].nim ],
                     [ 'Program Studi', ':', mahasiswa[i].prodi ],
-                    [ 'Tempat, Tanggal Lahir', ':', `${mahasiswa[i].tl.toUpperCase()}, ${mahasiswa[i].tgl}` ],
+                    [ 'Tempat, Tanggal Lahir', ':', `${mahasiswa[i].tempat_lahir.toUpperCase()}, ${mahasiswa[i].tanggal_lahir}` ],
                 ]
             },
             layout: 'noBorders',
@@ -75,14 +84,14 @@ function generateDoc(data, i) {
         {
             columns: [
                 { text: '', width: '*' },
-                { text: `Yogyakarta, ${tanggal}`, margin: [50, 0, 0, 0]},
+                { text: `Yogyakarta, ${formatedDate}`, margin: [50, 0, 0, 0]},
             ],
             margin: [0, 10, 0, 6]
         },
         {
             columns: [
-                `Pembimbing I\n\n\n\n\n${dosen[0]}`,
-                { text: `Pembimbing II\n\n\n\n\n${dosen[1]}`, margin: [50, 0, 0, 0]}
+                `Pembimbing I\n\n\n\n\n${penguji[0].dosen}`,
+                { text: `Pembimbing II\n\n\n\n\n${penguji[1].dosen}`, margin: [50, 0, 0, 0]}
             ],
             margin: [0, 0, 0, 10]
         },
@@ -94,11 +103,5 @@ function generateDoc(data, i) {
         }
     )
 
-    return doc
-}
-
-export default function (data) {
-    let doc = []
-    data.mahasiswa.forEach((e, i) => doc.push(...generateDoc(data, i)))
     return doc
 }
