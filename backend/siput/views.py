@@ -216,25 +216,33 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
     def recap(self, request, *args, **kwargs):
         response = dict()
         ujian = self.get_object().ujian
-        response.update({'ujian': RecapExamSerializer(ujian).data})
+        response.update({'rekap_ujian': RecapExamSerializer(ujian).data})
 
         students = self.get_object().ujian.skripsi.students.all()
         grades = []
+        jumlah_rerata = 0
+        rerata_total = 0
         for student in students:
             grade = {
                 "mahasiswa": student.nama,
-                "nilai": []
+                "nilai": [],
+                "jumlah_rerata": jumlah_rerata
             }
             for penguji in ujian.penguji.all():
                 list_nilai = penguji.grades.filter(mahasiswa=student)
-                nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
+                nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
                 grade['nilai'].append({
                     "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
                     "detail": RecapGradeSerializer(list_nilai, many=True).data,
-                    "rerata": nilai.get('rerata', 0)
+                    "rerata": "%.2f" % nilai.get('rerata') if nilai.get('rerata') else "%.2f" % 0
                 })
+                jumlah_rerata += nilai.get('rerata') if nilai.get('rerata') else 0
+            grade.update({"jumlah_rerata": "%.2f" % jumlah_rerata})
             grades.append(grade)
-        response.update({'nilai': grades})
+
+            rerata_total = jumlah_rerata / len(ujian.penguji.all())
+            grade.update({"rerata_total": "%.2f" % rerata_total})
+        response.update({'rekap_nilai': grades})
 
         comments = []
         for bab in range(0, 7):
@@ -249,13 +257,13 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                         "komentar": komentar.komentar
                     })
             comments.append(comment)
-        response.update({'komentar': comments})
+        response.update({'rekap_komentar': comments})
 
         if hasattr(ujian.skripsi, 'revision'):
             revisi = ujian.skripsi.revision
-            response.update({'revisi': revisi.revisi})
+            response.update({'revisi_judul': revisi.revisi})
 
-        return Response(response, status=200)
+        return Response(response, status=status.HTTP_200_OK)
 
 class SiputProfileViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )

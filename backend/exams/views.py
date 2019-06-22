@@ -116,13 +116,16 @@ class ExamViewSet(viewsets.ModelViewSet):
 
     @action(detail=True)
     def recap(self, request, *args, **kwargs):
-        result = dict()
+        response = dict()
         # Data Ujian
         ujian = self.get_object()
+        response.update({"rekap_ujian": self.get_serializer(ujian).data})
 
         # Data Nilai
         students = ujian.skripsi.students.all()
         grades = []
+        jumlah_rerata = 0
+        rerata_total = 0
         for student in students:
             grade = {
                 "mahasiswa": student.nama,
@@ -130,14 +133,19 @@ class ExamViewSet(viewsets.ModelViewSet):
             }
             for penguji in ujian.penguji.all():
                 list_nilai = penguji.grades.filter(mahasiswa=student)
-                rerata = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai', output_field=FloatField()))
+                rerata = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
                 grade['nilai'].append({
                     "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
                     "detail": RecapGradeSerializer(list_nilai, many=True).data,
-                    "rerata": rerata.get('rerata', 0)
+                    "rerata": "%.2f" % rerata.get('rerata') if rerata.get('rerata') else "%.2f" % 0
                 })
+                jumlah_rerata += rerata.get('rerata') if rerata.get('rerata') else 0
+            grade.update({"jumlah_rerata": "%.2f" % jumlah_rerata})
             grades.append(grade)
-        result.update({"rekap_nilai": grades})
+
+            rerata_total = jumlah_rerata / len(ujian.penguji.all())
+            grade.update({"rerata_total": "%.2f" % rerata_total})
+        response.update({"rekap_nilai": grades})
 
         # Data Komentar
         comments = []
@@ -153,20 +161,16 @@ class ExamViewSet(viewsets.ModelViewSet):
                         "komentar": komentar.komentar
                     })
             comments.append(comment)
-        result.update({'rekap_komentar': comments})
+        response.update({'rekap_komentar': comments})
 
         # Data Revisi Judul
         if hasattr(ujian.skripsi, 'revision'):
             revisi = ujian.skripsi.revision
-            result.update({'revisi_judul': revisi.revisi})
+            response.update({'revisi_judul': revisi.revisi})
         else:
-            result.update({'revisi_judul': None})
+            response.update({'revisi_judul': None})
 
-        return Response({
-            "ujian": self.get_serializer(ujian).data,
-            "result": result
-            
-        })
+        return Response(response, status=status.HTTP_200_OK)
 
 class RoomSessionAPI(views.APIView):
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)

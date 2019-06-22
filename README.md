@@ -270,7 +270,7 @@ Endpoint untuk umum:
 		}
 	]
 ```
-1. **POST** /api/me/exams/\<id>\/add_revision/ : create revisi judul
+1. **POST** /api/me/exams/\<id>\/revision/ : create revisi judul
 ```JSON
 	{
 		"revisi": true, // jika ada revisi judul, jika tidak maka nilai false
