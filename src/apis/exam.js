@@ -12,6 +12,7 @@ export default {
     getExamGrades: async (id) => await axios.get(`/me/exams/${id}/grades/`),
     getExamRevision: async (id) => await axios.get(`/me/exams/${id}/revision/`),
     getExamRecap: async (id) => await axios.get(`/me/exams/${id}/recap/`),
+    getExamDocumentData: async (id) => await axios.get(`/exams/${id}/recap/`),
 
     createNewExam: async (payload) => await axios.post('/exams/', payload),
     addThesis: async (name, formData) => await axios.post(`/exams/upload-skripsi/${name}`, formData),
