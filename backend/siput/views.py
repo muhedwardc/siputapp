@@ -87,7 +87,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
     def history(self, request, *args, **kwargs):
         list_all_exam = self.get_queryset()
         page = self.paginate_queryset(list_all_exam)
-        serializer = self.get_serializer(page, many=True)
+        serializer = ListSiputPengujiSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
     @action(detail=True)
