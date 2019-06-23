@@ -160,8 +160,31 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             response['result'] = json_data
             return Response(response, status=201)
 
-    @action(methods=['POST'], detail=True)
+    @action(detail=True)
     def revision(self, request, *args, **kwargs):
+        response = dict()
+        if self.get_object().is_leader == False:
+            return Response({
+                "message": "Anda tidak memiliki authoritas untuk menambah revisi judul."
+            }, status=403)
+
+        skripsi = self.get_object().ujian.skripsi
+        if hasattr(skripsi, 'revision'):
+            revisi = skripsi.revision
+            response.update({
+                "revisi": True,
+                "konten": revisi.revisi
+            })
+            return Response(response, status=status.HTTP_200_OK)
+        else:
+            response.update({
+                "revisi": False,
+                "kontent": None
+            })
+            return Response(response, status=status.HTTP_200_OK)
+
+    @revision.mapping.post    
+    def add_revision(self, request, *args, **kwargs):
         response = {"status": "Gagal"}
         json_data = request.data
         if self.get_object().is_leader == False:
