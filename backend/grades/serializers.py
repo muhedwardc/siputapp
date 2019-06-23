@@ -11,11 +11,11 @@ class ListGradeSerializer(serializers.ModelSerializer):
 
 class GradeSerializer(serializers.ModelSerializer):
     mahasiswa = serializers.IntegerField(source='pk')
-    nilai = ListGradeSerializer(source='grades', many=True)
+    daftar_nilai = ListGradeSerializer(source='grades', many=True)
 
     class Meta:
         model = Student
-        fields = ('mahasiswa', 'nilai')
+        fields = ('mahasiswa', 'daftar_nilai')
 
 class CreateGradeSerializer(serializers.ModelSerializer):
     class Meta:

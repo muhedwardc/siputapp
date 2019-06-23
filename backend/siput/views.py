@@ -144,7 +144,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         grades = []
         for data in json_data:
             # student = Student.objects.get(pk=data.get('mahasiswa'))
-            for grade in data.get('grades'):
+            for grade in data.get('daftar_nilai'):
                 grade = {
                     "mahasiswa": data.get('mahasiswa'),
                     "penguji": self.get_object().pk,
