@@ -277,7 +277,7 @@
                 </tab-content>
                 <tab-content title="Dosen Penguji" :before-change="validateDosen">
                     <v-form ref="form4" lazy-validation v-model="valid[3]">
-                    <v-layout row align-center>
+                    <v-layout row align-center wrap>
                         <h3>Pilih Dosen Pembimbing dan Penguji</h3>
                         <v-spacer></v-spacer>
                         <v-text-field
@@ -681,10 +681,8 @@ export default {
         async fetchDosen() {
             this.loadingDosen = true
             try {
-                const response = await this.$thessa.getAllDosen()
-                this.dosen = response.data.results
-                this.totalItems = response.data.count
-                this.pagination.links = response.data.links
+                const response = await this.$thessa.getAllDosen('page=all')
+                this.dosen = response.data
                 this.loadingDosen = false
             } catch (error) {
                 this.showSnackbar(error)
