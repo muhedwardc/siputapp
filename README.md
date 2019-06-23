@@ -252,17 +252,17 @@ Endpoint untuk umum:
 	[
 		{
 			"mahasiswa": 35,
-			"grades": [
+			"daftar_nilai": [
 				{
-					"so_id": 1,
+					"so": 1,
 					"nilai" :87
 				},
 				{
-					"so_id": 2,
+					"so": 2,
 					"nilai": 92
 				},
 				{
-					"so_id": 3,
+					"so": 3,
 					"nilai": 85,
 				},
 				...
