@@ -35,9 +35,14 @@ class UserViewSet(viewsets.ModelViewSet):
         if "ordering" in request.GET:
             list_dosen = list_dosen.order_by(request.GET.get('ordering'))
 
-        page = self.paginate_queryset(list_dosen)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        pagination = request.GET.get('page')
+        if pagination == 'all':
+            serializer = self.get_serializer(list_dosen, many=True)
+            return Response(serializer.data)
+        else:
+            page = self.paginate_queryset(list_dosen)
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
     @action(detail=False)
     def akademik(self, request, *args, **kwargs):
