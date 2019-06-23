@@ -10,6 +10,7 @@ class ListGradeSerializer(serializers.ModelSerializer):
 
 
 class GradeSerializer(serializers.ModelSerializer):
+    mahasiswa = serializers.IntegerField(source='pk')
     nilai = ListGradeSerializer(source='grades', many=True)
 
     class Meta:
