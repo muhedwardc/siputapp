@@ -159,6 +159,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             response['status'] = "Sukses"
             response['result'] = json_data
             return Response(response, status=201)
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True)
     def revision(self, request, *args, **kwargs):
