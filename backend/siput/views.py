@@ -244,14 +244,14 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
         students = self.get_object().ujian.skripsi.students.all()
         grades = []
-        jumlah_rerata = 0
-        rerata_total = 0
         for student in students:
             grade = {
                 "mahasiswa": student.nama,
                 "nilai": [],
                 "jumlah_rerata": jumlah_rerata
             }
+            jumlah_rerata = 0
+            rerata_total = 0
             for penguji in ujian.penguji.all():
                 list_nilai = penguji.grades.filter(mahasiswa=student)
                 nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
