@@ -291,6 +291,8 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         if hasattr(ujian.skripsi, 'revision'):
             revisi = ujian.skripsi.revision
             response.update({'revisi_judul': revisi.revisi})
+        else:
+            response.update({'revisi_judul': None})
 
         return Response(response, status=status.HTTP_200_OK)
 

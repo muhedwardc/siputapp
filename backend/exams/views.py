@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser, FileUploadParser
 
-from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer, UploadEssaySerializer, EditExamSerializer
+from .serializers import RoomSerializer, SessionSerializer, ExamSerializer, ListExamSerializer, CreateExamSerializer, PengujiSerializer, CreatePengujiSerializer, CreateRoomSerializer, CreateSessionSerializer, UploadEssaySerializer, EditExamSerializer, RecapExamSerializer
 from backend.grades.serializers import RecapGradeSerializer
 from backend.essays.serializers import CreateEssaySerializer, EssaySerializer
 from .models import Exam, Penguji, Room, Session
@@ -119,7 +119,7 @@ class ExamViewSet(viewsets.ModelViewSet):
         response = dict()
         # Data Ujian
         ujian = self.get_object()
-        response.update({"rekap_ujian": self.get_serializer(ujian).data})
+        response.update({"rekap_ujian": RecapExamSerializer(ujian).data})
 
         # Data Nilai
         students = ujian.skripsi.students.all()
@@ -129,7 +129,8 @@ class ExamViewSet(viewsets.ModelViewSet):
         for student in students:
             grade = {
                 "mahasiswa": student.nama,
-                "nilai": []
+                "nilai": [],
+                "jumlah_rerata": jumlah_rerata
             }
             for penguji in ujian.penguji.all():
                 list_nilai = penguji.grades.filter(mahasiswa=student)
@@ -160,7 +161,7 @@ class ExamViewSet(viewsets.ModelViewSet):
                     "daftar_komentar": []
                 }
                 for komentar in penguji.comments.filter(bab=bab):
-                    comment.append({
+                    comment['daftar_komentar'].append{
                         "halaman": komentar.halaman,
                         "koreksi": komentar.komentar
                     })
