@@ -125,13 +125,13 @@ class ExamViewSet(viewsets.ModelViewSet):
         students = ujian.skripsi.students.all()
         grades = []
         for student in students:
+            jumlah_rerata = 0
+            rerata_total = 0
             grade = {
                 "mahasiswa": student.nama,
                 "nilai": [],
                 "jumlah_rerata": jumlah_rerata
             }
-            jumlah_rerata = 0
-            rerata_total = 0
             for penguji in ujian.penguji.all():
                 list_nilai = penguji.grades.filter(mahasiswa=student)
                 rerata = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
@@ -161,7 +161,7 @@ class ExamViewSet(viewsets.ModelViewSet):
                     "daftar_komentar": []
                 }
                 for komentar in penguji.comments.filter(bab=bab):
-                    comment['daftar_komentar'].append{
+                    comment['daftar_komentar'].append({
                         "halaman": komentar.halaman,
                         "koreksi": komentar.komentar
                     })
