@@ -1,13 +1,13 @@
 import KOP from './partials/kop'
+import scoreBoard from './partials/score-board'
 import moment from 'moment'
 
 export default function (data, i) {
     moment.locale('id')
     let doc = []
-    const { result, ujian } = data
-    const { tanggal, ruang, sesi, penguji, skripsi } = ujian
+    const { tanggal, ruang, sesi, penguji, skripsi } = data
     const { mahasiswa, judul } = skripsi
-    const hari = moment(ujian.tanggal, 'DD/MM/YYYY').format('dddd')
+    const hari = moment(tanggal, 'DD/MM/YYYY').format('dddd')
     const p = [
         `Pada hari ini ${hari}, ${moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')} pukul ${sesi.slice(0,5)} WIB bertempat di ${ruang} Departemen Teknik Elektro dan Teknologi Informasi, Fakultas Teknik UGM telah dilaksanakan ujian skripsi bagi mahasiswa:`
     ]
@@ -37,6 +37,7 @@ export default function (data, i) {
         ]
     }
     let kopVertical = KOP.portrait()
+    let scoreBoardTable = scoreBoard.getTable()
     doc.push(
         kopVertical,
         { text: 'BERITA ACARA PENDADARAN', bold: true, alignment: 'center', margin: [0, 5, 0, 5] },
@@ -113,54 +114,7 @@ export default function (data, i) {
                     },
                     margin: [0, 0, 10, 0]
                 },
-                {
-                    width: 180,
-                    table: {
-                        widths: [ '*', 80 ],
-                        body: [
-                            [
-                                { text: 'Skor', fillColor: '#CCCCCC', alignment: 'center' },
-                                { text: 'Nilai', fillColor: '#CCCCCC', alignment: 'center' },
-                            ],
-                            [ 
-                                { text: '≥ 84.6', alignment: 'center' }, 
-                                { text: 'A', alignment: 'center'} 
-                            ],
-                            [ 
-                                { text: '81.6 - 84.5', alignment: 'center' }, 
-                                { text: 'A-', alignment: 'center'} 
-                            ],
-                            [ 
-                                { text: '79.6 - 81.5', alignment: 'center' }, 
-                                { text: 'A/B', alignment: 'center'} 
-                            ],
-                            [ 
-                                { text: '75.6 - 79.5', alignment: 'center' }, 
-                                { text: 'B+', alignment: 'center'} 
-                            ],
-                            [ 
-                                { text: '69.6 - 75.5', alignment: 'center' }, 
-                                { text: 'B', alignment: 'center'} 
-                            ],
-                            [ 
-                                { text: '65.6 - 69.5', alignment: 'center' }, 
-                                { text: 'B-', alignment: 'center'} 
-                            ],
-                            [ 
-                                { text: '59.6 - 65.5', alignment: 'center' }, 
-                                { text: 'B/C', alignment: 'center'} 
-                            ],
-                            [ 
-                                { text: '54.6 - 59.5', alignment: 'center' }, 
-                                { text: 'C', alignment: 'center'} 
-                            ],
-                            [ 
-                                { text: '≤ 54.5', alignment: 'center' }, 
-                                { text: 'D', alignment: 'center'} 
-                            ],
-                        ],
-                    }
-                }
+                scoreBoardTable
             ]
         },
         {

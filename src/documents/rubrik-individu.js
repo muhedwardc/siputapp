@@ -1,34 +1,23 @@
-import socsHeader from './partials/socs-header';
 import socs from './partials/socs'
+import KOP from './partials/kop'
+import moment from 'moment'
+import scoreBoard from './partials/score-board';
 
-export default function (data) {
+function generateRubrik(rekap_ujian, dosen) {
     let doc = []
-    const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa, nilai } = data
-    const headerSOC = socsHeader
+    // const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa, nilai } = data
+    const { tanggal, sesi, ruang, skripsi } = rekap_ujian
+    const mahasiswa = skripsi.mahasiswa[0]
+    const kopVertical = KOP.portrait()
+    const socIndex = socs.index()
+    const hari = moment(tanggal, 'DD/MM/YYYY').format('dddd')
+    const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
+    socIndex.forEach((_, i) => {
+        socIndex[i].push({text: dosen.detail[i] ? dosen.detail[i].nilai : 0, alignment: 'center', bold: true})
+    })
+    let scoreBoardTable = scoreBoard.getTable(null, [100, 80], [10, 5, 0, 0])
     doc.push(
-        { text: '', pageBreak: 'before', pageOrientation: 'portrait' },
-        {
-            image: UGMLogo,
-            fit: [30, 30],
-            alignment: 'center',
-            margin: [0, 0, 0, 2]
-        },
-        {
-            text: [
-                'DEPARTEMEN TEKNIK ELEKTRO DAN TEKNOLOGI INFORMASI\n',
-                'FAKULTAS TEKNIK UNIVERSITAS GADJAH MADA',
-            ],
-            alignment: 'center'
-        },
-        {
-            text: 'Jl. Grafika No. 2, Fakultas Teknik UGM, Yogyakarta 55281 telp.(0274) 6492201,6492201 fax. (0274) 552305, http://jteti.ugm.ac.id, email:akademikjteti@gm.ac.id', 
-            fontSize: 9,
-            italics: true,
-            margin: [10, 2, 10, 0],
-            alignment: 'center'
-        },
-        { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ], margin: [0, 2, 0, 0] },
-        { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 3 } ], margin: [0, 4, 0, 4] },
+        kopVertical,
         {
             text: 'PENILAIAN UJIAN PENDADARAN',
             alignment: 'center',
@@ -48,8 +37,8 @@ export default function (data) {
                     ],
                     [ '', 'Nama Mahasiswa', '', mahasiswa.nama.toUpperCase() ],
                     [ '', 'NIM', '', mahasiswa.nim ],
-                    [ '', 'Hari, Tanggal Ujian', '', `${hari.toUpperCase()}, ${tanggal}`],
-                    [ '', 'Jam', '', waktu]
+                    [ '', 'Hari, Tanggal Ujian', '', `${hari.toUpperCase()}, ${formatedDate}`],
+                    [ '', 'Jam', '', sesi]
                 ]
             },
             layout: 'noBorders',
@@ -78,21 +67,7 @@ export default function (data) {
                 },
                 widths: [70, 70, '*', '*', '*', '*', 30],
                 body: [
-                    [
-                        {text: 'Student Outcome', fillColor: '#CCCCCC', alignment: 'center', rowSpan: 2, margin: [0, 7, 0, 0]},
-                        {text: 'Learning Outcome', fillColor: '#CCCCCC', alignment: 'center', rowSpan: 2, margin: [0, 7, 0, 0]},
-                        {text: 'Performance Indicator', fillColor: '#CCCCCC', alignment: 'center', colSpan: 4},
-                        '', '', '',
-                        {text: 'Nilai (0-\n100)', fillColor: '#CCCCCC', alignment: 'center', rowSpan: 2, margin: [0, 2, 0, 0]}
-                    ],
-                    [
-                        '', '',
-                        {text: 'Unsatisfactory (0-49)', fillColor: '#CCCCCC', alignment: 'center'},
-                        {text: 'Adequate (50-74)', fillColor: '#CCCCCC', alignment: 'center'},
-                        {text: 'Satisfactory (75-84)', fillColor: '#CCCCCC', alignment: 'center'},
-                        {text: 'Excellent (85-100)', fillColor: '#CCCCCC', alignment: 'center'},
-                        ''
-                    ], socs[0], socs[1]]
+                    ...socs.header(), socIndex[0], socIndex[1]]
             },
             fontSize: 7.5,
         },
@@ -101,29 +76,15 @@ export default function (data) {
             table: {
                 widths: [70, 70, '*', '*', '*', '*', 30],
                 body: [
+                    ...socs.header(), socIndex[2], socIndex[3], socIndex[4], socIndex[5],
                     [
-                        {text: 'Student Outcome', fillColor: '#CCCCCC', alignment: 'center', rowSpan: 2, margin: [0, 7, 0, 0]},
-                        {text: 'Learning Outcome', fillColor: '#CCCCCC', alignment: 'center', rowSpan: 2, margin: [0, 7, 0, 0]},
-                        {text: 'Performance Indicator', fillColor: '#CCCCCC', alignment: 'center', colSpan: 4},
-                        '', '', '',
-                        {text: 'Nilai (0-\n100)', fillColor: '#CCCCCC', alignment: 'center', rowSpan: 2, margin: [0, 2, 0, 0]}
-                    ],
-                    [
-                        '', '',
-                        {text: 'Unsatisfactory (0-49)', fillColor: '#CCCCCC', alignment: 'center'},
-                        {text: 'Adequate (50-74)', fillColor: '#CCCCCC', alignment: 'center'},
-                        {text: 'Satisfactory (75-84)', fillColor: '#CCCCCC', alignment: 'center'},
-                        {text: 'Excellent (85-100)', fillColor: '#CCCCCC', alignment: 'center'},
-                        ''
-                    ], socs[2], socs[3], socs[4], socs[5],
-                    [
-                        {text: 'Rerata', fillColor: '#CCCCCC', alignment: 'center'},
+                        {text: 'Rerata', fillColor: '#CCCCCC', colSpan: 6, alignment: 'left', margin: [0, 5, 0, 5]},
                         {text: '', fillColor: '#CCCCCC', alignment: 'center'},
                         {text: '', fillColor: '#CCCCCC', alignment: 'center'},
                         {text: '', fillColor: '#CCCCCC', alignment: 'center'},
                         {text: '', fillColor: '#CCCCCC', alignment: 'center'},
                         {text: '', fillColor: '#CCCCCC', alignment: 'center'},
-                        {text: '', fillColor: '#CCCCCC', alignment: 'center'},
+                        {text: dosen.rerata, fillColor: '#CCCCCC', alignment: 'center', bold: true, margin: [0, 5, 0, 5]},
                     ]
                 ]
             },
@@ -140,7 +101,7 @@ export default function (data) {
                         {text: ':', bold: true},
                         ''
                     ],
-                    [ '', 'Nama Dosen', '', 'Ridi Ferdiana' ],
+                    [ '', 'Nama Dosen', '', dosen.penguji ],
                     [
                         '',
                         { text: 'Tanda tangan', margin: [0, 50, 0, 0] },
@@ -159,55 +120,16 @@ export default function (data) {
                 'Kriteria konversi skor rata-rata menjadi nilai akhir.'
             ]
         },
-        {
-            table: {
-                widths: [ 100, 80 ],
-                body: [
-                    [
-                        { text: 'Skor', fillColor: '#CCCCCC', alignment: 'center' },
-                        { text: 'Nilai', fillColor: '#CCCCCC', alignment: 'center' },
-                    ],
-                    [ 
-                        { text: '≥ 84.6', alignment: 'center' }, 
-                        { text: 'A', alignment: 'center'} 
-                    ],
-                    [ 
-                        { text: '81.6 - 84.5', alignment: 'center' }, 
-                        { text: 'A-', alignment: 'center'} 
-                    ],
-                    [ 
-                        { text: '79.6 - 81.5', alignment: 'center' }, 
-                        { text: 'A/B', alignment: 'center'} 
-                    ],
-                    [ 
-                        { text: '75.6 - 79.5', alignment: 'center' }, 
-                        { text: 'B+', alignment: 'center'} 
-                    ],
-                    [ 
-                        { text: '69.6 - 75.5', alignment: 'center' }, 
-                        { text: 'B', alignment: 'center'} 
-                    ],
-                    [ 
-                        { text: '65.6 - 69.5', alignment: 'center' }, 
-                        { text: 'B-', alignment: 'center'} 
-                    ],
-                    [ 
-                        { text: '59.6 - 65.5', alignment: 'center' }, 
-                        { text: 'B/C', alignment: 'center'} 
-                    ],
-                    [ 
-                        { text: '54.6 - 59.5', alignment: 'center' }, 
-                        { text: 'C', alignment: 'center'} 
-                    ],
-                    [ 
-                        { text: '≤ 54.5', alignment: 'center' }, 
-                        { text: 'D', alignment: 'center'} 
-                    ],
-                ],
-            },
-            margin: [10, 5, 0, 0]
-        }
+        scoreBoardTable
     )
 
+    return doc
+}
+
+export default function(rekap_ujian, rekap_nilai) {
+    let doc = []
+    rekap_nilai[0].nilai.forEach(dosen => {
+        doc.push(...generateRubrik(rekap_ujian, dosen))
+    })
     return doc
 }

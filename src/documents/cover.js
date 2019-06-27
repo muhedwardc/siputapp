@@ -1,6 +1,10 @@
-function generateDoc(data) {
+import moment from 'moment'
+
+export default function(data) {
     const { ruang, sesi, tanggal } = data
     const { mahasiswa } = data.skripsi
+    const hari = moment(tanggal, 'DD/MM/YYYY').format('dddd')
+    const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     const mahasiswaList = mahasiswa.map(mhs => { return [{text: mhs.nama + '\n' + mhs.nim, alignment: 'center', fontSize: 20, margin: [0, 0, 0, 10]}] })
     let doc = [
         {
@@ -19,8 +23,8 @@ function generateDoc(data) {
                                             table: {
                                                 widths: ['auto', 'auto', '*'],
                                                 body: [
-                                                    // [ 'HARI', ':', hari ],
-                                                    [ 'TANGGAL', ':', tanggal ],
+                                                    [ 'HARI', ':', hari ],
+                                                    [ 'TANGGAL', ':', formatedDate ],
                                                     [ 'WAKTU', ':', sesi ],
                                                     [ 'RUANG', ':', ruang ],
                                                 ],
@@ -44,10 +48,5 @@ function generateDoc(data) {
         }
     ]
 
-    return doc
-}
-
-export default function (data) {
-    let doc = generateDoc(data)
     return doc
 }

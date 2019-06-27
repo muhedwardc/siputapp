@@ -1,30 +1,18 @@
 import KOP from './partials/kop'
+import getDepName from './partials/departement'
 import moment from 'moment'
 moment.locale('id')
 
-function documentByMahasiswa(data, dosenIndex, i) {
+function documentByMahasiswa(rekap_ujian, komentar_dosen, i) {
     let doc = []
-    const { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa, judul } = data
+    const { komentar, penguji } = komentar_dosen
+    const { tanggal, skripsi } = rekap_ujian
+    const dosen = rekap_ujian.penguji
+    const { judul, mahasiswa } = skripsi
     // const { tanggal}
     const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     const bab = ['ABSTRAK', 'BAB I\nPENDAHULUAN', 'BAB II\nDASAR TEORI', 'BAB III\nMETODE PENELITIAN', 'BAB IV\nHASIL DAN PEMBAHASAN', 'BAB V\nKESIMPULAN DAN SARAN', 'KOMENTAR UMUM/CATATAN']
-    const comments = [
-        [], [], [
-            {
-                page: 2,
-                text: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using'
-            },
-            {
-                page: 2,
-                text: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using'
-            },
-            {
-                page: 4,
-                text: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using'
-            },
-        ],
-        [], []
-    ]
+    const comments = komentar.map(e => e.daftar_komentar)
     let corrections = [
         [
             { text: 'NO.', alignment: 'center', margin: [0, 5, 0, 0] },
@@ -35,22 +23,24 @@ function documentByMahasiswa(data, dosenIndex, i) {
         ],
     ]
     for (let i = 0; i < bab.length; i ++) {
-        if (comments[i]) {
+        if (comments[i][0]) {
             corrections.push([
                 { border: [true, true, true, false], text: (i+1) },
                 { border: [true, true, true, false], text: bab[i], bold: true },
-                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].page : '', alignment: 'center' },
-                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].text : '' },
+                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].halaman : '', alignment: 'center' },
+                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].koreksi : '' },
                 { border: [true, true, true, false], text: '' },
             ])
             if (comments[i].length > 1) {
+                let border = [true, false, true, false]
                 for (let j = 1; j < comments[i].length; j++) {
+                    if (j == comments[i].length - 1) border = [true, false, true, true]
                     corrections.push([
-                        { border: [true, false, true, false], text: '' },
-                        { border: [true, false, true, false], text: '' },
-                        { border: [true, false, true, false], text: comments[i][j] ? comments[i][j].page : '', alignment: 'center' },
-                        { border: [true, false, true, false], text: comments[i][j] ? comments[i][j].text : '' },
-                        { border: [true, false, true, false], text: '' },
+                        { border, text: '' },
+                        { border, text: '' },
+                        { border, text: comments[i][j] ? comments[i][j].halaman : '', alignment: 'center' },
+                        { border, text: comments[i][j] ? comments[i][j].koreksi : '' },
+                        { border, text: '' },
                     ])
                 }
             } 
@@ -62,17 +52,7 @@ function documentByMahasiswa(data, dosenIndex, i) {
             ])
         }
     }
-    let dosenTabel = [
-        [
-            { text: 'NO.', alignment: 'center' },
-            { text: 'PENGUJI', alignment: 'center' },
-            { text: 'JABATAN', alignment: 'center' },
-            { text: 'TANDA TANGAN', alignment: 'center' },
-        ],
-    ]
-    dosen.forEach((dosen, i) => {
-        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen, margin: [0, 10, 0, 10]}, { text: (i == 0 ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
-    })
+    const departement = getDepName.getName(mahasiswa[i].prodi, mahasiswa[i].konsentrasi)
     let kopVertical = KOP.portrait()
     doc.push(
         kopVertical,
@@ -95,7 +75,7 @@ function documentByMahasiswa(data, dosenIndex, i) {
                     [
                         'Prodi/Konsentrasi',
                         ':',
-                        `${mahasiswa[i].prodi}/${mahasiswa[i].konsentrasi}`
+                        `${departement[0]}/${departement[1]}`
                     ],
                     [
                         'Judul Skripsi',
@@ -105,17 +85,17 @@ function documentByMahasiswa(data, dosenIndex, i) {
                     [
                         'Pembimbing I',
                         ':',
-                        dosen[0]
+                        dosen[0].dosen
                     ],
                     [
                         'Pembimbing II',
                         ':',
-                        dosen[1]
+                        dosen[1].dosen
                     ],
                     [
                         'Dikoreksi Oleh',
                         ':',
-                        dosen[dosenIndex]
+                        penguji
                     ]
                 ]
             },
@@ -147,7 +127,7 @@ function documentByMahasiswa(data, dosenIndex, i) {
                     width: '*',
                     text: [
                         `Yogyakarta, ${tanggal}\nDosen Pengoreksi\n\n\n\n\n`,
-                        { text: dosen[dosenIndex], bold: true }
+                        { text: penguji, bold: true }
                     ]
                 }
             ],
@@ -157,10 +137,10 @@ function documentByMahasiswa(data, dosenIndex, i) {
     return doc
 }
 
-export default function (data, i) {
+export default function (rekap_ujian, rekap_komentar, i) {
     let doc = []
-    for (let j = 0; j < data.ujian.penguji.length-1; j ++) {
-        doc.push(...documentByMahasiswa(data, j, i))
+    for (let j = 0; j < rekap_komentar.length; j ++) {
+        doc.push(...documentByMahasiswa(rekap_ujian, rekap_komentar[j], i))
     }
     return doc
 }
