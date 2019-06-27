@@ -35,22 +35,27 @@ class ExamViewSet(viewsets.ModelViewSet):
         return super().get_queryset().filter(deleted_at__isnull=True)
  
     def list(self, request, *args, **kwargs):
+        exams = self.get_queryset()
+        
         if 'mulai' in request.GET and 'selesai' in request.GET:
             mulai = request.GET.get('mulai')
             selesai = request.GET.get('selesai')
-            exams = self.get_queryset().filter(tanggal__range=(mulai, selesai))
-            page = self.paginate_queryset(exams)
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            exams = exams.filter(tanggal__range=(mulai, selesai))
+            # page = self.paginate_queryset(exams)
+            # serializer = self.get_serializer(page, many=True)
+            # return self.get_paginated_response(serializer.data)
 
         elif 'tanggal' in request.GET:
             date = request.GET.get('tanggal')
-            exams = self.get_queryset().filter(tanggal=date)
-            page = self.paginate_queryset(exams)
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            exams = exams.filter(tanggal=date)
+            # page = self.paginate_queryset(exams)
+            # serializer = self.get_serializer(page, many=True)
+            # return self.get_paginated_response(serializer.data)
 
-        exams = self.get_queryset()
+        if 'search' in request.GET:
+            search = request.GET.get('search')
+            exams = exams.filter(Q(skripsi__judul__icontains=search) | Q(skripsi__students__nama__icontains=search))
+            
         page = self.paginate_queryset(exams)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
