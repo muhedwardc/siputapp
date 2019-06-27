@@ -261,10 +261,36 @@
                             </tr>
                         </table>
                     </div>
-                    <h3 class="mt-4">REKAP KOMENTAR</h3>
-                    <table class="recap-table">
-
-                    </table>
+                    <h3 class="mt-4 mb-2">REKAP KOMENTAR</h3>
+                    <v-tabs
+                        v-model="recapBab"
+                        color="white"
+                        grow
+                        class="outline-tab mb-4"
+                        show-arrows
+                        >
+                        <v-tabs-slider color="primary"></v-tabs-slider>
+                        <v-tab v-for="b in bab" :key="b">{{ b }}</v-tab>
+                        <v-tabs-items v-if="recap" v-model="recapBab">
+                            <v-tab-item class="recap-comments-container" v-for="(bab, i) in commentsRecapByBab" :key="i">
+                                <table v-if="bab.length" class="v-datatable v-table theme--light">
+                                    <tr>
+                                        <td width="60px">No.</td>
+                                        <td width="60px">Hal</td>
+                                        <td>Komentar</td>
+                                        <td width="380px">Dosen</td>
+                                    </tr>
+                                    <tr v-for="(komentar, j) in bab" :key="j">
+                                        <td v-text="j+1"></td>
+                                        <td v-text="komentar.komentar.halaman"></td>
+                                        <td v-text="komentar.komentar.koreksi"></td>
+                                        <td v-text="komentar.dosen"></td>
+                                    </tr>
+                                </table>
+                                <p v-else class="pa-4">Tidak ada komentar untuk bab ini</p>
+                            </v-tab-item>
+                        </v-tabs-items>
+                    </v-tabs>
                     <v-layout class="end-exam" wrap>
                         <p class="red--text font-weight-bold ma-0"><i>Pastikan semua nilai dan komentar sudah benar, tepat, serta sudah disetujui oleh semua penguji.<br>Seluruh hasil ujian akan disimpan dan tidak dapat diubah ketika sudah menekan tombol SELESAI.</i></p>
                         <v-spacer></v-spacer>
@@ -318,7 +344,7 @@ export default {
                 page: ''
             },
             itemIndex: 0,
-            bab: ['ABSTRAK', 'BAB I PENDAHULUAN', 'BAB II DASAR TEORI', 'BAB III METODE PENELITIAN', 'BAB IV HASIL DAN PEMBAHASAN', 'KOMENTAR UMUM/CATATAN'],
+            bab: ['ABSTRAK', 'BAB I PENDAHULUAN', 'BAB II DASAR TEORI', 'BAB III METODE PENELITIAN', 'BAB IV HASIL DAN PEMBAHASAN', 'BAB V KESIMPULAN DAN SARAN', 'KOMENTAR UMUM/CATATAN'],
             corrections: [],
             newCorrection: {
                 komentar: '',
@@ -345,6 +371,7 @@ export default {
             step: 0,
             showRecap: false,
             recap: null,
+            recapBab: 0,
             fetchingComments: false, 
             errorFetchingComments: false,
             fetchingGrades: false,
@@ -373,22 +400,23 @@ export default {
         },
 
         commentsRecapByBab() {
-            // if (this.recap) {
-            //     const { rekap_komentar } = this.recap
-            //     let recapByBab = []
-            //     for (let i = 0; i < rekap_komentar[0].komentar.length; i ++) {
-            //         let recapByDosenByBab = []
-            //         for (let j = 0; rekap_komentar.length; j++) {
-            //             if (rekap_komentar[i].daftar_komentar.length) {
-            //                 let commentsRecap = rekap_komentar[i].daftar_komentar.map(komentar => {
-            //                     return {dosen: rekap_komentar[i].penguji, komentar}
-            //                 })
-            //                 recapByDosenByBab.push(...commentsRecap)
-            //             }
-            //         }
-            //         recapByDosenByBab
-            //     }
-            // }
+            if (this.recap) {
+                const { rekap_komentar } = this.recap
+                let recapByBab = []
+                for (let i = 0; i < this.bab.length; i ++) {
+                    let recapByDosenByBab = []
+                    for (let j = 0; j < rekap_komentar.length; j++) {
+                        if (rekap_komentar[j].komentar[i].daftar_komentar.length) {
+                            let commentsRecap = rekap_komentar[j].komentar[i].daftar_komentar.map(komentar => {
+                                return {dosen: rekap_komentar[j].penguji, komentar}
+                            })
+                            recapByDosenByBab.push(...commentsRecap)
+                        }
+                    }
+                    recapByBab.push(recapByDosenByBab)
+                }
+                return recapByBab
+            }
         },
 
         convertGrade() {
@@ -956,4 +984,23 @@ export default {
             border-radius: 4px
             padding: 4px
             margin-bottom: 4px
+    
+    .recap-comments-container
+        background: white
+        
+        table 
+            width: 100%
+            collapse: collapse
+
+            tr
+                &:first-of-type,
+                &:last-of-type
+                    border-bottom: 1px solid #a7a7a7
+
+                td
+                    padding: 16px
+                
+                td:not(:last-of-type),
+                th:not(:last-of-type)
+                    border-right: 1px solid #a7a7a7
 </style>
