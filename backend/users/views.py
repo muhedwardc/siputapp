@@ -8,8 +8,8 @@ from knox.models import AuthToken
 from django.db.models import Q
 from django.conf import settings
 
-from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer
-from .models import User
+from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer, PengelolaSerializer
+from .models import User, Pengelola
 from backend.pagination import CustomPagination
 
 
@@ -78,6 +78,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 "users": serializer.data
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PengelolaViewSet(viewsets.ModelViewSet):
+    serializer_class = PengelolaSerializer
+    queryset = Pengelola.objects.all()
 
 
 class LoginAPI(views.APIView):

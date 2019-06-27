@@ -82,3 +82,15 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+
+class Pengelola(models.Model):
+    jabatan = models.CharField(max_length=250, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.jabatan
+    
+    class Meta:
+        db_table = 'pengelola'
+        verbose_name = 'Pengelola'
+        verbose_name_plural = 'Pengelola'
