@@ -133,9 +133,21 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
     @action(detail=True)
     def grades(self, request, *args, **kwargs):
+        response = list()
         students = self.get_object().ujian.skripsi.students.all()
-        serializer = GradeSerializer(students, many=True)
-        return Response(serializer.data)
+
+        for student in students:
+            daftar_nilai = []
+            for grade in student.grades.filter(penguji=self.get_object()):
+                nilai = GradeSerializer(grade)
+                daftar_nilai.append(nilai)
+
+            response.append({
+                "mahasiswa": student.pk,
+                "daftar_nilai": daftar_nilai
+            })
+
+        return Response(response, status=200)
 
     @grades.mapping.post
     def add_grades(self, request, *args, **kwargs):

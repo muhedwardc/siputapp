@@ -3,19 +3,10 @@ from rest_framework import serializers
 from .models import Grade
 from backend.essays.models import Student
 
-class ListGradeSerializer(serializers.ModelSerializer):
+class GradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
         fields = ('so', 'nilai')
-
-
-class GradeSerializer(serializers.ModelSerializer):
-    mahasiswa = serializers.IntegerField(source='pk')
-    daftar_nilai = ListGradeSerializer(source='grades', many=True)
-
-    class Meta:
-        model = Student
-        fields = ('mahasiswa', 'daftar_nilai')
 
 class CreateGradeSerializer(serializers.ModelSerializer):
     class Meta:
