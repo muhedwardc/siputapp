@@ -22,7 +22,7 @@
                     <v-layout class="mb-1">
                         <v-icon class="mr-1" small>access_time</v-icon>
                         <span>
-                            <span class="mr-2"><b>{{ isToday ? 'Hari ini' : dateUjian }}</b></span>
+                            <span class="mr-2" :class="isToday ? 'purple--text' : null"><b>{{ item.ujian.status == 3 ? 'SEDANG BERLANGSUNG' : isToday ? 'HARI INI' : dateUjian }}</b></span>
                             <span v-text="item.ujian.sesi"></span>
                         </span>
                     </v-layout>
@@ -36,7 +36,6 @@
                     </v-layout>
                     <!-- <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi }} - Ruang {{ item.ujian.ruang }}</span> -->
                 </v-card-text>
-                <v-spacer></v-spacer>
             </v-layout>
         </v-card>
         <v-card v-if="type == 1" flat class="exam-item mb-3" column @click="$router.push(`/ujian/${item.id}`)">

@@ -11,7 +11,7 @@
 				<app-logo></app-logo>
 			</v-layout>
 		</v-list>
-		<v-list>
+		<v-list v-if="$store.state.auth.token">
 			<v-list-tile
 				v-for="route in routes" 
 				:key="route.title"
