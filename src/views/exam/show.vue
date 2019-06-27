@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <v-layout v-if="exam" row wrap>
+        <v-layout v-if="exam && $store.state.auth.token" row wrap>
             <v-flex xs12>
                 <v-dialog persistent v-model="editDialog" max-width="600px">
                     <v-card>
@@ -291,7 +291,7 @@
                 </v-dialog>
                 <v-card>
                     <v-card-text v-if="exam">
-                        <v-layout row>
+                        <v-layout row wrap>
                             <v-layout column>
                                 <h3 class="headline font-weight-regular mt-1 text-capitalize">
                                     {{ exam.skripsi.judul }}
@@ -516,7 +516,11 @@ export default {
         },
 
         isLeader() {
-            return this.exam.penguji[0].dosen == this.$store.state.auth.user.nama
+            if (this.exam.ujian) {
+                return this.$store.state.auth.user.id == this.exam.ujian.skripsi.pembimbing_satu
+            }
+
+            return false
         },
 
         isToday() {

@@ -1,46 +1,45 @@
 <template>
-    <v-layout column>
-        <v-layout align-center wrap>
+    <app-list-container>
+        <template v-slot:header>
             <h3>DAFTAR UJIAN ANDA</h3>
             <v-spacer></v-spacer>
             <v-spacer></v-spacer>
-            <v-text-field
-                v-model="search"
-                label="Cari ujian"
-                append-icon="search"
-                class="no-message solid-input"
-                solo
-            ></v-text-field>
-        </v-layout>
-        <div class="mt-4">
+            <app-search-box @on-search="onSearch($event)"></app-search-box>
+        </template>
+        <template v-slot:list>
             <v-data-table
                 class="zebra-column solid-container"
+                hide-actions
                 :headers="headers"
                 :search="search"
                 :items="exams"
                 :rows-per-page-items="perPage"
-                :loading="loading"
-            >
-            <template slot="headerCell" slot-scope="props">
-                <span class="black--text font-weight-bold" style="font-size: 13px">
-                    {{ props.header.text }}
-                </span>
-            </template>
-            <template v-slot:no-data>
-                <v-layout :value="!exams" class="pa-2" justify-center>
-                    Tidak ada ujian untuk ditampilkan.
-                </v-layout>
-            </template>
-            <template v-slot:items="props">
-                <td>{{ readableData(props.item.ujian.tanggal) }}</td>
-                <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
-                <td>{{ props.item.ujian.sesi }}</td>
-                <td>{{ props.item.ujian.ruang }}</td>
-                <td>{{ props.item.ujian.penguji[0].dosen == $store.state.auth.user.nama ? 'Ketua' : 'Anggota' }}</td>
-            </template>
+                :loading="loading">
+                <template slot="headerCell" slot-scope="props">
+                    <span class="black--text font-weight-bold" style="font-size: 13px">
+                        {{ props.header.text }}
+                    </span>
+                </template>
+                <template v-slot:no-data>
+                    <v-layout :value="!exams" class="pa-2" align-center column>
+                        Tidak ada ujian untuk ditampilkan.
+                        <v-btn color="primary" @click="fetchExams()">Muat ulang</v-btn>
+                    </v-layout>
+                </template>
+                <template v-slot:items="props">
+                    <td>{{ readableData(props.item.ujian.tanggal) }}</td>
+                    <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
+                    <td>{{ props.item.ujian.sesi }}</td>
+                    <td>{{ props.item.ujian.ruang }}</td>
+                    <td>{{ props.item.ujian.penguji[0].dosen == $store.state.auth.user.nama ? 'Ketua' : 'Anggota' }}</td>
+                    <td>{{ examStatus(props.item.ujian.status) }}</td>
+                </template>
+                <template v-slot:footer>
+                    <app-pagination-footer :page="page" :totalItems="totalItems" :td="headers.length" @on-page-change="getExam($event)"></app-pagination-footer>
+                </template>
             </v-data-table>
-        </div>
-    </v-layout>
+        </template>
+    </app-list-container>
 </template>
 
 <script>
@@ -56,7 +55,7 @@ export default {
                 {
                     text: 'Tanggal',
                     value: 'ujian.tanggal',
-                    sortable: true,
+                    sortable: false,
                     align: 'center'
                 },
                 {
@@ -83,9 +82,18 @@ export default {
                     sortable: false,
                     align: 'center'
                 },
+                {
+                    text: 'Status',
+                    value: 'ujian.status',
+                    sortable: false,
+                    align: 'center'
+                },
             ],
             exams: [],
-            perPage: [ 10 ]
+            perPage: [ 10 ],
+            page: 1,
+            totalItems: 0,
+            textSearch: '',
         }   
     },
 
@@ -93,6 +101,12 @@ export default {
         thisMonth() {
             moment.locale('id')
             return moment().format('MMMM')
+        },
+
+        examStatus() {
+            return function(s) {
+                return s == 3 ? 'Selesai' : s == 2 ? 'Sedang Berlangsung' : 'Belum Mulai'
+            }
         }
     },
 
@@ -101,16 +115,43 @@ export default {
             'showSnackbar'
         ]),
 
+        async onSearch (text = '') {
+            this.page = 1
+            this.textSearch = text
+            if (this.$store.state.cancelTokenSource) this.$store.state.cancelTokenSource.cancel()
+            this.loading = true
+            this.$store.state.useUploadProgress = true
+            try {
+                const response = await this.$thessa.getMyExamsHistory('search=' + text)
+                this.totalItems = response.data.count
+                this.exams = response.data.results
+                this.page = 1
+                this.loading = false
+                this.$store.state.useUploadProgress = false
+            } catch (error) {
+                this.showSnackbar({
+                    message: error.message,
+                    type: 'error'
+                })
+                this.loading = false
+                this.$store.state.useUploadProgress = false
+            }
+        },
+
         readableData(date) {
             if (moment().format('DD/MM/YYYY') == date) return 'Hari ini'
             return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
         },
 
-        async fetchExams() {
+        async fetchExams(page = 1) {
             this.loading = true
+            let qs = 'page=' + page
+            if (this.textSearch) qs += '&search=' + this.textSearch
             try {
-                const history = await this.$thessa.getMyExamsHistory()
+                const history = await this.$thessa.getMyExamsHistory(qs)
                 this.exams.push.apply(this.exams, history.data.results)
+                this.totalItems = history.data.count
+                this.page = page
                 this.loading = false
             } catch (error) {
                 this.exams = []

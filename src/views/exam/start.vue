@@ -25,7 +25,7 @@
                 <v-tabs-slider color="primary"></v-tabs-slider>
                 <v-tab>Komentar</v-tab>
                 <v-tab>Penilaian</v-tab>
-                <v-tab>Revisi Judul</v-tab>
+                <v-tab v-if="isLeader">Revisi Judul</v-tab>
             </v-tabs>
             <v-tabs-items v-model="step">
                 <v-tab-item class="tab-container">
@@ -113,42 +113,47 @@
                             </v-layout>
                         </v-layout>
                     </template>
-                    <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
+                    <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; min-height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
                         <v-layout column>
-                            <b>{{ socs[gradeTemp.so_id].name }}</b>
-                            <p class="mb-1">{{ socs[gradeTemp.so_id].description }}</p>
+                            <b>{{ socs[gradeTemp.so-1].name }}</b>
+                            <p class="mb-1">{{ socs[gradeTemp.so-1].description }}</p>
                             <v-form v-model="validGrades">
-                            <table class="mt-2 grade-list">
-                                <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
-                                    <div :key="mahasiswa.nim">
-                                        <tr>
-                                            <td v-text="mahasiswa.nama" colspan="2"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><v-text-field :disabled="saving" :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.grades[index]"></v-text-field></td>
-                                            <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.grades[index])"></b></td>
-                                        </tr>
-                                    </div>
-                                </template>
-                            </table>
+                                <table class="mt-2 grade-list">
+                                    <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
+                                        <div :key="mahasiswa.nim">
+                                            <tr>
+                                                <td v-text="mahasiswa.nama" colspan="2"></td>
+                                            </tr>
+                                            <tr>
+                                                <td><v-text-field :disabled="saving" :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.daftar_nilai[index]"></v-text-field></td>
+                                                <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.daftar_nilai[index])"></b></td>
+                                            </tr>
+                                        </div>
+                                    </template>
+                                </table>
                             </v-form>
-                            <v-layout>
-                                <v-spacer></v-spacer>
-                                <v-btn class="error" @click="discardGrades" :disabled="saving">Batal</v-btn>
-                                <v-btn class="success" @click="saveGrades" :loading="saving">simpan</v-btn>
+                            <v-layout column>
+                                <v-layout wrap>
+                                    <v-spacer></v-spacer>
+                                    <v-btn class="error" @click="discardGrades" :disabled="saving">Batal</v-btn>
+                                    <v-btn class="success" @click="saveGrades" :loading="saving">simpan</v-btn>
+                                </v-layout>
+                                <v-layout column>
+                                    <b class="mt-2">Indikator Penilaian</b>
+                                    <v-layout v-for="(list, i) in socs[selectedSO].indicators" :key="i" style="display: block;" column>
+                                        <b>{{ gradeIndicators[i] }}</b>
+                                        <ul>
+                                            <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
+                                        </ul>
+                                    </v-layout>
+                                </v-layout>
                             </v-layout>
-                        </v-layout>
-                        <b class="mt-2">Indikator Penilaian</b>
-                        <v-layout column v-for="(list, i) in socs[selectedSO].indicators" :key="i">
-                            <b>{{ gradeIndicators[i] }}</b>
-                            <ul>
-                                <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
-                            </ul>
                         </v-layout>
                     </v-layout>
                 </v-tab-item>
-                <v-tab-item class="tab-container">
+                <v-tab-item class="tab-container" v-if="isLeader">
                     <h3 class="font-weight-medium">Apakah ada revisi judul?</h3>
+                    <p class="font-weight-medium ma-0" v-text="'Judul: ' + exam.ujian.skripsi.judul"></p>
                     <v-radio-group class="pa-0 mt-2" v-model="revisionTemp.revisi" :mandatory="false">
                         <v-radio color="primary" label="Tidak ada revisi judul" :value="false"></v-radio>
                         <v-radio color="primary" label="Ada, revisi judulnya:" :value="true"></v-radio>
@@ -179,12 +184,22 @@
             </v-card>
         </v-dialog>
         <v-content id="exam-content">
-            <embed :src="'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'" id="exam-content-view">
+            <object data='https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' id="exam-content-view">
+                <v-layout column align-center justify-center style="height: 100%">
+                    <h1>Maaf,</h1>
+                    <p class="ma-0 mt-2 mb-2">Peramban Anda tidak mendukung penampilan PDF</p>
+                    <v-btn class="primary">
+                        <a class="white--text text-capitalize" target="_blank" href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf">lihat naskah</a>
+                    </v-btn>
+                    <!-- <p class="mb-4"><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf">Unduh Naskah</a></p> -->
+                </v-layout>
+            </object>
+            <!-- <embed :src="'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'" id="exam-content-view"> -->
             <!-- <embed :src="'https://drive.google.com/viewerng/viewer?embedded=true&url=https://www.otago.ac.nz/library/pdf/Google_searching.pdf'" id="exam-content-view"> -->
             <!-- <iframe :src="this.exam.ujian.skripsi.naskah.replace('/media/', '/uploads/')" id="exam-content-view"></iframe> -->
             <v-layout v-if="!drawer" row class="toggle-button">
                 <v-btn @click="toggleCorrectionSection()" class="pa-2 flat primary text-capitalize">
-                    Tambah Komentar
+                    Borang Penilaian
                 </v-btn>
             </v-layout>
         </v-content>
@@ -198,7 +213,7 @@
                 <v-toolbar-items>
                     <v-btn flat @click="syncRecap">
                         <v-icon left :class="{rotating: sync}">sync</v-icon>
-                        <span class="text-capitalize">Sinkronkan Rekap</span>
+                        <span class="text-capitalize">Perbarui Rekap</span>
                     </v-btn>
                 </v-toolbar-items>
             </v-toolbar>
@@ -214,8 +229,8 @@
                     </template>
                     <hr class="mt-4 mb-4">
                     <h3 class="mb-2">REKAP PENILAIAN UJIAN TUGAS AKHIR</h3>
-                    <v-layout style="width: 100%;">
-                        <table class="recap-table" v-if="recap">
+                    <div class="recap-table v-table__overflow">
+                        <table class="v-datatable v-table theme--light" v-if="recap">
                             <tr class="text-xs-center">
                                 <td rowspan="2">Dosen</td>
                                 <td :colspan="recap.rekap_ujian.skripsi.mahasiswa.length">Nilai</td>
@@ -231,16 +246,21 @@
                             </tr>
                             <tr>
                                 <td><b>Total</b></td>
-                                <td v-for="(total, i) in gradesTotal" :key="i" v-text="total"></td>
+                                <td v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.jumlah_rerata"></td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <td><b>Rerata</b></td>
-                                <td class="font-weight-bold" v-for="(average, i) in gradesAverage" :key="i" v-text="average"></td>
+                                <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.rerata_total"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td><b>Konversi</b></td>
+                                <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="convertGrade(mahasiswa.rerata_total)"></td>
                                 <td></td>
                             </tr>
                         </table>
-                    </v-layout>
+                    </div>
                     <h3 class="mt-4">REKAP KOMENTAR</h3>
                     <table class="recap-table">
 
@@ -264,6 +284,7 @@
 import {mapActions} from 'vuex'
 import moment from 'moment'
 import socs from './socs'
+import { POINT_CONVERSION_COMPRESSED } from 'constants';
 export default {
     data() {
         return {
@@ -280,8 +301,8 @@ export default {
                 konten: null
             },
             gradeTemp: {
-                so_id: 0,
-                grades: []
+                so: 1,
+                daftar_nilai: []
             },
             grades: [],
             socs: socs,
@@ -344,7 +365,46 @@ export default {
 
     computed: {
         isLeader() {
-            return this.$store.state.auth.user.id == this.exam.ujian.skripsi.pembimbing_satu
+            if (this.exam.ujian) {
+                return this.$store.state.auth.user.id == this.exam.ujian.skripsi.pembimbing_satu
+            }
+
+            return false
+        },
+
+        commentsRecapByBab() {
+            // if (this.recap) {
+            //     const { rekap_komentar } = this.recap
+            //     let recapByBab = []
+            //     for (let i = 0; i < rekap_komentar[0].komentar.length; i ++) {
+            //         let recapByDosenByBab = []
+            //         for (let j = 0; rekap_komentar.length; j++) {
+            //             if (rekap_komentar[i].daftar_komentar.length) {
+            //                 let commentsRecap = rekap_komentar[i].daftar_komentar.map(komentar => {
+            //                     return {dosen: rekap_komentar[i].penguji, komentar}
+            //                 })
+            //                 recapByDosenByBab.push(...commentsRecap)
+            //             }
+            //         }
+            //         recapByDosenByBab
+            //     }
+            // }
+        },
+
+        convertGrade() {
+            return function(numGrade) {
+                let grade = Number(numGrade)
+                if (grade >= 84.6 && grade <= 100) return 'A'
+                else if (grade >= 81.6 && grade < 84.6) return 'A-'
+                else if (grade >= 79.6 && grade < 81.6) return 'A/B'
+                else if (grade >= 75.6 && grade < 79.6) return 'B+'
+                else if (grade >= 69.6 && grade < 75.6) return 'B'
+                else if (grade >= 65.6 && grade < 69.6) return 'B-'
+                else if (grade >= 59.6 && grade < 65.6) return 'B/C'
+                else if (grade >= 54.6 && grade < 59.6) return 'C'
+                else if (grade >= 0 && grade < 54.6) return 'D'
+                return 'Tidak valid'
+            }
         },
 
         mobileAndShow() {
@@ -402,34 +462,25 @@ export default {
             return ''
         },
 
-        gradesTotal() {
-            if (this.recap) {
-                return this.recap.rekap_nilai.map(mahasiswa => {
-                    return mahasiswa.nilai.reduce((a, b) => {
-                        let na = a.rerata ? a.rerata : 0
-                        let nb = b.rerata ? b.rerata : 0
-                        return na + nb
-                    })
+        filledGrades() {
+            return function(i) {
+                let filled = true
+                this.grades.forEach(mhs => {
+                    if (!(mhs.daftar_nilai[i] && mhs.daftar_nilai[i].nilai)) filled = false
                 })
+    
+                if (filled) {
+                    filled = [],
+                    this.grades.forEach(mhs => {
+                        filled.push(mhs.daftar_nilai[i].nilai)
+                    })
+    
+                    filled = filled.join(', ')
+                }
+    
+                return filled
             }
         },
-
-        gradesAverage() {
-            if (this.recap) {
-                return this.recap.rekap_nilai.map(mahasiswa => {
-                    let total = 0
-                    let assigned = 0
-                    mahasiswa.nilai.forEach(({rerata}) => {
-                        if (rerata) {
-                            total += rerata
-                            assigned += 1
-                        }
-                    })
-                    let result = assigned ? Number((total/assigned).toFixed(2)) : 0
-                    return result + ' (' + this.gradeIndicator(result) + ')'
-                })
-            }
-        }
     },
 
     methods: {
@@ -470,10 +521,26 @@ export default {
             }
         },
 
+        fillNullGrades(gradesByMahasiswa) {
+            return gradesByMahasiswa.map(grades => {
+                let socs = Array.from(Array(6), (_, index) => {return {so: index+1, nilai: null}})
+                for (let i = 0; i < grades.daftar_nilai.length; i++) {
+                    const so = grades.daftar_nilai[i].so
+                    socs.splice(so-1, 1, grades.daftar_nilai[i])
+                }
+                let result = {
+                    mahasiswa: grades.mahasiswa,
+                    daftar_nilai: socs
+                }
+                return result
+            })
+        },
+
         async fetchGrades() {
             this.fetchingGrades = true
             try {
                 const response = await this.$thessa.getExamGrades(this.$router.currentRoute.params.id)
+                this.grades = this.fillNullGrades(response.data)
                 this.fetchingGrades = true
                 this.constructGrades(response.data)
             } catch (error) {
@@ -488,6 +555,8 @@ export default {
                 const res = await this.$thessa.getExamById(this.$router.currentRoute.params.id)
                 this.exam = res.data
                 this.generateGrades()
+                this.fetchComments()
+                this.fetchGrades()
             } catch (error) {
                 this.showSnackbar(error)
                 this.$router.go(-1)
@@ -498,22 +567,26 @@ export default {
             this.errorFetchingRevision = false
             try {
                 const res = await this.$thessa.getExamRevision(this.$router.currentRoute.params.id)
-                console.log(res)
+                this.revisionTemp.revisi = res.data.revisi
+                this.revisionTemp.konten = res.data.konten
+                this.revision.revisi = res.data.revisi
+                this.revision.konten = res.data.konten
             } catch (error) {
                 this.errorFetchingRevision = true
             }
         },
 
         async saveGrades() {
-            const { so_id, grades } = this.gradeTemp
+            const { so, daftar_nilai } = this.gradeTemp
             this.saving = true
             let tempGrades = JSON.parse(JSON.stringify(this.grades))
             this.exam.ujian.skripsi.mahasiswa.forEach((mahasiswa, i) => {
-                tempGrades[i].grades.splice(so_id, 1, {so_id, nilai: grades[i]})
+                tempGrades[i].daftar_nilai.splice(so-1, 1, {so: so, nilai: Number(Number(daftar_nilai[i]).toFixed(2))})
             })
             try {
                 const response = await this.$thessa.submitGrades(this.$router.currentRoute.params.id, tempGrades)
-                this.grades = response.data.result
+                this.grades = this.fillNullGrades(response.data.result)
+                this.fetchGrades()
                 this.saving = false
             } catch (error) {
                 this.showSnackbar(error)
@@ -563,9 +636,12 @@ export default {
             try {
                 const response = await this.$thessa.submitRevision(this.$router.currentRoute.params.id, {revisi: this.revisionTemp.revisi, konten: this.revisionTemp.revisi ? this.revisionTemp.konten : ''})
                 const result = response.data.result
-                this.revision = result
-                this.revisionTemp = result
+                this.revision.revisi = result.revisi
+                this.revision.konten = result.konten
+                this.revisionTemp.revisi = result.revisi
+                this.revisionTemp.konten = result.konten
                 this.saving = false
+                this.showSnackbar({type: 'success', message: 'Berhasil menambahkan revisi judul'})
             } catch (error) {
                 this.showSnackbar(error)
                 this.saving = false
@@ -600,47 +676,29 @@ export default {
 
         addGrades(index) {
             this.validGrades = true
-            let grades = []
-            this.grades.forEach((mhs,i) => mhs.grades[index] && mhs.grades[index].nilai ? grades.splice(i, 1, mhs.grades[index].nilai) : null)
+            let daftar_nilai = []
+            this.grades.forEach((mhs,i) => mhs.daftar_nilai[index] && mhs.daftar_nilai[index].nilai ? daftar_nilai.splice(i, 1, mhs.daftar_nilai[index].nilai) : null)
             this.addingGrade = true
             this.gradeTemp = {
-                so_id: index,
-                grades
+                so: index+1,
+                daftar_nilai
             }
         },
 
         discardGrades() {
             this.addingGrade = false
             this.gradeTemp = {
-                so_id: 0,
-                grades: []
+                so: 1,
+                daftar_nilai: []
             }
             this.validGrades = true
-        },
-
-        filledGrades(i) {
-            let filled = true
-            this.grades.forEach(mhs => {
-                mhs.grades[i] && mhs.grades[i].nilai ? null : filled = false
-            })
-
-            if (filled) {
-                filled = [],
-                this.grades.forEach(mhs => {
-                    filled.push(mhs.grades[i].nilai)
-                })
-
-                filled = filled.join(', ')
-            }
-
-            return filled
         },
 
         generateGrades() {
             let grades = this.exam.ujian.skripsi.mahasiswa.map(({ id }) => {
                 return {
                     mahasiswa: id,
-                    grades: Array.from(Array(this.socs.length), (_, index) => {return {so_id: index, nilai: null}})
+                    daftar_nilai: Array.from(Array(this.socs.length), (_, index) => {return {so: index+1, nilai: null}})
                 }
             })
             this.grades = grades
@@ -726,16 +784,15 @@ export default {
     },
 
     created() {
+        this.generateCorrectionsTemplate()
+        this.getDrawerWidth()
+        this.windowWidth <= 991 ? this.drawer = false : true
+        window.addEventListener('resize', this.getDrawerWidth)
+
         if (this.$store.state.auth.token) {
             this.fetchExam()
-            this.fetchComments()
-            this.fetchGrades()
-            this.fetchRevision()
-            this.generateCorrectionsTemplate()
-            this.getDrawerWidth()
+            this.isLeader ? this.fetchRevision() : null
             this.syncRecap()
-            this.windowWidth <= 991 ? this.drawer = false : true
-            window.addEventListener('resize', this.getDrawerWidth)
         } else {
             return this.$router.push('/login')
         }
