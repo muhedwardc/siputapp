@@ -139,7 +139,10 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         for student in students:
             daftar_nilai = []
             for grade in student.grades.filter(penguji=self.get_object()):
-                nilai = GradeSerializer(grade)
+                nilai = {
+                    "so": grade.so.pk,
+                    "nilai": grade.nilai
+                }
                 daftar_nilai.append(nilai)
 
             response.append({
