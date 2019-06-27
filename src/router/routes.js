@@ -5,8 +5,11 @@ export default [
     },
     {
         path: '/login',
-        name: 'Login',
-        meta: { publicRoute: true },
+        name: 'Sistem Informasi Ujian Tugas Akhir DTETI',
+        meta: { 
+            publicRoute: true, 
+            noMenu: true 
+        },
         component: () => import('@/views/login.vue')
     },
     {
@@ -65,7 +68,7 @@ export default [
     },
     {
         path: '/profil',
-        name: 'Profil Dosen',
+        name: 'Profil',
         meta: {
             requiresAuth: true,
             dosenRoute: true,
@@ -113,33 +116,13 @@ export default [
     {
         path: '/ujian/:id/mulai',
         name: 'Ujian Mulai',
-        meta: { 
-            exam: true,
+        meta: {
             requiresAuth: true,
-            dosenRoute: true
+            dosenRoute: true,
+            noMenu: true,
         },
         component: () => import('@/views/exam/start.vue')
     },
-    // {
-    //     path: '/playground',
-    //     name: 'Playground',
-    //     meta: {
-    //         requiresAuth: true,
-    //         dosenRoute: true,
-    //         akademikRoute: true
-    //     },
-    //     component: () => import('@/views/playground/index.vue')
-    // },
-    // {
-    //     path: '/ujian/:id/dokumen-pendadaran',
-    //     name: 'Dokumen Pendadaran',
-    //     meta: {
-    //         exam: true,
-    //         isDocument: true,
-    //         requiresAuth: true,
-    //     },
-    //     component: () => import('@/views/playground/document.vue')
-    // },
     {
         path: '*',
         name: '404 Page Not Found',
