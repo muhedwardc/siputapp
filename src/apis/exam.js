@@ -4,7 +4,7 @@ import store from '../store'
 export default {
     getAllExams: async (qs) => await axios.get(`/exams/${qs ? '?' + qs : ''}`),
     getMyExams: async (qs) => await axios.get(`/me/exams/${qs ? '?' + qs : ''}`),
-    getMyExamsHistory: async () => await axios.get('/me/exams/history/'),
+    getMyExamsHistory: async (qs) => await axios.get(`/me/exams/history/${qs ? '?' + qs : ''}`),
     getExamsByDate: async (date) => await axios.get(`/exams/?tanggal=${date}`),
     getExamsBetweenDate: async (start, end) => await axios.get(`/exams/?mulai=${start}&selesai=${end}`),
     getExamById: async (id) => await axios.get(`/${store.state.auth.user.is_admin ? '' : 'me/'}exams/${id}/`),
