@@ -64,9 +64,3 @@
 .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
     background: #fafafa;
 }
-
-@media screen and (max-width: 500px) {
-    .no-message.solid-input .v-input__slot {
-        margin-top: 8px;
-    }
-}
