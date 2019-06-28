@@ -1,14 +1,15 @@
 import KOP from './partials/kop'
+import getDepName from './partials/departement'
 import moment from 'moment'
 
-export default function (data, i) {
+export default function (data, revisi_judul, i) {
     moment.locale('id')
     let doc = []
-    const { tanggal, skripsi, penguji } = data.ujian
-    const { revisi_judul } = data.result
+    const { tanggal, skripsi, penguji } = data
     const { mahasiswa, judul } = skripsi
     const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     let kopVertical = KOP.portrait()
+    const departement = getDepName.getName(mahasiswa[i].prodi, null)
     doc.push(
         kopVertical,
         {
@@ -73,8 +74,8 @@ export default function (data, i) {
                     [ '', '', { table: { widths: ['*'], heights: [50], body: [[revisi_judul ? revisi_judul : '']] }, margin: [0, 0, 0, 10]} ],
                     [ 'Nama Mahasiswa', ':', mahasiswa[i].nama ],
                     [ 'NIM', ':', mahasiswa[i].nim ],
-                    [ 'Program Studi', ':', mahasiswa[i].prodi ],
-                    [ 'Tempat, Tanggal Lahir', ':', `${mahasiswa[i].tempat_lahir.toUpperCase()}, ${mahasiswa[i].tanggal_lahir}` ],
+                    [ 'Program Studi', ':', departement[0] ],
+                    [ 'Tempat, Tanggal Lahir', ':', `${mahasiswa[i].tempat_lahir.toUpperCase()}, ${moment(mahasiswa[i].tanggal_lahir, 'DD/MM/YYYY').format('DD MMMM YYYY')}` ],
                 ]
             },
             layout: 'noBorders',

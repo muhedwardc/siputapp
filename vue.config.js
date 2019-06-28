@@ -1,4 +1,6 @@
 var path = require('path')
+var BrotliGzipPlugin = require('brotli-gzip-webpack-plugin')
+var PrerenderSPAPlugin = require('prerender-spa-plugin')
 // const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 module.exports = {
@@ -11,6 +13,29 @@ module.exports = {
     // And set the CDN origin to `yourdomain.com/static`
     // Whitenoise will serve once to CDN which will then cache
     // and distribute
+    // configureWebpack: {
+    //   plugins: [
+    //     new BrotliGzipPlugin({
+    //       asset: '[path].br[query]',
+    //       algorithm: 'brotli',
+    //       test: /\.(js|css|html|svg)$/,
+    //       threshold: 10240,
+    //       minRatio: 0.8,
+    //       quality: 11
+    //     }),
+    //     new BrotliGzipPlugin({
+    //       asset: '[path].gz[query]',
+    //       algorithm: 'gzip',
+    //       test: /\.(js|css|html|svg)$/,
+    //       threshold: 10240,
+    //       minRatio: 0.8
+    //     }),
+    //     new PrerenderSPAPlugin({
+    //       staticDir: path.join(__dirname, 'dist'),
+    //       routes: [ '/', '/login' ],
+    //     })
+    //   ],
+    // },
     devServer: {
       proxy: {
         '/api*': {

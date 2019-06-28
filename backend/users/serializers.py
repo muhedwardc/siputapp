@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Pengelola
 from django.contrib.auth import authenticate
 
 
@@ -72,3 +72,11 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('nama', 'prodi', 'konsentrasi', 'nip', 'foto')
+
+class PengelolaSerializer(serializers.ModelSerializer):
+    nama = serializers.CharField(source='user.nama', required=False)
+    nip = serializers.CharField(source='user.nip', required=False)
+
+    class Meta:
+        model = Pengelola
+        exclude = ('id',)

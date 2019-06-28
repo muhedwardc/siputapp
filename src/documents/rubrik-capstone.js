@@ -1,5 +1,4 @@
-function generateRubrik(data, i) {
-    const rekap_nilai = data.result.rekap_nilai
+function generateRubrik(rekap_ujian, rekap_nilai, dosenIndex) {
     let socs = [
         [
             'SO(c): Engineering Design',
@@ -376,13 +375,14 @@ function generateRubrik(data, i) {
     let mhsGrade = []
     let averages = []
     rekap_nilai.forEach((e, i) => averages.push(
-        { text: 'Mhs ' + (i+1) + ': ' + (e.rerata ? e.rerata : 0), margin: [0, 8, 0, 8], fontSize: 12, bold: true }
+        { text: 'Mhs ' + (i+1) + ': ' + (e.nilai[dosenIndex].rerata), margin: [0, 8, 0, 8], fontSize: 12, bold: true }
     ))
-    for (let i = 0; i <= 7 - averages.length; i ++) averages.push('')
-    socs.forEach((s, j) => {
+    for (let i = 0; i <= 8 - averages.length; i ++) averages.push('')
+    socs.forEach((_, j) => {
         rekap_nilai.forEach((m, k) => {
+            let nilai = m.nilai[dosenIndex].detail[j].nilai
             mhsGrade.push('Mhs ' + (k+1) + ':\n')
-            mhsGrade.push({text: m.nilai[i][j] + '\n', bold: true, lineHeight: 1.5, decoration: 'underline'})
+            mhsGrade.push({text: (nilai ? nilai : 0) + '\n', bold: true, lineHeight: 1.5, decoration: 'underline'})
         })
         socs[j].push({
             text: [...mhsGrade],
@@ -406,7 +406,7 @@ function generateRubrik(data, i) {
         },
         {
             table: {
-                widths: [70, 100, '*', '*', '*', '*', 30],
+                widths: [70, 100, '*', '*', '*', '*', 40],
                 body: [
                     [
                         {text: 'Student Outcome', fillColor: '#CCCCCC', alignment: 'center', rowSpan: 2, margin: [0, 7, 0, 0]},
@@ -444,12 +444,13 @@ function generateRubrik(data, i) {
         },
         { text: 'Semua Dosen menguji semua mahasiswa\nNilai Akhir adalah nilai rata-rata', margin: [0, 10, 0, 0]},
     ]
-
     return doc
 }
 
-export default function (data, i) {
+export default function (rekap_ujian, rekap_nilai, i) {
     let doc = []
-    const penguji = data.ujian.penguji
-    penguji.forEach((_, i) => doc.push(...generateRubrik(data, i)))
+    for (let j = 0; j < rekap_nilai[i].nilai.length; j ++) {
+        doc.push(...generateRubrik(rekap_ujian, rekap_nilai, j))
+    }
+    return doc
 }

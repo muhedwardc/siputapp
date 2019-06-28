@@ -47,7 +47,7 @@ export default {
         async getDocument(type = 'download') {
             this.fetchingData = true
             try {
-                const response = await this.$thessa.getExamDocumentData(this.examId)
+                const response = this.$store.state.auth.user.is_admin ? await this.$thessa.getExamDocumentData(this.examId) : await this.$thessa.getExamRecap(this.examId)
                 this.recap = response.data
                 this.fetchingData = false
                 this.generateDocument(type)
@@ -59,7 +59,6 @@ export default {
 
         generateDocument(type = 'download') {
             try {
-
                 this.generatingDocument = true
                 this.documentObj = documentGenerator(this.recap)
                 if (this.documentObj) {
@@ -85,6 +84,7 @@ export default {
                 this.generatingDocument = false
             } catch (error) {
                 this.generatingDocument = false
+                console.log(error)
             }
         }
     }

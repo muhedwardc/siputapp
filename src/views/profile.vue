@@ -30,32 +30,34 @@
                 </v-flex>
             </v-layout>
             <template v-if="!user.is_admin">
-                <v-layout row wrap align-center>
+                <v-layout row wrap align-center class="pt-3 pb-3">
                     <v-flex xs12 sm4>
                         <b>Prodi</b>
                     </v-flex>
                     <v-flex xs12 sm8>
-                        <v-select
+                        {{ user.prodi }}
+                        <!-- <v-select
                             v-model="user.prodi"
                             :items="prodiOptions"
                             :rules="[v => !!v || 'Harus diisi']"
                             required
                             :disabled="loading"
-                            ></v-select>
+                            ></v-select> -->
                     </v-flex>
                 </v-layout>
-                <v-layout row wrap align-center>
+                <v-layout row wrap align-center class="pt-3 pb-3">
                     <v-flex xs12 sm4>
                         <b>Konsentrasi</b>
                     </v-flex>
                     <v-flex xs12 sm8>
-                        <v-select
+                        {{ user.konsentrasi }}
+                        <!-- <v-select
                             v-model="user.konsentrasi"
                             :items="konsentrasiOptions[selectedProdi]"
                             :rules="[v => !!v || 'Harus diisi']"
                             required
                             :disabled="loading"
-                            ></v-select>
+                            ></v-select> -->
                     </v-flex>
                 </v-layout>
             </template>

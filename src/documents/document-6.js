@@ -3,6 +3,7 @@
 export default function (data) {
     let doc = []
     const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa, nilai } = data
+    const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     doc.push(
         { text: '', pageBreak: 'before', pageOrientation: 'portrait' },
         {
@@ -53,7 +54,7 @@ export default function (data) {
                     [ 'Nama Mahasiswa', ':', mahasiswa.nama ],
                     [ 'NIM', ':', mahasiswa.nim ],
                     [ 'Program Studi', ':', mahasiswa.prodi ],
-                    [ 'Tempat, Tanggal Lahir', ':', `${mahasiswa.tl.toUpperCase()}, ${mahasiswa.tgl}` ],
+                    [ 'Tempat, Tanggal Lahir', ':', `${mahasiswa.tempat_lahir.toUpperCase()}, ${mahasiswa.tanggal_lahir}` ],
                 ]
             },
             layout: 'noBorders',
@@ -63,7 +64,7 @@ export default function (data) {
         {
             columns: [
                 { text: '', width: '*' },
-                { text: `Yogyakarta, ${tanggal}\n\nPembimbing I\n\n\n\n\n\n${dosen[0]}`, margin: [50, 0, 0, 0]},
+                { text: `Yogyakarta, ${formatedDate}\n\nPembimbing I\n\n\n\n\n\n${dosen[0]}`, margin: [50, 0, 0, 0]},
             ],
             margin: [0, 10, 0, 10]
         },

@@ -1,8 +1,3 @@
-import SB from './partials/score-board'
-import SOCS from './partials/socs'
-import SOCS_HEADER from './partials/socs-header'
-// import DOC_HEADER from './partials/head'
-
 import COVER from './cover'
 import BERITA_ACARA from './berita-acara'
 import DAFTAR_HADIR from './daftar-hadir'
@@ -13,19 +8,22 @@ import RUBRIK_INDIVIDU from './rubrik-individu'
 import RUBRIK_CAPSTONE from './rubrik-capstone'
 
 export default function index(data) {
-    const mahasiswa = data.ujian.skripsi.mahasiswa.length
-    // var { tanggal, hari, ruang, waktu, dosen, sekretaris, mahasiswa, kadep } = data
-    // const RUBRIK = mahasiswa.length ? RUBRIK_CAPSTONE(data) : RUBRIK_INDIVIDU(data, SOCS_HEADER, SOCS)
+    const { rekap_komentar, rekap_nilai, rekap_ujian, revisi_judul } = data
+    const mahasiswa = rekap_ujian.skripsi.mahasiswa.length
+    function RUBRIK(capstone, i) {
+        if (capstone) return RUBRIK_CAPSTONE(rekap_ujian, rekap_nilai, i)
+        return RUBRIK_INDIVIDU(rekap_ujian, rekap_nilai)
+    }
     
-    let doc = [...COVER(data.ujian)]
+    let doc = [...COVER(rekap_ujian)]
     for (let i = 0; i < mahasiswa; i ++) {
         doc.push(
-            ...BERITA_ACARA(data, i),
-            ...DAFTAR_HADIR(data, i),
-            // ...RUBRIK,
-            ...LEMBAR_REVISI(data, i),
-            ...REKAP_PENILAIAN(data),
-            // ...LEMBAR_KOREKSI(data, i)
+            ...BERITA_ACARA(rekap_ujian, i),
+            ...DAFTAR_HADIR(rekap_ujian, i),
+            ...RUBRIK(mahasiswa > 1, i),
+            ...LEMBAR_REVISI(rekap_ujian, revisi_judul, i),
+            ...REKAP_PENILAIAN(rekap_ujian, rekap_nilai),
+            ...LEMBAR_KOREKSI(rekap_ujian, rekap_komentar, i)
         )
     }
 

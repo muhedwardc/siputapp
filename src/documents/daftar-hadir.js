@@ -4,7 +4,7 @@ import moment from 'moment'
 export default function (data, i) {
     moment.locale('id')
     let doc = []
-    const { tanggal, sesi, penguji, ruang, skripsi } = data.ujian
+    const { tanggal, sesi, penguji, ruang, skripsi } = data
     const { mahasiswa } = skripsi
     const sekretaris = {
         nama: 'Hanung Adi  Nugroho, S.T., M.E., Ph.D.',
@@ -77,7 +77,7 @@ export default function (data, i) {
                 },
                 {
                     width: '*',
-                    text: `Mahasiswa yang diuji\n\n\n\n\n${mahasiswa[i].nama}\nNIP ${mahasiswa[i].nim}`,
+                    text: `Mahasiswa yang diuji\n\n\n\n\n${mahasiswa[i].nama}\n${mahasiswa[i].nim}`,
                     margin: [ 40, 0, 0, 0 ]
                 }
             ],

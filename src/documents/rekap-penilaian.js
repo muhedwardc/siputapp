@@ -1,11 +1,11 @@
 import KOP from './partials/kop'
 import moment from 'moment'
+import scoreBoard from './partials/score-board'
 
-export default function (data) {
+export default function (ujian, rekap_nilai) {
     moment.locale('id')
     let doc = []
-    const { tanggal, penguji, skripsi } = data.ujian
-    const { rekap_nilai } = data.result
+    const { tanggal, penguji, skripsi } = ujian
     const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     let emptyCol = []
     let romanian = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
@@ -17,17 +17,17 @@ export default function (data) {
         gradeWidth.push('*')
         gradeCol.push({ text: romanian[i], alignment: 'center' })
     })
+    emptyCol.pop()
     rekap_nilai.forEach((e, i) => {
         let row = new Array()
         row.push(e.mahasiswa)
         row.push(skripsi.mahasiswa[i].nim)
-        e.nilai.forEach(grade => row.push({ text: grade.rerata ? Number(grade.rerata.toFixed(2)) : 0, alignment: 'center' }))
-        row.push({ text: e.sum ? e.sum : 0, alignment: 'center' })
-        row.push({ text: e.rerata ? e.rerata : 0, alignment: 'center' })
+        e.nilai.forEach(grade => row.push({ text: grade.rerata, alignment: 'center' }))
+        row.push({ text: e.jumlah_rerata, alignment: 'center' })
+        row.push({ text: e.rerata_total, alignment: 'center' })
         row.push({ text: e.pass ? 'LULUS' : 'TIDAK LULUS', alignment: 'center' })
         mahasiswaGrade.push(row)
     })
-    emptyCol.pop()
     let dosenTabel = [
         [
             { text: 'NO.', alignment: 'center' },
@@ -40,6 +40,7 @@ export default function (data) {
         dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen.dosen, margin: [0, 10, 0, 10]}, { text: (i == 0 ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
     })
     let kopLandscape = KOP.landscape()
+    let scoreBoardTable = scoreBoard.getTable(null, [100, 80], [10, 5, 0, 0])
     doc.push(
         kopLandscape,
         {
@@ -52,7 +53,7 @@ export default function (data) {
         },
         {
             table: {
-                widths: [150, 100, '*','*','*','*','*','*', 70, 70, 80],
+                widths: [150, 100, ...gradeWidth, 70, 70, 100],
                 body: [
                     [
                         { text: 'NAMA', alignment: 'center', rowSpan: 2, margin: [0, 10, 0, 0] },
@@ -87,54 +88,7 @@ export default function (data) {
                                 'Kriteria konversi skor rata-rata menjadi nilai akhir.'
                             ]
                         },
-                        {
-                            table: {
-                                widths: [ 100, 80 ],
-                                body: [
-                                    [
-                                        { text: 'Skor', fillColor: '#CCCCCC', alignment: 'center' },
-                                        { text: 'Nilai', fillColor: '#CCCCCC', alignment: 'center' },
-                                    ],
-                                    [ 
-                                        { text: '≥ 84.6', alignment: 'center' }, 
-                                        { text: 'A', alignment: 'center'} 
-                                    ],
-                                    [ 
-                                        { text: '81.6 - 84.5', alignment: 'center' }, 
-                                        { text: 'A-', alignment: 'center'} 
-                                    ],
-                                    [ 
-                                        { text: '79.6 - 81.5', alignment: 'center' }, 
-                                        { text: 'A/B', alignment: 'center'} 
-                                    ],
-                                    [ 
-                                        { text: '75.6 - 79.5', alignment: 'center' }, 
-                                        { text: 'B+', alignment: 'center'} 
-                                    ],
-                                    [ 
-                                        { text: '69.6 - 75.5', alignment: 'center' }, 
-                                        { text: 'B', alignment: 'center'} 
-                                    ],
-                                    [ 
-                                        { text: '65.6 - 69.5', alignment: 'center' }, 
-                                        { text: 'B-', alignment: 'center'} 
-                                    ],
-                                    [ 
-                                        { text: '59.6 - 65.5', alignment: 'center' }, 
-                                        { text: 'B/C', alignment: 'center'} 
-                                    ],
-                                    [ 
-                                        { text: '54.6 - 59.5', alignment: 'center' }, 
-                                        { text: 'C', alignment: 'center'} 
-                                    ],
-                                    [ 
-                                        { text: '≤ 54.5', alignment: 'center' }, 
-                                        { text: 'D', alignment: 'center'} 
-                                    ],
-                                ],
-                            },
-                            margin: [10, 5, 0, 0]
-                        }
+                        scoreBoardTable
                     ],
                     margin: [0, 0, 20, 0]
                 },
