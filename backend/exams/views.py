@@ -15,7 +15,7 @@ from backend.essays.serializers import CreateEssaySerializer, EssaySerializer
 from .models import Exam, Penguji, Room, Session
 from backend.pagination import CustomPagination
 
-
+from django.conf import settings
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
@@ -92,7 +92,7 @@ class ExamViewSet(viewsets.ModelViewSet):
         filename = fs.save(essay_file.name, essay_file)
         file_url = fs.url(filename)
         return Response({
-            "file": file_url
+            "file": settings.BASE_URL + file_url
         }, status=status.HTTP_201_CREATED)
 
     @action(methods=['PUT'], detail=True)
