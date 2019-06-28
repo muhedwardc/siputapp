@@ -86,7 +86,7 @@ class ExamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
 
 class CreateExamSerializer(serializers.ModelSerializer):
     skripsi = CreateEssaySerializer()
