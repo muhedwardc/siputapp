@@ -40,5 +40,11 @@ export default {
     .search-box .v-input__control {
         min-height: 36px !important;
     }
+
+    @media screen and (max-width: 500px) {
+        .search-box.no-message {
+            margin-top: 8px;
+        }
+    }
 </style>
 
