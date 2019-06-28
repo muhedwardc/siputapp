@@ -55,7 +55,7 @@ export default [
             requiresAuth: true,
             akademikRoute: true,
         },
-        component: () => import('@/views/akademik/principal.vue')
+        component: () => import('@/views/akademik/managers.vue')
     },
     {
         path: '/dosen',
