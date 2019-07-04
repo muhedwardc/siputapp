@@ -1,13 +1,13 @@
 <template>
-    <v-toolbar class="top-navbar" app flat>
-        <v-toolbar-side-icon @click="$store.state.sidebar = !$store.state.sidebar"></v-toolbar-side-icon>
+    <v-toolbar class="top-navbar" app color="primary">
+        <v-toolbar-side-icon class="white--text" @click="$store.state.sidebar = !$store.state.sidebar"></v-toolbar-side-icon>
         <v-spacer></v-spacer>
         <v-toolbar-items class="hidden-xs-and-down toolbar-item">
             <v-btn v-if="$store.state.auth.user" @click="$router.replace(`/profil`)" flat slot="activator" class="pl-4 pr-4 profile">
                 <v-avatar tile class="profile-picture mr-2" size="32">
                     <img :src="$store.state.auth.user.foto || ''" alt="">
                 </v-avatar>
-                <span>{{ $store.state.auth.user.nama }}</span>
+                <span class="white--text">{{ $store.state.auth.user.nama }}</span>
             </v-btn>
         </v-toolbar-items>
     </v-toolbar>
@@ -26,6 +26,7 @@
 
     .toolbar-item > * {
         border-left: 1px solid #eee;
+        border-radius: 0 !important;
     }
 
     .notifications {
