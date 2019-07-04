@@ -28,6 +28,8 @@ export default {
     data() {
         return {
             recap: null,
+            kadep: null,
+            sekretaris: null,
             documentObj: null,
             documentDefinition: null,
             pdf: null,
@@ -49,8 +51,23 @@ export default {
             try {
                 const response = this.$store.state.auth.user.is_admin ? await this.$thessa.getExamDocumentData(this.examId) : await this.$thessa.getExamRecap(this.examId)
                 this.recap = response.data
+                await this.getManagers()
+                this.recap.kadep = this.kadep
+                this.recap.sekretaris = this.sekretaris
                 this.fetchingData = false
                 this.generateDocument(type)
+            } catch (error) {
+                this.$store.dispatch('showSnackbar', error.message ? error.message : error)
+                this.fetchingData = false
+            }
+        },
+
+        async getManagers() {
+            try {
+                const response = await this.$thessa.getManagers()
+                const data = response.data
+                this.kadep = data.find(pengelola => pengelola.jabatan == 'Kepala Departemen')
+                this.sekretaris = data.find(pengelola => pengelola.jabatan == 'Sekretaris')
             } catch (error) {
                 this.$store.dispatch('showSnackbar', error.message ? error.message : error)
                 this.fetchingData = false
@@ -84,7 +101,6 @@ export default {
                 this.generatingDocument = false
             } catch (error) {
                 this.generatingDocument = false
-                console.log(error)
             }
         }
     }
