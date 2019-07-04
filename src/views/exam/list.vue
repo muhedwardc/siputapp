@@ -28,7 +28,7 @@
                 </template>
                 <template v-slot:items="props">
                     <td>{{ readableData(props.item.ujian.tanggal) }}</td>
-                    <td @click="$router.push(`/ujian/${props.item.id}`)" style="cursor: pointer;">{{ props.item.ujian.skripsi.judul }}</td>
+                    <td style="cursor: pointer;"><router-link :to="`/ujian/${props.item.id}`" style="text-decoration: none; color: black;"><b>{{ props.item.ujian.skripsi.judul}}</b> <br> oleh: {{listMahasiswa(props.item.ujian.skripsi.mahasiswa)}}</router-link></td>
                     <td>{{ props.item.ujian.sesi }}</td>
                     <td>{{ props.item.ujian.ruang }}</td>
                     <td>{{ props.item.ujian.penguji[0].dosen == $store.state.auth.user.nama ? 'Ketua' : 'Anggota' }}</td>
@@ -106,6 +106,14 @@ export default {
         examStatus() {
             return function(s) {
                 return s == 3 ? 'Selesai' : s == 2 ? 'Sedang Berlangsung' : 'Belum Mulai'
+            }
+        },
+
+        listMahasiswa() {
+            return function(mahasiswa) {
+                let str = []
+                mahasiswa.forEach(m => str.push(m.nama))
+                return str.join(', ')
             }
         }
     },
