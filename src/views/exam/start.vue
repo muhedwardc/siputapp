@@ -68,7 +68,7 @@
                                         <template v-if="correction.items.length > 0">
                                             <h3 class="mb-1 grey--text" v-text="bab[section]"></h3>
                                             <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
-                                                <p class="mb-0" v-text="item.komentar"></p>
+                                                <p class="mb-0" style="word-break: break-word;" v-text="item.komentar"></p>
                                                 <v-layout row align-center>
                                                     <span class="font-weight-bold" style="color: #9C9C9C">Halaman {{item.halaman}}</span>
                                                     <v-spacer></v-spacer>
@@ -96,7 +96,7 @@
                         <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 0">
                             <p class="mb-0"><b>Mahasiswa</b></p>
                             <ol class="mb-3">
-                                <li v-for="mhs in exam.ujian.skripsi.mahasiswa" :key="mhs.nim" v-text="mhs.nama"></li>
+                                <li v-for="(mhs, index) in exam.ujian.skripsi.mahasiswa" :key="mhs.nim">{{ mhs.nama + ', ' }} <b>{{'rerata sementara: ' + getCurrentAverage(index)}}</b></li>
                             </ol>
                         </template>
                         <v-layout column v-if="exam.ujian">
@@ -206,7 +206,7 @@
         <v-dialog fullscreen v-model="showRecap" transition="dialog-bottom-transition" class="recap-dialog">
             <v-toolbar fixed dark color="primary">
                 <v-btn icon dark @click="showRecap = false">
-                    <v-icon>close</v-icon>
+                    <v-icon>arrow_back</v-icon>
                 </v-btn>
                 <v-toolbar-title>Rekap</v-toolbar-title>
                 <v-spacer></v-spacer>
@@ -398,7 +398,23 @@ export default {
 
             return false
         },
-
+        getCurrentAverage() {
+            return function(index) {
+                const grades = this.grades[index]
+                if (grades) {
+                    let gradesAssigned = grades.daftar_nilai.filter(a => a.nilai || a.nilai != null )
+                    if (gradesAssigned.length) {
+                        let sum = 0
+                        for (let i = 0; i < gradesAssigned.length; i ++) {
+                            sum += gradesAssigned[i].nilai
+                        }
+                        return (sum/gradesAssigned.length).toFixed(2)
+                    }
+                }
+    
+                return 0
+            }
+        },
         commentsRecapByBab() {
             if (this.recap) {
                 const { rekap_komentar } = this.recap
