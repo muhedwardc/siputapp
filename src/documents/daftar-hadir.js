@@ -1,15 +1,11 @@
 import KOP from './partials/kop'
 import moment from 'moment'
 
-export default function (data, i) {
+export default function (data, sekretaris, i) {
     moment.locale('id')
     let doc = []
     const { tanggal, sesi, penguji, ruang, skripsi } = data
     const { mahasiswa } = skripsi
-    const sekretaris = {
-        nama: 'Hanung Adi  Nugroho, S.T., M.E., Ph.D.',
-        nip: '197802242002121001'
-    } 
     const hari = moment(tanggal, 'DD/MM/YYYY').format('dddd')
     const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
 

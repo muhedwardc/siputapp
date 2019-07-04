@@ -2,7 +2,7 @@ import KOP from './partials/kop'
 import scoreBoard from './partials/score-board'
 import moment from 'moment'
 
-export default function (data, i) {
+export default function (data, kadep, i) {
     moment.locale('id')
     let doc = []
     const { tanggal, ruang, sesi, penguji, skripsi } = data
@@ -143,7 +143,7 @@ export default function (data, i) {
             columns: [
                 [
                     'Ketua DTETI\nFakultas Teknik UGM',
-                    { text: 'Sarjiya, S.T., M.T., Ph.D.' + '\nNIP ' + '197307061999031005', bold: true, margin: [0, 30, 0, 0] }
+                    { text: kadep.nama + '\nNIP ' + kadep.nip, bold: true, margin: [0, 30, 0, 0] }
                 ]
             ],
             margin: [0, 8, 0, 10],

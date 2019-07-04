@@ -25,10 +25,10 @@ function documentByMahasiswa(rekap_ujian, komentar_dosen, i) {
     for (let i = 0; i < bab.length; i ++) {
         if (comments[i][0]) {
             corrections.push([
-                { border: [true, true, true, false], text: (i+1) },
+                { border: [true, true, true, false], text: (i+1), alignment: 'center' },
                 { border: [true, true, true, false], text: bab[i], bold: true },
                 { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].halaman : '', alignment: 'center' },
-                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].koreksi : '' },
+                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].koreksi : '', noWrap: false },
                 { border: [true, true, true, false], text: '' },
             ])
             if (comments[i].length > 1) {
@@ -39,14 +39,14 @@ function documentByMahasiswa(rekap_ujian, komentar_dosen, i) {
                         { border, text: '' },
                         { border, text: '' },
                         { border, text: comments[i][j] ? comments[i][j].halaman : '', alignment: 'center' },
-                        { border, text: comments[i][j] ? comments[i][j].koreksi : '' },
+                        { border, text: comments[i][j] ? comments[i][j].koreksi : '', noWrap: false },
                         { border, text: '' },
                     ])
                 }
             } 
         } else {
             corrections.push([
-                i+1,
+                { text: i+1, alignment: 'center' },
                 { text: bab[i], bold: true },
                 '', '', ''
             ])
@@ -104,10 +104,10 @@ function documentByMahasiswa(rekap_ujian, komentar_dosen, i) {
         },
         {
             table: {
-                widths: ['auto', 100 , 50, '*', 50],
+                widths: [25, 100 , 50, 260, 50],
                 heights: function(i) {
                     if (i === 0) return
-                    return 40
+                    return 20
                 },
                 body: corrections
             },
@@ -126,7 +126,7 @@ function documentByMahasiswa(rekap_ujian, komentar_dosen, i) {
                 {
                     width: '*',
                     text: [
-                        `Yogyakarta, ${tanggal}\nDosen Pengoreksi\n\n\n\n\n`,
+                        `Yogyakarta, ${formatedDate}\nDosen Pengoreksi\n\n\n\n\n`,
                         { text: penguji, bold: true }
                     ]
                 }

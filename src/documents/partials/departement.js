@@ -27,7 +27,6 @@ const listProdiWithKonsentrasi = [
 export default {
     getName: function (prodi, konsentrasi) {
         let result = null
-        console.log(listProdiWithKonsentrasi)
         if (prodi) {
             const found = listProdiWithKonsentrasi.find(n => n.pendek == prodi)
             if (found) result = [found.panjang]
