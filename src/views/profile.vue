@@ -97,13 +97,17 @@ export default {
     computed: {
         changed() {
             const auth = this.$store.state.auth
-            const hasChanged =
-                (this.user.nama && this.user.nama.trim() !== auth.user.nama.trim())
-                || (this.user.nip && this.user.nip.trim() !== auth.user.nip.trim())
-                || (this.user.prodi && this.user.prodi.trim() !== auth.user.prodi.trim())
-                || (this.user.konsentrasi && this.user.konsentrasi.trim() !== auth.user.konsentrasi.trim())
-            
-            return hasChanged
+            if (auth.user) {
+                const hasChanged =
+                    (this.user.nama && this.user.nama.trim() !== auth.user.nama.trim())
+                    || (this.user.nip && this.user.nip.trim() !== auth.user.nip.trim())
+                    || (this.user.prodi && this.user.prodi.trim() !== auth.user.prodi.trim())
+                    || (this.user.konsentrasi && this.user.konsentrasi.trim() !== auth.user.konsentrasi.trim())
+
+                return hasChanged
+            }
+
+            return false
         }
     },
 

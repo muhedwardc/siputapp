@@ -16,7 +16,7 @@
                 :rows-per-page-items="perPage"
                 :loading="loading">
                 <template slot="headerCell" slot-scope="props">
-                    <span class="black--text font-weight-bold" style="font-size: 13px">
+                    <span @click="props.header.text == 'Tanggal' ? fetchExams(1, 'tanggal') : null" class="black--text font-weight-bold" style="font-size: 13px">
                         {{ props.header.text }}
                     </span>
                 </template>
@@ -32,7 +32,7 @@
                     <td>{{ props.item.ujian.sesi }}</td>
                     <td>{{ props.item.ujian.ruang }}</td>
                     <td>{{ props.item.ujian.penguji[0].dosen == $store.state.auth.user.nama ? 'Ketua' : 'Anggota' }}</td>
-                    <td>{{ examStatus(props.item.ujian.status) }}</td>
+                    <td :class="props.item.ujian.status == 3 ? 'success--text font-weight-bold' : props.item.ujian.status == 2 ? 'warning--text' : null">{{ examStatus(props.item.ujian.status) }}</td>
                 </template>
                 <template v-slot:footer>
                     <app-pagination-footer :page="page" :totalItems="totalItems" :td="headers.length" @on-page-change="getExam($event)"></app-pagination-footer>
@@ -50,6 +50,7 @@ export default {
     data() {
         return {
             loading: false,
+            sort: null,
             search: '',
             headers: [
                 {
@@ -73,11 +74,11 @@ export default {
                 {
                     text: 'Ruangan',
                     value: 'ujian.ruang',
-                    sortable: true,
+                    sortable: false,
                     align: 'center'
                 },
                 {
-                    text: 'Ketua',
+                    text: 'Peran',
                     value: 'is_ketua',
                     sortable: false,
                     align: 'center'
@@ -151,13 +152,15 @@ export default {
             return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
         },
 
-        async fetchExams(page = 1) {
+        async fetchExams(page = 1, sort = null) {
             this.loading = true
-            let qs = 'page=' + page
+            if (sort) this.sort = sort
+            let qs = 'page=' + (page ? page : 1)
             if (this.textSearch) qs += '&search=' + this.textSearch
+            if (this.sort) qs += '&ordering=' + this.sort
             try {
                 const history = await this.$thessa.getMyExamsHistory(qs)
-                this.exams.push.apply(this.exams, history.data.results)
+                this.exams = history.data.results
                 this.totalItems = history.data.count
                 this.page = page
                 this.loading = false

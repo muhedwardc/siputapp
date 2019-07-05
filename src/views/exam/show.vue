@@ -298,10 +298,25 @@
                                     <span @click="edit('skripsi.judul', 'text', 'Judul Skripsi')" class="edit--text" v-if="isAdmin">[EDIT]</span>
                                 </h3>
                             </v-layout>
-                            <v-btn v-if="!isAdmin" depressed color="info" class="ma-0 mt-2" @click="startExam(exam.id)"><v-icon left>send</v-icon>masuk ujian</v-btn>
+                            <v-dialog persistent v-model="agreementDialog" max-width="600px">
+                                <v-card class="pa-4">
+                                    <p>Saat ini ujian skripsi belum dimulai. Dengan menekan tombol <b>mulai</b>, Anda akan mengubah status ujian menjadi mulai sehingga semua dosen terkait dapat memasuki ujian.</p>
+                                    <v-layout row>
+                                        <v-spacer></v-spacer>
+                                        <v-btn color="error" :disabled="startingExam" @click="agreementDialog = false">batal</v-btn>
+                                        <v-btn color="success" @click="startExam" :loading="startingExam">mulai</v-btn>
+                                    </v-layout>
+                                </v-card>
+                            </v-dialog>
+                            <v-btn v-if="!isAdmin && exam.status == 2" depressed color="primary" class="ma-0 mt-2" @click="joinExam(examId)"><v-icon left>send</v-icon>Masuk Ujian</v-btn>
+                            <v-btn v-if="!isAdmin && isPembimbing && exam.status == 1" depressed color="primary" class="ma-0 mt-2" @click="checkExamStatus(examId)" :loading="checkingStatus"><v-icon left>send</v-icon>Mulai Ujian</v-btn>
+                            <v-btn v-if="!isAdmin && !isPembimbing && exam.status == 1" depressed color="primary" class="ma-0 mt-2" @click="joinExam(examId)"><v-icon left>send</v-icon>Masuk Ujian</v-btn>
+                            <v-btn v-if="!isAdmin && exam.status == 3" depressed color="success" class="ma-0 mt-2"><v-icon left>check_circle</v-icon>Ujian Selesai</v-btn>
                             <v-btn v-if="isAdmin" depressed color="error" class="ma-0 mt-2" @click="dialogDelete = true"><v-icon left>delete</v-icon>hapus ujian</v-btn>
                         </v-layout>
-                        <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }} <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">[EDIT]</span></span>
+                        <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }}
+                        <!-- <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">[EDIT]</span> -->
+                        </span>
                         <v-layout column class="mt-2">
                             <span class="font-weight-bold">Naskah Skripsi</span>
                             <v-layout class="mt-2" align-center>
@@ -316,6 +331,12 @@
                                     <v-icon>verified_user</v-icon>
                                 </v-avatar>
                                 Ketua
+                            </v-chip>
+                            <v-chip v-if="!isLeader && !isAdmin && isPembimbing" color="success" class="white--text ml-0">
+                                <v-avatar class="mr-0">
+                                    <v-icon>verified_user</v-icon>
+                                </v-avatar>
+                                Pembimbing 2
                             </v-chip>
                             <v-chip class="ml-0" :class="isToday ? 'white--text' : ''" :color="isToday ? 'purple' : ''">
                                 <v-avatar class="mr-0">
@@ -341,8 +362,8 @@
                         </v-layout>
                         <hr>
                         <v-layout class="mt-3" column>
-                            <span class="font-weight-bold">Berkas Hasil Ujian <template><v-icon small color="warning">error</v-icon><span class="ma-0 font-weight-regular">Ujian belum selesai</span></template></span>
-                            <app-exam-result class="mt-2" :examId="examId"></app-exam-result>
+                            <span class="font-weight-bold">Berkas Hasil Ujian <template v-if="exam.status == 3"><v-icon small color="success">check_circle</v-icon><span class="ma-0 font-weight-regular">Ujian sudah selesai</span></template><template v-else><v-icon small color="warning">error</v-icon><span class="ma-0 font-weight-regular">Ujian belum selesai</span></template></span>
+                            <app-exam-result v-if="exam.status == 3" class="mt-2" :examId="examId"></app-exam-result>
                         </v-layout>
                         <hr>
                         <v-layout column class="mt-4">
@@ -391,7 +412,7 @@
                                 </template>
                                 <template v-slot:items="props">
                                     <td>{{ props.item.dosen }}</td>
-                                    <td>{{ props.item.is_leader ? 'Ketua Penguji' : props.index == 1 ? 'Pembimbing 2' : 'Penguji' }}</td>
+                                    <td>{{ props.index == 0 ? 'Pembimbing 1' : props.index == 1 ? 'Pembimbing 2' : 'Penguji' }}</td>
                                 </template>
                             </v-data-table>
                         </v-layout>
@@ -412,6 +433,8 @@ export default {
     data() {
         return {
             exam: null,
+            agreementDialog: false,
+            startingExam: false,
             examId: null,
             search: '',
             editDialog: '',
@@ -478,7 +501,7 @@ export default {
                     value: 'dosen',
                 },
                 {
-                    text: 'Status',
+                    text: 'Peran',
                     sortable: false,
                     align: 'left',
                     value: 'is_leader',
@@ -496,6 +519,7 @@ export default {
             objDocument: null,
             pdfDocGenerator: null,
             generating: false,
+            checkingStatus: false
         }
     },
 
@@ -516,11 +540,13 @@ export default {
         },
 
         isLeader() {
-            if (this.exam.ujian) {
-                return this.$store.state.auth.user.id == this.exam.ujian.skripsi.pembimbing_satu
-            }
+            return this.$store.state.auth.user.id == this.exam.skripsi.pembimbing_satu
+        },
 
-            return false
+        isPembimbing() {
+            const userId = this.$store.state.auth.user.id
+            const skripsi = this.exam.skripsi
+            return userId == skripsi.pembimbing_dua || userId == skripsi.pembimbing_satu
         },
 
         isToday() {
@@ -552,6 +578,21 @@ export default {
         ...mapActions([
             'showSnackbar'
         ]),
+
+        async checkExamStatus(examId) {
+            this.checkingStatus = true
+            try {
+                const res = await this.$thessa.getExamStatus(examId)
+                const status = res.data.status
+                this.exam.status = status
+                if (status == 1) this.agreementDialog = true
+                else if (status == 2) this.$router.push('/ujian/' + examId + '/mulai')
+                this.checkingStatus = false
+            } catch (error) {
+                this.checkingStatus = false
+            }
+            this.agreementDialog = true
+        },
 
         onFilePicked (e) {
             let newFile = {}
@@ -651,7 +692,6 @@ export default {
                         formData.append('file', this.editTemp.value.file)
                         try {
                             const name = + new Date() + '_' + this.editTemp.value.name
-                            console.log(name, formData)
                             return
                             // const res = await this.$thessa.addThesis(name, formData)
                         } catch (error) {
@@ -675,7 +715,11 @@ export default {
                 const exam = await this.$thessa.getExamById(this.examId)
                 this.exam = this.isAdmin ? exam.data : exam.data.ujian
             } catch (error) {
-                this.$store.dispatch('showSnackbar', error.message)
+                if (error.response.status == 404) {
+                    this.$router.go(-1)
+                } else {
+                    this.$store.dispatch('showSnackbar', error.message)
+                }
             }
         },
 
@@ -683,8 +727,20 @@ export default {
             window.open('http://www.africau.edu/images/default/sample.pdf', '_blank')
         },
 
-        startExam() {
+        joinExam() {
             this.$router.push(`/ujian/${this.examId}/mulai`)
+        },
+
+        async startExam() {
+            this.startingExam = true
+            try {
+                await this.$thessa.startExam(this.examId)
+                this.startingExam = false
+                this.$router.push('/ujian/' + this.examId + '/mulai')
+            } catch (error) {
+                this.showSnackbar(error)
+                this.startingExam = false
+            }
         },
 
         getValue(key) {

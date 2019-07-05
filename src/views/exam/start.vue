@@ -1,308 +1,346 @@
 <template>
-    <div class="full" v-if="this.exam.ujian">
-        <v-navigation-drawer 
-            v-model="drawer" 
-            :width="drawerWidth" 
-            app
-            right
-            clipped
-            persistent
-            mobile-break-point="991" 
-            class="correction-section pb-4"
-            fixed>
-            <v-toolbar dark color="primary">
-                <v-toolbar-side-icon @click="toggleCorrectionSection"></v-toolbar-side-icon>
-                <v-toolbar-title class="white--text" v-text="title"></v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-btn class="white red--text text-uppercase" @click="fetchRecap"><b>Selesai</b></v-btn>
-            </v-toolbar>
-            <v-tabs
-                v-model="step"
-                color="white"
-                grow
-                class="outline-tab"
-                >
-                <v-tabs-slider color="primary"></v-tabs-slider>
-                <v-tab>Komentar</v-tab>
-                <v-tab>Penilaian</v-tab>
-                <v-tab v-if="isLeader">Revisi Judul</v-tab>
-            </v-tabs>
-            <v-tabs-items v-model="step">
-                <v-tab-item class="tab-container">
-                    <v-layout column style="position: relative;">
-                        <v-slide-y-reverse-transition>
-                            <v-layout column class="pt-2" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
-                                <v-form ref="add-correction-form" v-model="valid" lazy-validation>
-                                <v-layout row justify-space-between>
-                                    <v-select
-                                        v-model="selectedBab"
-                                        :items="bab"
-                                        :rules="[v => !!v || 'Pilih salah satu']"
-                                        solo
-                                        placeholder="Pilih Bab"
-                                        class="mr-2"></v-select>
-                                    <v-text-field :rules="[v => !!v || 'Harus diisi', v => !isNaN(v) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
-                                </v-layout>
-                                <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.komentar" placeholder="Masukkan komentar"></v-textarea>
-                                <v-layout>
-                                    <v-spacer></v-spacer>
-                                    <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection" :disabled="saving">Batal</v-btn>
-                                    <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges" :loading="saving">Edit</v-btn>
-                                    <v-btn v-else class="success ma-0 mb-2" @click="addCorrection" :loading="saving">Simpan</v-btn>
-                                </v-layout>
-                                </v-form>
-                            </v-layout>
-                        </v-slide-y-reverse-transition>
-                        <v-layout column v-show="!creating">
-                            <app-loading :loadingState="fetchingComments"></app-loading>
-                            <v-layout align-center v-if="errorFetchingComments" column>
-                                <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat komentar</p>
-                                <v-btn flat class="primary--text" @click="fetchComments">
-                                    <v-icon left small>refresh</v-icon>
-                                    <span class="text-lowercase">muat ulang komentar</span>
-                                </v-btn>
-                            </v-layout>
-                            <template v-else-if="!fetchingComments">
-                                <v-layout column v-if="correctionFilled">
-                                    <v-layout column v-for="(correction, section) in corrections" :key="section">
-                                        <template v-if="correction.items.length > 0">
-                                            <h3 class="mb-1 grey--text" v-text="bab[section]"></h3>
-                                            <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
-                                                <p class="mb-0" style="word-break: break-word;" v-text="item.komentar"></p>
-                                                <v-layout row align-center>
-                                                    <span class="font-weight-bold" style="color: #9C9C9C">Halaman {{item.halaman}}</span>
-                                                    <v-spacer></v-spacer>
-                                                    <v-btn icon flat :ripple="false" @click="editCorrection(section, index)">
-                                                        <v-icon class="seconday--text" small>edit</v-icon>
-                                                    </v-btn>
-                                                    <v-btn icon flat :ripple="false" @click="showDialog(section, index)">
-                                                        <v-icon class="secondary--text" small>delete</v-icon>
-                                                    </v-btn>
-                                                </v-layout>
-                                            </v-layout>
-                                        </template>
-                                    </v-layout>
-                                </v-layout>
-                                <v-layout justify-center v-else>
-                                    Anda belum memberikan komentar.
-                                </v-layout>
-                            </template>
-                        </v-layout>
-                        <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
-                    </v-layout>
-                </v-tab-item>
-                <v-tab-item class="tab-container">
-                    <template v-show="!addingGrade">
-                        <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 0">
-                            <p class="mb-0"><b>Mahasiswa</b></p>
-                            <ol class="mb-3">
-                                <li v-for="(mhs, index) in exam.ujian.skripsi.mahasiswa" :key="mhs.nim">{{ mhs.nama + ', ' }} <b>{{'rerata sementara: ' + getCurrentAverage(index)}}</b></li>
-                            </ol>
-                        </template>
-                        <v-layout column v-if="exam.ujian">
-                            <v-layout align-start v-for="(so, index) in socs" :key="index">
-                                <v-chip label class="mr-3">{{index + 1}}</v-chip>
-                                <v-layout row>
-                                    <v-layout column>
-                                        <b v-text="so.name"></b>
-                                        <b v-if="filledGrades(index)" class="success--text">Nilai: {{ filledGrades(index) }}</b>
-                                        <b v-else class="error--text">Nilai belum lengkap</b>
-                                    </v-layout>
-                                    <v-btn class="primary ml-3" @click="addGrades(index)">beri nilai</v-btn>
-                                </v-layout>
-                            </v-layout>
-                        </v-layout>
-                    </template>
-                    <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; min-height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
-                        <v-layout column>
-                            <b>{{ socs[gradeTemp.so-1].name }}</b>
-                            <p class="mb-1">{{ socs[gradeTemp.so-1].description }}</p>
-                            <v-form v-model="validGrades">
-                                <table class="mt-2 grade-list">
-                                    <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
-                                        <div :key="mahasiswa.nim">
-                                            <tr>
-                                                <td v-text="mahasiswa.nama" colspan="2"></td>
-                                            </tr>
-                                            <tr>
-                                                <td><v-text-field :disabled="saving" :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.daftar_nilai[index]"></v-text-field></td>
-                                                <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.daftar_nilai[index])"></b></td>
-                                            </tr>
-                                        </div>
-                                    </template>
-                                </table>
-                            </v-form>
-                            <v-layout column>
-                                <v-layout wrap>
-                                    <v-spacer></v-spacer>
-                                    <v-btn class="error" @click="discardGrades" :disabled="saving">Batal</v-btn>
-                                    <v-btn class="success" @click="saveGrades" :loading="saving">simpan</v-btn>
-                                </v-layout>
-                                <v-layout column>
-                                    <b class="mt-2">Indikator Penilaian</b>
-                                    <v-layout v-for="(list, i) in socs[selectedSO].indicators" :key="i" style="display: block;" column>
-                                        <b>{{ gradeIndicators[i] }}</b>
-                                        <ul>
-                                            <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
-                                        </ul>
-                                    </v-layout>
-                                </v-layout>
-                            </v-layout>
-                        </v-layout>
-                    </v-layout>
-                </v-tab-item>
-                <v-tab-item class="tab-container" v-if="isLeader">
-                    <h3 class="font-weight-medium">Apakah ada revisi judul?</h3>
-                    <p class="font-weight-medium ma-0" v-text="'Judul: ' + exam.ujian.skripsi.judul"></p>
-                    <v-radio-group class="pa-0 mt-2" v-model="revisionTemp.revisi" :mandatory="false">
-                        <v-radio color="primary" label="Tidak ada revisi judul" :value="false"></v-radio>
-                        <v-radio color="primary" label="Ada, revisi judulnya:" :value="true"></v-radio>
-                    </v-radio-group>
-                    <p>Masukkan revisi judul</p>
-                    <v-textarea :disabled="!revisionTemp.revisi" box v-model="revisionTemp.konten"></v-textarea>
-                    <v-layout>
+    <div class="full">
+        <template v-if="loaded">
+            <template v-if="exam.ujian.status == 2">
+                <v-navigation-drawer 
+                    v-model="drawer" 
+                    :width="drawerWidth" 
+                    app
+                    right
+                    clipped
+                    persistent
+                    mobile-break-point="991" 
+                    class="correction-section pb-4"
+                    fixed>
+                    <v-toolbar dark color="primary">
+                        <v-toolbar-side-icon @click="toggleCorrectionSection">
+                            <v-icon large>chevron_right</v-icon>
+                        </v-toolbar-side-icon>
+                        <v-toolbar-title class="white--text" v-text="title"></v-toolbar-title>
                         <v-spacer></v-spacer>
-                        <v-btn v-show="revisionHasChanged" class="default ma-0 mr-2" :disabled="saving" @click="resetRevision">hapus perubahan</v-btn>
-                        <v-btn v-show="revisionHasChanged" class="success ma-0" :loading="saving" @click="addRevision">simpan revisi</v-btn>
-                    </v-layout>
-                </v-tab-item>
-            </v-tabs-items>
-        </v-navigation-drawer>
-        <v-dialog v-model="dialog.show" persistent max-width="600px">
-            <v-card>
-                <v-card-title class="title pb-0">Anda ingin menghapus komentar ini?</v-card-title>
-                <v-card-text>
-                    <h3 v-text="corrections[dialog.section].name"></h3>
-                    <span class="font-weight-bold">Halaman {{dialog.page}}</span><br>
-                    <p v-text="dialog.text" class="mb-1 mt-1"></p>
-                </v-card-text>
-                <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn class="font-weight-bold" flat @click="closeDialog()">Batal</v-btn>
-                <v-btn class="font-weight-bold" color="green darken-1" flat @click="deleteCorrection(dialog.section, dialog.index)">Ya</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-        <v-content id="exam-content">
-            <object data='https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' id="exam-content-view">
-                <v-layout column align-center justify-center style="height: 100%">
-                    <h1>Maaf,</h1>
-                    <p class="ma-0 mt-2 mb-2">Peramban Anda tidak mendukung penampilan PDF</p>
-                    <v-btn class="primary">
-                        <a class="white--text text-capitalize" target="_blank" href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf">lihat naskah</a>
-                    </v-btn>
-                    <!-- <p class="mb-4"><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf">Unduh Naskah</a></p> -->
-                </v-layout>
-            </object>
-            <!-- <embed :src="'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'" id="exam-content-view"> -->
-            <!-- <embed :src="'https://drive.google.com/viewerng/viewer?embedded=true&url=https://www.otago.ac.nz/library/pdf/Google_searching.pdf'" id="exam-content-view"> -->
-            <!-- <iframe :src="this.exam.ujian.skripsi.naskah.replace('/media/', '/uploads/')" id="exam-content-view"></iframe> -->
-            <v-layout v-if="!drawer" row class="toggle-button">
-                <v-btn @click="toggleCorrectionSection()" class="pa-2 flat primary text-capitalize">
-                    Borang Penilaian
-                </v-btn>
-            </v-layout>
-        </v-content>
-        <v-dialog fullscreen v-model="showRecap" transition="dialog-bottom-transition" class="recap-dialog">
-            <v-toolbar fixed dark color="primary">
-                <v-btn icon dark @click="showRecap = false">
-                    <v-icon>arrow_back</v-icon>
-                </v-btn>
-                <v-toolbar-title>Rekap</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-toolbar-items>
-                    <v-btn flat @click="syncRecap">
-                        <v-icon left :class="{rotating: sync}">sync</v-icon>
-                        <span class="text-capitalize">Perbarui Rekap</span>
-                    </v-btn>
-                </v-toolbar-items>
-            </v-toolbar>
-            <v-content style="margin-top: 50px; width: 100%;" class="pa-0">
-                <v-layout column class="pa-4" style="width: 100%;">
-                    <h3 class="mb-2">INFORMASI UJIAN</h3>
-                    <template v-if="recap">
-                        <p class="mb-0" v-text="recap.rekap_ujian.skripsi.judul"></p>
-                        <v-layout align-center class="mt-2"><v-icon class="mr-2">schedule</v-icon> {{today}}</v-layout>
-                        <v-layout align-center class="mt-2"><v-icon class="mr-2">event</v-icon> {{recap.rekap_ujian.sesi}}</v-layout>
-                        <v-layout align-center class="mt-2"><v-icon class="mr-2">location_on</v-icon> {{recap.rekap_ujian.ruang}}</v-layout>
-                        <v-layout align-center class="mt-2"><v-icon class="mr-2">person</v-icon> {{mahasiswa}}</v-layout>
-                    </template>
-                    <hr class="mt-4 mb-4">
-                    <h3 class="mb-2">REKAP PENILAIAN UJIAN TUGAS AKHIR</h3>
-                    <div class="recap-table v-table__overflow">
-                        <table class="v-datatable v-table theme--light" v-if="recap">
-                            <tr class="text-xs-center">
-                                <td rowspan="2">Dosen</td>
-                                <td :colspan="recap.rekap_ujian.skripsi.mahasiswa.length">Nilai</td>
-                                <td rowspan="2">Keterangan</td>
-                            </tr>
-                            <tr class="text-xs-center">
-                                <td class="mahasiswa-cell" v-for="(nilai, i) in recap.rekap_nilai" :key="i" v-text="nilai.mahasiswa"></td>
-                            </tr>
-                            <tr v-for="(penguji, i) in recap.rekap_ujian.penguji" :key="i" :class="penguji.dosen == $store.state.auth.user.nama ? 'success lighten-4' : ''">
-                                <td class="dosen-cell" v-text="penguji.dosen"></td>
-                                <td v-for="(mahasiswa, j) in recap.rekap_nilai" :key="j">{{ mahasiswa.nilai[i].rerata ? mahasiswa.nilai[i].rerata : 0 }}</td>
-                                <td >Keterangan</td>
-                            </tr>
-                            <tr>
-                                <td><b>Total</b></td>
-                                <td v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.jumlah_rerata"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td><b>Rerata</b></td>
-                                <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.rerata_total"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td><b>Konversi</b></td>
-                                <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="convertGrade(mahasiswa.rerata_total)"></td>
-                                <td></td>
-                            </tr>
-                        </table>
-                    </div>
-                    <h3 class="mt-4 mb-2">REKAP KOMENTAR</h3>
+                        <v-btn class="white red--text text-uppercase" @click="fetchRecap"><b>Selesai</b></v-btn>
+                    </v-toolbar>
                     <v-tabs
-                        v-model="recapBab"
+                        v-model="step"
                         color="white"
                         grow
-                        class="outline-tab mb-4"
-                        show-arrows
+                        class="outline-tab"
                         >
                         <v-tabs-slider color="primary"></v-tabs-slider>
-                        <v-tab v-for="b in bab" :key="b">{{ b }}</v-tab>
-                        <v-tabs-items v-if="recap" v-model="recapBab">
-                            <v-tab-item class="recap-comments-container" v-for="(bab, i) in commentsRecapByBab" :key="i">
-                                <table v-if="bab.length" class="v-datatable v-table theme--light">
-                                    <tr>
-                                        <td width="60px">No.</td>
-                                        <td width="60px">Hal</td>
-                                        <td>Komentar</td>
-                                        <td width="380px">Dosen</td>
+                        <v-tab>Komentar</v-tab>
+                        <v-tab>Penilaian</v-tab>
+                        <v-tab v-if="isLeader">Revisi Judul</v-tab>
+                    </v-tabs>
+                    <v-tabs-items v-model="step">
+                        <v-tab-item class="tab-container">
+                            <v-layout column style="position: relative;">
+                                <v-slide-y-reverse-transition>
+                                    <v-layout column class="pt-2" v-show="creating" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 4">
+                                        <v-form ref="add-correction-form" v-model="valid" lazy-validation>
+                                        <v-layout row justify-space-between>
+                                            <v-select
+                                                v-model="selectedBab"
+                                                :items="bab"
+                                                :rules="[v => !!v || 'Pilih salah satu']"
+                                                solo
+                                                placeholder="Pilih Bab"
+                                                class="mr-2"></v-select>
+                                            <v-text-field :rules="[v => !!v || 'Harus diisi', v => !isNaN(v) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
+                                        </v-layout>
+                                        <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.komentar" placeholder="Masukkan komentar"></v-textarea>
+                                        <v-layout>
+                                            <v-spacer></v-spacer>
+                                            <v-btn class="error ma-0 mb-2 mr-2" @click="resetNewCorrection" :disabled="saving">Batal</v-btn>
+                                            <v-btn v-if="temp.edit" class="success ma-0 mb-2" @click="saveChanges" :loading="saving">Edit</v-btn>
+                                            <v-btn v-else class="success ma-0 mb-2" @click="addCorrection" :loading="saving">Simpan</v-btn>
+                                        </v-layout>
+                                        </v-form>
+                                    </v-layout>
+                                </v-slide-y-reverse-transition>
+                                <v-layout column v-show="!creating">
+                                    <app-loading :loadingState="fetchingComments"></app-loading>
+                                    <v-layout align-center v-if="errorFetchingComments" column>
+                                        <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat komentar</p>
+                                        <v-btn flat class="primary--text" @click="fetchComments">
+                                            <v-icon left small>refresh</v-icon>
+                                            <span class="text-lowercase">muat ulang komentar</span>
+                                        </v-btn>
+                                    </v-layout>
+                                    <template v-else-if="!fetchingComments">
+                                        <v-layout column v-if="correctionFilled">
+                                            <v-layout column v-for="(correction, section) in corrections" :key="section">
+                                                <template v-if="correction.items.length > 0">
+                                                    <h3 class="mb-1 grey--text" v-text="bab[section]"></h3>
+                                                    <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
+                                                        <p class="mb-0" style="word-break: break-word;" v-text="item.komentar"></p>
+                                                        <v-layout row align-center>
+                                                            <span class="font-weight-bold" style="color: #9C9C9C">Halaman {{item.halaman}}</span>
+                                                            <v-spacer></v-spacer>
+                                                            <v-btn icon flat :ripple="false" @click="editCorrection(section, index)">
+                                                                <v-icon class="grey--text" small>edit</v-icon>
+                                                            </v-btn>
+                                                            <v-btn icon flat :ripple="false" @click="showDialog(section, index)">
+                                                                <v-icon class="grey--text" small>delete</v-icon>
+                                                            </v-btn>
+                                                        </v-layout>
+                                                    </v-layout>
+                                                </template>
+                                            </v-layout>
+                                        </v-layout>
+                                        <v-layout justify-center v-else>
+                                            Anda belum memberikan komentar.
+                                        </v-layout>
+                                    </template>
+                                </v-layout>
+                                <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
+                            </v-layout>
+                        </v-tab-item>
+                        <v-tab-item class="tab-container">
+                            <template v-show="!addingGrade">
+                                <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 0">
+                                    <p class="mb-0"><b>Mahasiswa</b></p>
+                                    <ol class="mb-3">
+                                        <li v-for="(mhs, index) in exam.ujian.skripsi.mahasiswa" :key="mhs.nim">{{ mhs.nama }} <br><b>{{'rerata sementara: ' + getCurrentAverage(index)}}</b></li>
+                                    </ol>
+                                </template>
+                                <v-layout column v-if="exam.ujian">
+                                    <v-layout align-start v-for="(so, index) in socs" :key="index">
+                                        <v-chip label class="mr-3">{{index + 1}}</v-chip>
+                                        <v-layout row>
+                                            <v-layout column>
+                                                <b v-text="so.name"></b>
+                                                <b v-if="filledGrades(index)" class="success--text">Nilai: {{ filledGrades(index) }}</b>
+                                                <b v-else class="error--text">Nilai belum lengkap</b>
+                                            </v-layout>
+                                            <v-btn class="primary ml-3" @click="addGrades(index)">beri nilai</v-btn>
+                                        </v-layout>
+                                    </v-layout>
+                                </v-layout>
+                            </template>
+                            <v-layout column class="pa-4" v-show="addingGrade" style="width: 100%; min-height: 100%; position: absolute; top: 0; left: 0; background-color: white; z-index: 10">
+                                <v-layout column>
+                                    <b>{{ socs[gradeTemp.so-1].name }}</b>
+                                    <p class="mb-1">{{ socs[gradeTemp.so-1].description }}</p>
+                                    <v-form v-model="validGrades">
+                                        <table class="mt-2 grade-list">
+                                            <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
+                                                <div :key="mahasiswa.nim">
+                                                    <tr>
+                                                        <td v-text="mahasiswa.nama" colspan="2"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><v-text-field :disabled="saving" :rules="[v => !isNaN(v) && v <= 100 && v >= 0 || 'Angka 0 - 100']" type="number" class="grade" min="0" max="100" placeholder="ex. 85" solo v-model="gradeTemp.daftar_nilai[index]"></v-text-field></td>
+                                                        <td class="pb-4 pl-2"><b v-text="gradeIndicator(gradeTemp.daftar_nilai[index])"></b></td>
+                                                    </tr>
+                                                </div>
+                                            </template>
+                                        </table>
+                                    </v-form>
+                                    <v-layout column>
+                                        <v-layout wrap>
+                                            <v-spacer></v-spacer>
+                                            <v-btn class="error" @click="discardGrades" :disabled="saving">Batal</v-btn>
+                                            <v-btn class="success" @click="saveGrades" :loading="saving">simpan</v-btn>
+                                        </v-layout>
+                                        <v-layout column>
+                                            <b class="mt-2">Indikator Penilaian</b>
+                                            <v-layout v-for="(list, i) in socs[selectedSO].indicators" :key="i" style="display: block;" column>
+                                                <b>{{ gradeIndicators[i] }}</b>
+                                                <ul>
+                                                    <li v-for="(indicator, index) in list" :key="index" v-text="indicator"></li>
+                                                </ul>
+                                            </v-layout>
+                                        </v-layout>
+                                    </v-layout>
+                                </v-layout>
+                            </v-layout>
+                        </v-tab-item>
+                        <v-tab-item class="tab-container" v-if="isLeader">
+                            <h3 class="font-weight-medium">Apakah ada revisi judul?</h3>
+                            <p class="font-weight-medium ma-0" v-text="'Judul: ' + exam.ujian.skripsi.judul"></p>
+                            <v-radio-group class="pa-0 mt-2" v-model="revisionTemp.revisi" :mandatory="false">
+                                <v-radio color="primary" label="Tidak ada revisi judul" :value="false"></v-radio>
+                                <v-radio color="primary" label="Ada, revisi judulnya:" :value="true"></v-radio>
+                            </v-radio-group>
+                            <p>Masukkan revisi judul</p>
+                            <v-textarea :disabled="!revisionTemp.revisi" box v-model="revisionTemp.konten"></v-textarea>
+                            <v-layout>
+                                <v-spacer></v-spacer>
+                                <v-btn v-show="revisionHasChanged" class="default ma-0 mr-2" :disabled="saving" @click="resetRevision">hapus perubahan</v-btn>
+                                <v-btn v-show="revisionHasChanged" class="success ma-0" :loading="saving" @click="addRevision">simpan revisi</v-btn>
+                            </v-layout>
+                        </v-tab-item>
+                    </v-tabs-items>
+                </v-navigation-drawer>
+                <v-dialog persistent v-model="finishDialog" max-width="600px">
+                    <v-card v-if="isLeader" class="pa-4">
+                        <h1>Selesaikan Ujian?</h1>
+                        <p class="mt-2">Saat ini ujian skripsi sedang berlangsung. Dengan menekan tombol <b>selesai</b>, Anda akan mengubah status ujian menjadi selesai.<br>Pastikan <b>semua dosen</b> telah <b class="error--text">melengkapi nilai</b> dan menambahkan komentar jika diperlukan.</p>
+                        <v-layout row>
+                            <v-spacer></v-spacer>
+                            <v-btn color="white" class="primary--text" :disabled="finishingExam" @click="finishDialog = false">batal</v-btn>
+                            <v-btn color="primary" @click="finishExam" :loading="finishingExam">selesai</v-btn>
+                        </v-layout>
+                    </v-card>
+                    <v-card v-else class="pa-4">
+                        <h1>Selesaikan Ujian?</h1>
+                        <p class="mt-2">Dengan menekan tombol <b>selesai</b>, Anda telah menyelesaikan penilaian dan pemberian komentar.</p>
+                        <v-layout row>
+                            <v-spacer></v-spacer>
+                            <v-btn color="white" class="primary--text" @click="finishDialog = false">batal</v-btn>
+                            <v-btn color="primary" @click="redirectHome">selesai</v-btn>
+                        </v-layout>
+                    </v-card>
+                </v-dialog>
+                <v-dialog v-model="dialog.show" persistent max-width="600px">
+                    <v-card>
+                        <v-card-title class="title pb-0">Anda ingin menghapus komentar ini?</v-card-title>
+                        <v-card-text>
+                            <h3 v-text="corrections[dialog.section].name"></h3>
+                            <span class="font-weight-bold">Halaman {{dialog.page}}</span><br>
+                            <p v-text="dialog.text" class="mb-1 mt-1"></p>
+                        </v-card-text>
+                        <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn class="font-weight-bold" flat @click="closeDialog()">Batal</v-btn>
+                        <v-btn class="font-weight-bold" color="green darken-1" flat @click="deleteCorrection(dialog.section, dialog.index)">Ya</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                <v-content id="exam-content">
+                    <object data='https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' id="exam-content-view">
+                        <v-layout column align-center justify-center style="height: 100%">
+                            <h1>Maaf,</h1>
+                            <p class="ma-0 mt-2 mb-2">Peramban Anda tidak mendukung penampilan PDF</p>
+                            <v-btn class="primary">
+                                <a class="white--text text-capitalize" target="_blank" href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf">lihat naskah</a>
+                            </v-btn>
+                            <!-- <p class="mb-4"><a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf">Unduh Naskah</a></p> -->
+                        </v-layout>
+                    </object>
+                    <!-- <embed :src="'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'" id="exam-content-view"> -->
+                    <!-- <embed :src="'https://drive.google.com/viewerng/viewer?embedded=true&url=https://www.otago.ac.nz/library/pdf/Google_searching.pdf'" id="exam-content-view"> -->
+                    <!-- <iframe :src="this.exam.ujian.skripsi.naskah.replace('/media/', '/uploads/')" id="exam-content-view"></iframe> -->
+                    <v-layout v-if="!drawer" row class="toggle-button">
+                        <v-btn @click="toggleCorrectionSection()" class="pa-2 flat primary text-capitalize">
+                            Borang Penilaian
+                        </v-btn>
+                    </v-layout>
+                </v-content>
+                <v-dialog fullscreen v-model="showRecap" transition="dialog-bottom-transition" class="recap-dialog">
+                    <v-toolbar fixed dark color="primary">
+                        <v-btn icon dark @click="showRecap = false">
+                            <v-icon>arrow_back</v-icon>
+                        </v-btn>
+                        <v-toolbar-title>Rekap</v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-toolbar-items>
+                            <v-btn flat @click="syncRecap">
+                                <v-icon left :class="{rotating: sync}">sync</v-icon>
+                                <span class="text-capitalize">Muat ulang</span>
+                            </v-btn>
+                        </v-toolbar-items>
+                    </v-toolbar>
+                    <v-content style="margin-top: 50px; width: 100%;" class="pa-0">
+                        <v-layout column class="pa-4" style="width: 100%;">
+                            <h3 class="mb-2">INFORMASI UJIAN</h3>
+                            <template v-if="recap">
+                                <p class="mb-0" v-text="recap.rekap_ujian.skripsi.judul"></p>
+                                <v-layout align-center class="mt-2"><v-icon class="mr-2">schedule</v-icon> {{today}}</v-layout>
+                                <v-layout align-center class="mt-2"><v-icon class="mr-2">event</v-icon> {{recap.rekap_ujian.sesi}}</v-layout>
+                                <v-layout align-center class="mt-2"><v-icon class="mr-2">location_on</v-icon> {{recap.rekap_ujian.ruang}}</v-layout>
+                                <v-layout align-center class="mt-2"><v-icon class="mr-2">person</v-icon> {{mahasiswa}}</v-layout>
+                            </template>
+                            <hr class="mt-4 mb-4">
+                            <h3 class="mb-2">REKAP PENILAIAN UJIAN TUGAS AKHIR</h3>
+                            <div class="recap-table v-table__overflow">
+                                <table class="v-datatable v-table theme--light" v-if="recap">
+                                    <tr class="text-xs-center">
+                                        <td rowspan="2">Dosen</td>
+                                        <td :colspan="recap.rekap_ujian.skripsi.mahasiswa.length">Nilai</td>
+                                        <td rowspan="2">Keterangan</td>
                                     </tr>
-                                    <tr v-for="(komentar, j) in bab" :key="j">
-                                        <td v-text="j+1"></td>
-                                        <td v-text="komentar.komentar.halaman"></td>
-                                        <td v-text="komentar.komentar.koreksi"></td>
-                                        <td v-text="komentar.dosen"></td>
+                                    <tr class="text-xs-center">
+                                        <td class="mahasiswa-cell" v-for="(nilai, i) in recap.rekap_nilai" :key="i" v-text="nilai.mahasiswa"></td>
+                                    </tr>
+                                    <tr v-for="(penguji, i) in recap.rekap_ujian.penguji" :key="i" :class="penguji.dosen == $store.state.auth.user.nama ? 'success lighten-4' : ''">
+                                        <td class="dosen-cell" v-text="penguji.dosen"></td>
+                                        <td v-for="(mahasiswa, j) in recap.rekap_nilai" :key="j">{{ mahasiswa.nilai[i].rerata ? mahasiswa.nilai[i].rerata : 0 }}</td>
+                                        <td v-text="getAverageByDosen(i)"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Total</b></td>
+                                        <td v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.jumlah_rerata"></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Rerata</b></td>
+                                        <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.rerata_total"></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Konversi</b></td>
+                                        <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="convertGrade(mahasiswa.rerata_total)"></td>
+                                        <td></td>
                                     </tr>
                                 </table>
-                                <p v-else class="pa-4">Tidak ada komentar untuk bab ini</p>
-                            </v-tab-item>
-                        </v-tabs-items>
-                    </v-tabs>
-                    <v-layout class="end-exam" wrap>
-                        <p class="red--text font-weight-bold ma-0"><i>Pastikan semua nilai dan komentar sudah benar, tepat, serta sudah disetujui oleh semua penguji.<br>Seluruh hasil ujian akan disimpan dan tidak dapat diubah ketika sudah menekan tombol SELESAI.</i></p>
-                        <v-spacer></v-spacer>
-                        <v-layout class="pa-0">
-                            <v-spacer></v-spacer>
-                            <v-btn color="primary">SELESAI</v-btn>
+                            </div>
+                            <h3 class="mt-4 mb-2">REKAP KOMENTAR</h3>
+                            <v-tabs
+                                v-model="recapBab"
+                                color="white"
+                                grow
+                                class="outline-tab mb-4"
+                                show-arrows
+                                >
+                                <v-tabs-slider color="primary"></v-tabs-slider>
+                                <v-tab v-for="b in bab" :key="b">{{ b }}</v-tab>
+                                <v-tabs-items v-if="recap" v-model="recapBab">
+                                    <v-tab-item class="recap-comments-container" v-for="(bab, i) in commentsRecapByBab" :key="i">
+                                        <table v-if="bab.length" class="v-datatable v-table theme--light">
+                                            <tr>
+                                                <td width="60px">Halaman</td>
+                                                <td>Komentar</td>
+                                                <td width="380px">Dosen</td>
+                                            </tr>
+                                            <tr v-for="(komentar, j) in bab" :key="j">
+                                                <td v-text="komentar.komentar.halaman"></td>
+                                                <td v-text="komentar.komentar.koreksi"></td>
+                                                <td v-text="komentar.dosen"></td>
+                                            </tr>
+                                        </table>
+                                        <p v-else class="pa-4">Tidak ada komentar untuk bab ini</p>
+                                    </v-tab-item>
+                                </v-tabs-items>
+                            </v-tabs>
+                            <v-layout class="end-exam" wrap>
+                                <p class="red--text font-weight-bold ma-0"><i>Pastikan semua nilai dan komentar sudah benar, tepat, serta sudah disetujui oleh semua penguji.<br>Seluruh hasil ujian akan disimpan dan tidak dapat diubah ketika sudah menekan tombol SELESAI.</i></p>
+                                <v-spacer></v-spacer>
+                                <v-layout class="pa-0">
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="primary" @click="finishDialog = true">SELESAI</v-btn>
+                                </v-layout>
+                            </v-layout>
+                        </v-layout>
+                    </v-content>
+                </v-dialog>
+            </template>
+            <v-layout v-else class="pa-4" justify-center>
+                <v-card v-if="exam.ujian.status == 1" max-width="600px">
+                    <v-layout column align-center class="pa-4">
+                        <p>Ujian untuk skripsi <b>{{ exam.ujian.skripsi.judul }}</b> belum dimulai, pastikan Ketua Sidang telah memulai ujian</p>
+                        <v-layout>
+                            <v-btn class="text-capitalize" color="primary" @click="fetchExam" :loading="!loaded">Muat ulang</v-btn>
+                            <v-btn class="text-capitalize" color="primary" @click="$router.go(-1)">Kembali</v-btn>
                         </v-layout>
                     </v-layout>
-                </v-layout>
-            </v-content>
-        </v-dialog>
-        <v-dialog></v-dialog>
+                </v-card>
+                <v-card v-else-if="exam.ujian.status == 3" class="pa-4">
+                    <p class="mb-0">Ujian telah selesai, Anda akan dialihkan ke halaman detail ujian dalam {{ time }} detik.</p>
+                </v-card>
+            </v-layout>
+        </template>
+        <app-loading class="mt-4" :loadingState="!loaded"></app-loading>
     </div>
 </template>
 
@@ -311,12 +349,14 @@ import {mapActions} from 'vuex'
 import moment from 'moment'
 import socs from './socs'
 import { POINT_CONVERSION_COMPRESSED } from 'constants';
+import { setTimeout, setInterval, clearInterval } from 'timers';
 export default {
     data() {
         return {
             exam: {},
             sync: false,
             selectedSO: 0,
+            loaded: false,
             hasRevision: false,
             revisionTemp: {
                 revisi: false,
@@ -380,7 +420,10 @@ export default {
             errorFetchingGrades: false,
             fetchingRevision: false,
             errorFetchingRevision: false,
-            saving: false
+            saving: false,
+            time: 5,
+            finishDialog: false,
+            finishingExam: false,
         }
     },
 
@@ -432,6 +475,18 @@ export default {
                     recapByBab.push(recapByDosenByBab)
                 }
                 return recapByBab
+            }
+        },
+
+        getAverageByDosen() {
+            return function(dosenIndex) {
+                const mahasiswa = this.recap.rekap_nilai
+                let sum = 0
+                mahasiswa.forEach(item => {
+                    sum += Number(item.nilai[dosenIndex].rerata)
+                })
+                let average = sum/mahasiswa.length
+                return this.convertGrade(average)
             }
         },
 
@@ -530,6 +585,12 @@ export default {
     methods: {
         ...mapActions(['showSnackbar']),
 
+        redirectHome() {
+            this.$store.state.finishedExam = this.exam.ujian
+            this.$store.state.finishedExam.id = this.$router.currentRoute.params.id
+            this.$router.push('/dosen')
+        },
+
         async syncRecap() {
             this.sync = true
             try {
@@ -595,14 +656,29 @@ export default {
         },
 
         async fetchExam() {
+            this.loaded = false
             try {
                 const res = await this.$thessa.getExamById(this.$router.currentRoute.params.id)
                 this.exam = res.data
                 this.generateGrades()
                 this.fetchComments()
                 this.fetchGrades()
+                this.loaded = true
+                if (this.exam.ujian.status == 3) {
+                    this.time = 5
+                    window.redirectInterval = setInterval(() => {
+                        if (this.time > 0) {
+                            this.time -= 1
+                        } else {
+                            clearInterval(window.redirectInterval)
+                            this.loaded = false
+                            this.$router.push('/ujian/' + this.$router.currentRoute.params.id)
+                        }
+                    }, 1000)
+                }
             } catch (error) {
                 this.showSnackbar(error)
+                this.loaded = true
                 this.$router.go(-1)
             }
         },
@@ -617,6 +693,18 @@ export default {
                 this.revision.konten = res.data.konten
             } catch (error) {
                 this.errorFetchingRevision = true
+            }
+        },
+
+        async finishExam() {
+            this.finishingExam = true
+            try {
+                await this.$thessa.finishExam(this.$router.currentRoute.params.id)
+                this.$router.replace('/ujian/' + this.$router.currentRoute.params.id)
+                this.finishingExam = false
+            } catch (error) {
+                this.showSnackbar(error)
+                this.finishingExam = false
             }
         },
 
@@ -930,7 +1018,8 @@ export default {
             text-transform: capitalize
 
             .v-tabs__item.v-tabs__item--active
-                color: #47ABF7
+                font-weight: bold
+                color: #1996f5
 
     .tab-container
         padding: 8px 12px 8px 12px

@@ -16,7 +16,7 @@
                 :rows-per-page-items="perPage"
                 :loading="loading">
                 <template slot="headerCell" slot-scope="props">
-                    <span class="black--text font-weight-bold" style="font-size: 13px">
+                    <span @click="props.header.value == 'tanggal' ? getExam(1, 'tanggal') : null" class="black--text font-weight-bold" style="font-size: 13px">
                         {{ props.header.text }}
                     </span>
                 </template>
@@ -31,7 +31,7 @@
                     <td style="cursor: pointer;"><router-link :to="`/ujian/${props.item.id}`" class="text-xs-left" style="text-decoration: none; color: black;"><b>{{ props.item.skripsi.judul}}</b> <br> oleh: {{listMahasiswa(props.item.skripsi.mahasiswa)}}</router-link></td>
                     <td class="text-xs-left">{{ props.item.sesi }}</td>
                     <td class="text-xs-left">{{ props.item.ruang }}</td>
-                    <td class="text-xs-left">{{ props.item.status ? status[props.item.status] : status[0] }}</td>
+                    <td class="text-xs-left" :class="props.item.status == 3 ? 'success--text' : props.item.status == 2 ? 'warning--text' : null">{{ props.item.status ? status[props.item.status-1] : status[0] }}</td>
                 </template>
                 <template v-slot:footer>
                     <app-pagination-footer :page="page" :totalItems="totalItems" :td="headers.length" @on-page-change="getExam($event)"></app-pagination-footer>
@@ -51,7 +51,7 @@ export default {
             loading: false,
             search: '',
             headers: [
-                { text: 'Tanggal', value: 'tanggal', sortable: true, width: '150' },
+                { text: 'Tanggal', value: 'tanggal', sortable: false, width: '150' },
                 { text: 'Judul', align: 'left', sortable: false, value: 'skripsi.judul' },
                 { text: 'Jam', value: 'sesi.start_time', sortable: false },
                 { text: 'Ruangan', value: 'ruang.nama', sortable: false },
@@ -118,10 +118,12 @@ export default {
             }
         },
         
-        async getExam(page = 1) {
+        async getExam(page = 1, sort = null) {
             this.loading = true
+            if (sort) this.sort = sort
             let qs = 'page=' + page
             if (this.textSearch) qs += '&search=' + this.textSearch
+            if (this.sort) qs += '&ordering=' + this.sort
             try {
                 const response = await this.$thessa.getAllExams(qs)
                 this.totalItems = response.data.count
