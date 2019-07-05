@@ -76,7 +76,7 @@ class ListExamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ('id', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('id', 'status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
 
 class ExamSerializer(serializers.ModelSerializer):
     sesi = serializers.StringRelatedField()

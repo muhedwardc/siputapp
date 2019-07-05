@@ -108,6 +108,7 @@ class ChangePasswordAPI(views.APIView):
         return Response({
             "msg": "User password has been changed."
         })
+        
 class LoginGoogle(views.APIView):
     permission_classes = (permissions.AllowAny,)
 

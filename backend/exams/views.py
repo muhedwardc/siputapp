@@ -57,8 +57,16 @@ class ExamViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             new_ujian = serializer.save()
-            return Response(ExamSerializer(new_ujian).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "status": "OK",
+                "message": "Ujian berhasil dibuat.",
+                "ujian_id": new_ujian.pk
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            "status": "ERROR",
+            "message": "Ujian gagal dibuat.",
+            "error": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True)
     def penguji(self, request, *args, **kwargs):
@@ -95,10 +103,15 @@ class ExamViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response({
+                "status": "OK",
                 "message": "Data ujian berhasil diubah.",
                 "ujian": ExamSerializer(exam).data
             }, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "status": "ERROR",
+            "message": "Gagal mengubah data ujian.",
+            "error": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['PUT'], detail=True)
     def edit_essay(self, request, *args, **kwargs):
