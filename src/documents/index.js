@@ -18,7 +18,7 @@ export default function index(data) {
     let doc = [...COVER(rekap_ujian)]
     for (let i = 0; i < mahasiswa; i ++) {
         doc.push(
-            ...BERITA_ACARA(rekap_ujian, kadep, i),
+            ...BERITA_ACARA(rekap_ujian, Number(rekap_nilai[i].rerata_total), kadep, i),
             ...DAFTAR_HADIR(rekap_ujian, sekretaris, i),
             ...RUBRIK(mahasiswa > 1, i),
             ...LEMBAR_REVISI(rekap_ujian, revisi_judul, i),

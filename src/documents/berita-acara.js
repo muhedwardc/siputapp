@@ -2,7 +2,7 @@ import KOP from './partials/kop'
 import scoreBoard from './partials/score-board'
 import moment from 'moment'
 
-export default function (data, kadep, i) {
+export default function (data, nilai, kadep, i) {
     moment.locale('id')
     let doc = []
     const { tanggal, ruang, sesi, penguji, skripsi } = data
@@ -23,7 +23,7 @@ export default function (data, kadep, i) {
         dosenTabel.push([{ text: `${i+1}.`, alignment: 'center' }, dosen.dosen, (dosen.is_leader ? 'Ketua Tim *)' : 'Anggota'), `${i+1}.`])
     })
     let examresult = []
-    if (mahasiswa[i].nilai < 54.6 ) {
+    if (nilai < 54.6 ) {
         examresult = [
             { text: 'LULUS', decoration: 'lineThrough' },
             ' / ',
@@ -97,7 +97,7 @@ export default function (data, kadep, i) {
                                 { 
                                     text: [
                                         'NILAI ANGKA (0-100): ', 
-                                        { text: 0, bold: true }
+                                        { text: nilai, bold: true }
                                     ],
                                     margin: [0, 5, 0, 0]
                                 }

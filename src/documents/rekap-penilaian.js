@@ -2,6 +2,29 @@ import KOP from './partials/kop'
 import moment from 'moment'
 import scoreBoard from './partials/score-board'
 
+function convertGrade(numGrade) {
+    let grade = Number(numGrade)
+    if (grade >= 84.6 && grade <= 100) return 'A'
+    else if (grade >= 81.6 && grade < 84.6) return 'A-'
+    else if (grade >= 79.6 && grade < 81.6) return 'A/B'
+    else if (grade >= 75.6 && grade < 79.6) return 'B+'
+    else if (grade >= 69.6 && grade < 75.6) return 'B'
+    else if (grade >= 65.6 && grade < 69.6) return 'B-'
+    else if (grade >= 59.6 && grade < 65.6) return 'B/C'
+    else if (grade >= 54.6 && grade < 59.6) return 'C'
+    else if (grade >= 0 && grade < 54.6) return 'D'
+    return 'Tidak valid'
+}
+
+function getAverages(dosenIndex, rekap_nilai) {
+    let sum = 0
+    rekap_nilai.forEach(item => {
+        sum += Number(item.nilai[dosenIndex].rerata)
+    })
+    let average = sum/rekap_nilai.length
+    return convertGrade(average)
+}
+
 export default function (ujian, rekap_nilai) {
     moment.locale('id')
     let doc = []
@@ -25,7 +48,7 @@ export default function (ujian, rekap_nilai) {
         e.nilai.forEach(grade => row.push({ text: grade.rerata, alignment: 'center' }))
         row.push({ text: e.jumlah_rerata, alignment: 'center' })
         row.push({ text: e.rerata_total, alignment: 'center' })
-        row.push({ text: e.pass ? 'LULUS' : 'TIDAK LULUS', alignment: 'center' })
+        row.push({ text: getAverages(i, rekap_nilai), alignment: 'center' })
         mahasiswaGrade.push(row)
     })
     let dosenTabel = [
