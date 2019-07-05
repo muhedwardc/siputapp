@@ -1,6 +1,6 @@
 import json
 
-from django.db.models import Avg, Count, Min, Sum
+from django.db.models import Avg, Count, Min, Sum, Q
 from django.db.models import FloatField
 
 from rest_framework import viewsets, mixins, status, permissions
@@ -86,6 +86,12 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
     @action(detail=False)
     def history(self, request, *args, **kwargs):
         list_all_exam = self.get_queryset()
+
+        # filter berdasarkan judul skripsi atau nama mahasiswa
+        if 'search' in request.GET:
+            search = request.GET.get('search')
+            list_all_exam = list_all_exam.filter(Q(ujian__skripsi__judul__icontains=search) | Q(ujian__skripsi__students__nama__icontains=search)).distinct()
+
         page = self.paginate_queryset(list_all_exam)
         serializer = ListSiputPengujiSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
@@ -235,7 +241,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             else:
                 skripsi.title_revision = False
                 skripsi.save()
-                
+
         response['status'] = "Sukses"
         response['result'] = json_data
         return Response(response, status=201)
