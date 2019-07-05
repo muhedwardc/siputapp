@@ -7,7 +7,7 @@
                 <v-avatar tile class="profile-picture mr-2" size="32">
                     <img :src="$store.state.auth.user.foto || ''" alt="">
                 </v-avatar>
-                <span class="white--text">{{ $store.state.auth.user.nama }}</span>
+                <span class="white--text font-weight-bold">{{ $store.state.auth.user.nama }}</span>
             </v-btn>
         </v-toolbar-items>
     </v-toolbar>
@@ -22,11 +22,6 @@
         > div {
             padding-right: 0;
         }
-    }
-
-    .toolbar-item > * {
-        border-left: 1px solid #eee;
-        border-radius: 0 !important;
     }
 
     .notifications {

@@ -45,7 +45,8 @@ export default {
 
     computed: {
         pageInfo () {
-            const {page, rowsPerPage, totalItems} = this
+            let {page, rowsPerPage, totalItems} = this
+            if (!page) page = 1
             const first = (page-1)*rowsPerPage + 1
             const isLastPage = page*rowsPerPage > totalItems
             const last = isLastPage ? totalItems : page*rowsPerPage

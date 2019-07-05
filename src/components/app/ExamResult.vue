@@ -100,6 +100,7 @@ export default {
                 }
                 this.generatingDocument = false
             } catch (error) {
+                this.$store.dispatch('showSnackbar', error)
                 this.generatingDocument = false
             }
         }

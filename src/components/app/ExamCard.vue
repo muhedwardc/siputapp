@@ -20,10 +20,11 @@
                 </v-card-title>
                 <v-card-text class="pt-2 pl-4">
                     <v-layout class="mb-1">
-                        <v-icon class="mr-1" small>access_time</v-icon>
+                        <v-icon class="mr-1" small>event</v-icon>
                         <span>
                             <span class="mr-2" :class="isToday ? 'purple--text' : null"><b>{{ item.ujian.status == 3 ? 'SEDANG BERLANGSUNG' : isToday ? 'HARI INI' : dateUjian }}</b></span>
-                            <span v-text="item.ujian.sesi"></span>
+                            <v-icon class="mr-1" small>access_time</v-icon>
+                            <span :class="item.ujian.status == 2 ? 'purple--text font-weight-bold' : null">{{ item.ujian.status == 1 ? item.ujian.sesi : 'Sedang Berlangsung' }}</span>
                         </span>
                     </v-layout>
                     <v-layout class="mb-1">
@@ -41,7 +42,7 @@
         <v-card v-if="type == 1" flat class="exam-item mb-3" column @click="$router.push(`/ujian/${item.id}`)">
             <v-layout class="ml-0 mr-0" row justify-space-between align-start>
                 <h4><span class="warning--text" v-if="item.skripsi.is_capstone">Capstone: </span>{{item.skripsi.judul}}</h4>
-                <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
+                <v-chip label class="ma-0 exam-status" :color="item.status == 1 ? 'primary' : item.status == 2 ? 'warning' : 'error'" text-color="white">{{status[item.status-1]}}</v-chip>
             </v-layout>
             <p class="mb-0"><span :class="isToday ? 'purple--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : readableDate }}</span> - {{ item.sesi }} - {{ item.ruang }}</p>
             <p class="mb-0">Mahasiswa: {{ readableString(item.skripsi.mahasiswa, 'nama') }}</p>
@@ -66,6 +67,12 @@ export default {
         type: {
             type: Number,
             default: 0
+        }
+    },
+
+    data() {
+        return {
+            status: ['Belum mulai', 'Sedang berlangsung', 'Selesai']
         }
     },
 
