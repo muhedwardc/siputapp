@@ -209,14 +209,33 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             }, status=403)
 
         skripsi = self.get_object().ujian.skripsi
+
         if json_data.get('revisi') == True:
-            revision = TitleRevision.objects.create(skripsi=skripsi)
-            revision.revisi = json_data.get('konten')
-            revision.save()
+            if hasattr(skripsi, 'revision'):
+                revision = skripsi.revision
+                revision.revisi = json_data.get('konten')
+                revision.save()
 
-            skripsi.title_revision = True
-            skripsi.save()
+                skripsi.title_revision = True
+                skripsi.save()
+            else:
+                revision = TitleRevision.objects.create(skripsi=skripsi)
+                revision.revisi = json_data.get('konten')
+                revision.save()
 
+                skripsi.title_revision = True
+                skripsi.save()
+        else:
+            if hasattr(skripsi, 'revision'):
+                revision = skripsi.revision
+                revision.delete()
+
+                skripsi.title_revision = False
+                skripsi.save()
+            else:
+                skripsi.title_revision = False
+                skripsi.save()
+                
         response['status'] = "Sukses"
         response['result'] = json_data
         return Response(response, status=201)
