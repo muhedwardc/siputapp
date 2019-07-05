@@ -224,7 +224,6 @@ Endpoint untuk umum:
 
 1. **GET** /api/me/exams/
 1. **GET** /api/me/exams/\<id>\/
-1. **POST** /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
 1. **GET** /api/me/exams/\<id>\/essays/ : retrieve essays detail for selected exam
 1. **GET** /api/me/exams/\<id>\/comments/ : list all comments
 1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
@@ -280,6 +279,9 @@ Endpoint untuk umum:
 
 1. **GET** /api/me/exams/\<id>\/recap/ : get exam recap data
 1. **GET** /api/exams/\<id>\/recap/ : get full exam recap data (kebutuhan cetak berkas hasil pendadaran)
+
+1. **POST** /api/me/exams/\<id>\/start_exam/ : API untuk mengubah status ujian menjadi dimulai (yang bisa cuma ketua (sementara))
+1. **POST** /api/me/exams/\<id>\/finish_exam/ : API untuk mengubah status ujian menjadi selesai (yang bisa cuma ketua (sementara))
 
 1. **GET** /api/me/profile/ 
 1. **PUT** /api/me/profile/
