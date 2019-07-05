@@ -33,7 +33,8 @@ const state = {
     dashboard: false,
     dialog: false,
     drawer: true,
-    loadViewContent: true
+    loadViewContent: true,
+    finishedExam: null
 }
 
 export default state
