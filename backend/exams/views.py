@@ -39,13 +39,10 @@ class ExamViewSet(viewsets.ModelViewSet):
         
         # filter berdasarkan tanggal
         if 'mulai' in request.GET and 'selesai' in request.GET:
-            mulai = request.GET.get('mulai')
-            selesai = request.GET.get('selesai')
-            exams = exams.filter(tanggal__gte=mulai, tanggal__lte=selesai)
+            exams = exams.filter(tanggal__gte=request.GET.get('mulai'), tanggal__lte=request.GET.get('selesai'))
 
         elif 'tanggal' in request.GET:
-            date = request.GET.get('tanggal')
-            exams = exams.filter(tanggal=date)
+            exams = exams.filter(tanggal=request.GET.get('tanggal'))
 
         # filter berdasarkan judul skripsi atau nama mahasiswa
         if 'search' in request.GET:
