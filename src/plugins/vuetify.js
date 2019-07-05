@@ -22,7 +22,7 @@ import VProgressCircular from 'vuetify/es5/components/VProgressCircular/VProgres
 Vue.use(Vuetify, {
   iconfont: 'md',
   theme: {
-    primary: '#1996F5'
+    primary: '#1996F5',
   },
   components: {
     VToolbar, VToolbarSideIcon, VToolbarTitle, VToolbarItems,
