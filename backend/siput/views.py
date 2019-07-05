@@ -336,6 +336,22 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
         return Response(response, status=status.HTTP_200_OK)
 
+    @action(detail=True)
+    def status(self, request, *args, **kwargs):
+        ujian = self.get_object().ujian
+        
+        if ujian.status == 1:
+            message = "Ujian belum dimulai."
+        elif ujian.status == 2:
+            message = "Ujian sedang berlangsung."
+        else:
+            message = "Ujian telah selesai"
+
+        return Response({
+            "status": ujian.status,
+            "message": message
+        })
+
 class SiputProfileViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
     serializer_class = ProfileSerializer
