@@ -1,16 +1,16 @@
 <template>
-    <img :width="width" :height="height" src="/static/images/ugm-logo.png" alt="ugm-logo">
+    <img :width="width" :height="height" src="@/assets/ugm-logo.png" alt="ugm-logo">
 </template>
 
 <script>
 export default {
     props: {
         width: {
-            default: '50px',
+            default: '120px',
             type: String | Number
         },
         height: {
-            default: '50px',
+            default: '120px',
             type: String | Number
         }
     }

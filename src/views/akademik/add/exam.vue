@@ -7,7 +7,7 @@
                 stepSize="sm"
                 errorColor="#FF6666"
                 color="#1996F5">
-                <tab-content title="Informasi Ujian" :before-change="validateExamInfo">
+                <tab-content title="Informasi Ujian" :before-change="validateExamInfo" @on-validate="validateExamInfo">
                     <v-form
                         lazy-validation
                         ref="form1"
@@ -145,10 +145,16 @@
                                     v-model="exam.sesi"
                                     item-value="id"
                                     placeholder="Sesi"
-                                    item-text="mulai"
                                     :rules="[v => !!v || 'Bidang isian harus diisi']"
                                     :disabled="submitting || !exam.tanggal"
-                                    ></v-select>
+                                    >
+                                    <template slot="selection" slot-scope="data">
+                                        {{ data.item.mulai }} - {{ data.item.selesai }}
+                                    </template>
+                                    <template slot="item" slot-scope="data">
+                                        {{ data.item.mulai }} - {{ data.item.selesai }}
+                                    </template>
+                                </v-select>
                             </v-flex>
                         </v-layout>
                     </v-container>
@@ -248,6 +254,7 @@
                                                                 :rules="[...rules.required, ...rules.date]"
                                                                 v-on="on"
                                                                 :disabled="submitting"
+                                                                lazy-validation
                                                             ></v-text-field>
                                                         </template>
                                                         <v-date-picker :disabled="submitting" v-model="mahasiswa['tanggal_lahir']" @input="tanggal_dialog = false"></v-date-picker>
@@ -273,7 +280,8 @@
                             </v-form>
                         </v-form>
                     </v-layout>
-                    <v-btn color="primary" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa.length < 4" @click="addMahasiswa()">Tambah mahasiswa</v-btn>
+                    <p class="error--text mb-0" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa.length <= 1">Jumlah mahasiswa untuk capstone harus lebih dari satu.</p>
+                    <v-btn class="ml-0 text-capitalize font-weight bold" style="letter-spacing: .5px" @click="addMahasiswa" color="primary" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa.length < 4"><v-icon small left>add</v-icon> tambah mahasiswa</v-btn>
                 </tab-content>
                 <tab-content title="Dosen Penguji" :before-change="validateDosen">
                     <v-form ref="form4" lazy-validation v-model="valid[3]">
@@ -291,6 +299,7 @@
                         ></v-text-field>
                     </v-layout>
                     <p v-if="dosenValidation" class="mb-0 mt-2 error--text">{{ dosenValidation }}</p>
+                    <p>Dosen terpilih: <span v-text="dosenStr"></span></p>
                     <v-data-table
                         :headers="dosenHeaders"
                         :items="dosen"
@@ -396,7 +405,6 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
 import { FormWizard, TabContent, WizardButton } from 'vue-form-wizard'
 import 'vue-form-wizard/dist/vue-form-wizard.min.css'
 import moment from 'moment'
@@ -485,8 +493,9 @@ export default {
                 isBool: [v => (v == false || v == true) || 'Bidang isian ujian harus diisi'],
                 is_capstone: [v => (v == false || v == true) || 'Tipe ujian harus diisi'],
                 isNumber: [v => !isNaN(v) || 'Hanya dapat berisi angka'],
-                date: [v => /[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}/g.test(v) || 'Tanggal format YYYY-MM-DD']
-            }
+                date: [v => /^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}$/g.test(v) || 'Tanggal format YYYY-MM-DD']
+            },
+            dosenStr: 'belum dipilih'
         }
     },
 
@@ -497,11 +506,6 @@ export default {
     },
 
     computed: {
-        dosenList() {
-            let list = this.dosen
-            return list
-        },
-
         dosenValidation() {
             let errors = []
             if (this.exam.skripsi.pembimbing_satu == null) errors.push('Pembimbing satu belum dipilih')
@@ -509,22 +513,25 @@ export default {
             if (this.exam.penguji.length < 2) errors.push('Penguji kurang ' + (2 - this.exam.penguji.length) + ' dosen')
             if (errors.length > 0) return errors.join(', ')
             return false
-        }
+        },
     },
 
     methods: {
-        ...mapActions([
-            'showSnackbar'
-        ]),
         validateExamInfo() {
-            // this.showSnackbar(this.pdfName)
-            return this.$refs.form1.validate()
+            return this.$refs.form1.validate() && !!this.exam.skripsi.naskah
         },
         validateRoomSession() {
             return this.$refs.form2.validate()
         },
-        validateMahasiswa() {
-            return this.$refs.form3.validate()
+        validateMahasiswa(add = false) {
+            if (!add) {
+                if (this.exam.skripsi.is_capstone) {
+                    return this.$refs.form3.validate() && this.exam.skripsi.mahasiswa.length > 1
+                }
+                return this.$refs.form3.validate()
+            } else {
+                return this.$refs.form3.validate()
+            }
         },
         validateDosen() {
             return this.$refs.form4.validate()
@@ -611,9 +618,24 @@ export default {
                 this.selectedPenguji[i] = dosenId
             }
             this.cleanArr()
+            this.dosenStr = this.checkDosen()
         },
-        resetSelected() {
+        checkDosen() {
+            if (this.dosen.length) {
+                let arr = []
+                this.selectedPenguji.forEach(id => {
+                    if (id !== null) {
+                        arr.push(this.dosen.find(e => e.id == id).nama)
+                    } else {
+                        arr.push('belum dipilih')
+                    }
+                })
 
+                this.selectedPenguji.length <= 2 ? arr.push('penguji belum dipilih') : null
+                return arr.join(', ')
+            }
+
+            return 'belum dipilih'
         },
         isSelected(i) {
             if (i < 2) return !!this.selectedPenguji[i]
@@ -632,14 +654,11 @@ export default {
             this.$refs.form.resetValidation()
         },
         addMahasiswa() {
-            const valid = this.validateMahasiswa()
+            const valid = this.validateMahasiswa(true)
             if (!valid) return
             if (this.exam.skripsi.is_capstone) {
                 if (this.exam.skripsi.mahasiswa.length >= 4) {
-                    this.$store.dispatch('showSnackbar', {
-                        type: 'error',
-                        message: 'Melebihi batas mahasiswa'
-                    })
+                    this.showSnackbar('Melebihi batas mahasiswa')
                 } else {
                     this.exam.skripsi.mahasiswa.push({
                         nama: '',
@@ -737,6 +756,7 @@ export default {
             }
         },
         async createExam() {
+            if (!!this.dosenValidation) return false
             this.submitting = true
             try {
                 await this.$thessa.createNewExam(this.exam)

@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie'
+import moment from 'moment'
 
 const mutations = {
     logUserIn(state, payload) {

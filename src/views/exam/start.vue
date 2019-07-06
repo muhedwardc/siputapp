@@ -18,7 +18,7 @@
                         </v-toolbar-side-icon>
                         <v-toolbar-title class="white--text" v-text="title"></v-toolbar-title>
                         <v-spacer></v-spacer>
-                        <v-btn class="white red--text text-uppercase" @click="fetchRecap"><b>Selesai</b></v-btn>
+                        <v-btn class="white primary--text text-uppercase" @click="fetchRecap"><b>Selesai</b></v-btn>
                     </v-toolbar>
                     <v-tabs
                         v-model="step"
@@ -345,11 +345,9 @@
 </template>
 
 <script>
-import {mapActions} from 'vuex'
 import moment from 'moment'
 import socs from './socs'
-import { POINT_CONVERSION_COMPRESSED } from 'constants';
-import { setTimeout, setInterval, clearInterval } from 'timers';
+import { setInterval, clearInterval } from 'timers';
 export default {
     data() {
         return {
@@ -583,8 +581,6 @@ export default {
     },
 
     methods: {
-        ...mapActions(['showSnackbar']),
-
         redirectHome() {
             this.$store.state.finishedExam = this.exam.ujian
             this.$store.state.finishedExam.id = this.$router.currentRoute.params.id
