@@ -22,7 +22,7 @@
                     <v-layout class="mb-1">
                         <v-icon class="mr-1" small>event</v-icon>
                         <span>
-                            <span class="mr-2" :class="isToday(item.ujian.tanggal) ? 'purple--text' : null"><b>{{ item.ujian.status == 3 ? 'SEDANG BERLANGSUNG' : isToday(item.ujian.tanggal) ? 'HARI INI' : formatDate(item.ujian.tanggal) }}</b></span>
+                            <span class="mr-2" :class="isToday(item.ujian.tanggal) ? 'purple--text' : null"><b>{{ isToday(item.ujian.tanggal) ? 'HARI INI' : formatDate(item.ujian.tanggal) }}</b></span>
                             <v-icon class="mr-1" small>access_time</v-icon>
                             <span :class="item.ujian.status == 2 ? 'purple--text font-weight-bold' : null">{{ item.ujian.status == 1 ? item.ujian.sesi : 'Sedang Berlangsung' }}</span>
                         </span>
@@ -43,8 +43,22 @@
                 <h4><span class="warning--text" v-if="item.skripsi.is_capstone">Capstone: </span>{{item.skripsi.judul}}</h4>
                 <v-chip label class="ma-0 exam-status" :color="item.status == 1 ? 'primary' : item.status == 2 ? 'warning' : 'success'" text-color="white">{{examStatus(item.status)}}</v-chip>
             </v-layout>
-            <p class="mb-0"><span :class="isToday(item.ujian) ? 'purple--text font-weight-bold' : ''">{{ isToday(item.ujian) ? 'Hari ini' : formatDate(item.tanggal, 'LL') }}</span> - {{ item.sesi }} - {{ item.ruang }}</p>
-            <p class="mb-0">Mahasiswa: {{ joinToString(item.skripsi.mahasiswa, 'nama') }}</p>
+            <v-layout class="mb-1">
+                <v-icon class="mr-1" small>event</v-icon>
+                <span>
+                    <span class="mr-2" :class="isToday(item.tanggal) ? 'purple--text' : null"><b>{{ isToday(item.tanggal) ? 'HARI INI' : formatDate(item.tanggal) }}</b></span>
+                    <v-icon class="mr-1" small>access_time</v-icon>
+                    <span :class="item.status == 2 ? 'purple--text font-weight-bold' : null">{{ item.status == 1 ? item.sesi : 'Sedang Berlangsung' }}</span>
+                </span>
+            </v-layout>
+            <v-layout class="mb-1">
+                <v-icon class="mr-1" small>location_on</v-icon>
+                <span v-text="item.ruang"></span>
+            </v-layout>
+            <v-layout class="mb-1">
+                <v-icon class="mr-1" small>person</v-icon>
+                <span>{{ joinToString(item.skripsi.mahasiswa, 'nama') }}</span>
+            </v-layout>
             <p class="mb-0">Penguji: {{ joinToString(item.penguji, 'dosen') }}</p>
         </v-card>
     </transition>

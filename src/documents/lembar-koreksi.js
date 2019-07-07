@@ -9,7 +9,6 @@ function documentByMahasiswa(rekap_ujian, komentar_dosen, i) {
     const { tanggal, skripsi } = rekap_ujian
     const dosen = rekap_ujian.penguji
     const { judul, mahasiswa } = skripsi
-    // const { tanggal}
     const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     const bab = ['ABSTRAK', 'BAB I\nPENDAHULUAN', 'BAB II\nDASAR TEORI', 'BAB III\nMETODE PENELITIAN', 'BAB IV\nHASIL DAN PEMBAHASAN', 'BAB V\nKESIMPULAN DAN SARAN', 'KOMENTAR UMUM/CATATAN']
     const comments = komentar.map(e => e.daftar_komentar)

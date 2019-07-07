@@ -45,7 +45,7 @@
                                                 solo
                                                 placeholder="Pilih Bab"
                                                 class="mr-2"></v-select>
-                                            <v-text-field :rules="[v => !!v || 'Harus diisi', v => !isNaN(v) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
+                                            <v-text-field style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
                                         </v-layout>
                                         <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.komentar" placeholder="Masukkan komentar"></v-textarea>
                                         <v-layout>
@@ -74,7 +74,7 @@
                                                     <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
                                                         <p class="mb-0" style="word-break: break-word;" v-text="item.komentar"></p>
                                                         <v-layout row align-center>
-                                                            <span class="font-weight-bold" style="color: #9C9C9C">Halaman {{item.halaman}}</span>
+                                                            <span class="font-weight-bold" style="color: #9C9C9C">Halaman {{item.halaman ? item.halaman : '-'}}</span>
                                                             <v-spacer></v-spacer>
                                                             <v-btn icon flat :ripple="false" @click="editCorrection(section, index)">
                                                                 <v-icon class="grey--text" small>edit</v-icon>
@@ -258,34 +258,30 @@
                                     <tr class="text-xs-center">
                                         <td rowspan="2">Dosen</td>
                                         <td :colspan="recap.rekap_ujian.skripsi.mahasiswa.length">Nilai</td>
-                                        <td rowspan="2">Keterangan</td>
                                     </tr>
                                     <tr class="text-xs-center">
                                         <td class="mahasiswa-cell" v-for="(nilai, i) in recap.rekap_nilai" :key="i" v-text="nilai.mahasiswa"></td>
                                     </tr>
-                                    <tr v-for="(penguji, i) in recap.rekap_ujian.penguji" :key="i" :class="penguji.dosen == $store.state.auth.user.nama ? 'success lighten-4' : ''">
+                                    <tr v-for="(penguji, i) in recap.rekap_ujian.penguji" :key="i" :class="penguji.dosen == $store.state.auth.user.nama ? 'primary lighten-4' : ''">
                                         <td class="dosen-cell" v-text="penguji.dosen"></td>
                                         <td v-for="(mahasiswa, j) in recap.rekap_nilai" :key="j">{{ mahasiswa.nilai[i].rerata ? mahasiswa.nilai[i].rerata : 0 }}</td>
-                                        <td v-text="getAverageByDosen(i)"></td>
                                     </tr>
                                     <tr>
                                         <td><b>Total</b></td>
                                         <td v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.jumlah_rerata"></td>
-                                        <td></td>
                                     </tr>
                                     <tr>
                                         <td><b>Rerata</b></td>
                                         <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.rerata_total"></td>
-                                        <td></td>
                                     </tr>
                                     <tr>
                                         <td><b>Konversi</b></td>
                                         <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="convertGrade(mahasiswa.rerata_total)"></td>
-                                        <td></td>
                                     </tr>
                                 </table>
                             </div>
-                            <h3 class="mt-4 mb-2">REKAP KOMENTAR</h3>
+                            <hr class="mt-4 mb-4">
+                            <h3 class="mb-2">REKAP KOMENTAR</h3>
                             <v-tabs
                                 v-model="recapBab"
                                 color="white"
@@ -473,18 +469,6 @@ export default {
                     recapByBab.push(recapByDosenByBab)
                 }
                 return recapByBab
-            }
-        },
-
-        getAverageByDosen() {
-            return function(dosenIndex) {
-                const mahasiswa = this.recap.rekap_nilai
-                let sum = 0
-                mahasiswa.forEach(item => {
-                    sum += Number(item.nilai[dosenIndex].rerata)
-                })
-                let average = sum/mahasiswa.length
-                return this.convertGrade(average)
             }
         },
 

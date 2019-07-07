@@ -55,7 +55,6 @@
                                         <div v-for="(mahasiswa, index) in editTemp.value" :key="index" class="mb-4">
                                             <v-layout row wrap align-center class="mb-2">
                                                 <h3>Mahasiswa {{ index + 1 }}</h3>
-                                                <!-- <v-btn color="error" v-if="index > 0" @click="openDialog(mahasiswa['nama'].trim().length > 0 ? mahasiswa['nama'] : 'Mahasiswa ' + (index + 1), index)">Hapus mahasiswa</v-btn>                                             -->
                                             </v-layout>
                                             <table class="mahasiswa-table">
                                                 <tr>
@@ -193,7 +192,14 @@
                                     item-text="mulai"
                                     :rules="[v => !!v || 'Bidang isian harus diisi']"
                                     :disabled="submitting"
-                                    ></v-select>
+                                    >
+                                    <template slot="selection" slot-scope="data">
+                                        {{ data.item.mulai }} - {{ data.item.selesai }}
+                                    </template>
+                                    <template slot="item" slot-scope="data">
+                                        {{ data.item.mulai }} - {{ data.item.selesai }}
+                                    </template>    
+                                </v-select>
                             </v-layout>
                             <v-layout column v-if="editTemp.type == 'dosen'">
                                 <v-text-field
@@ -258,8 +264,8 @@
                         </v-card-text>
                         <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn class="font-weight-bold" color="red darken-1" flat @click="discard" :disabled="submitting">Batal</v-btn>
-                        <v-btn class="font-weight-bold" color="green darken-1" v-if="hasChanged" :loading="submitting" @click="saveEdit" flat>Ya</v-btn>
+                        <v-btn class="font-weight-bold" color="error" @click="discard" :disabled="submitting">Batal</v-btn>
+                        <v-btn class="font-weight-bold" color="success" v-if="hasChanged" :loading="submitting" @click="saveEdit">Ya</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -299,7 +305,8 @@
                             </v-layout>
                             <v-dialog persistent v-model="agreementDialog" max-width="600px">
                                 <v-card class="pa-4">
-                                    <p>Saat ini ujian skripsi belum dimulai. Dengan menekan tombol <b>mulai</b>, Anda akan mengubah status ujian menjadi mulai sehingga semua dosen terkait dapat memasuki ujian.</p>
+                                    <h2 class="mb-2">Mulai ujian?</h2>
+                                    <p>Saat ini ujian skripsi belum dimulai. Dengan menekan tombol <b>mulai</b>, Anda akan mengubah status ujian menjadi mulai sehingga semua dosen terkait dapat memasuki ujian.<br>Pastikan jumlah dosen yang hadir telah <b>memenuhi syarat</b> ujian skripsi.</p>
                                     <v-layout row>
                                         <v-spacer></v-spacer>
                                         <v-btn color="error" :disabled="startingExam" @click="agreementDialog = false">batal</v-btn>
