@@ -22,16 +22,18 @@ function documentByMahasiswa(rekap_ujian, komentar_dosen, i) {
         ],
     ]
     for (let i = 0; i < bab.length; i ++) {
+        let border = [true, true, true, false]
         if (comments[i][0]) {
+            if (comments[i].length == 1) border = [true, true, true, true]
             corrections.push([
-                { border: [true, true, true, false], text: (i+1), alignment: 'center' },
-                { border: [true, true, true, false], text: bab[i], bold: true },
-                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].halaman : '', alignment: 'center' },
-                { border: [true, true, true, false], text: comments[i][0] ? comments[i][0].koreksi : '', noWrap: false },
-                { border: [true, true, true, false], text: '' },
+                { border, text: (i+1), alignment: 'center' },
+                { border, text: bab[i], bold: true },
+                { border, text: comments[i][0] ? comments[i][0].halaman : '', alignment: 'center' },
+                { border, text: comments[i][0] ? comments[i][0].koreksi : '', noWrap: false },
+                { border, text: '' },
             ])
             if (comments[i].length > 1) {
-                let border = [true, false, true, false]
+                border = [true, false, true, false]
                 for (let j = 1; j < comments[i].length; j++) {
                     if (j == comments[i].length - 1) border = [true, false, true, true]
                     corrections.push([

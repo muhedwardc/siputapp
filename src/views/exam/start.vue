@@ -382,7 +382,7 @@ export default {
             corrections: [],
             newCorrection: {
                 komentar: '',
-                halaman: '',
+                halaman: null,
                 index: 0,
                 rules: {
                     required: [v => !!v && v.length > 0 || 'Harus diisi'],
@@ -825,18 +825,6 @@ export default {
             this.creating = true
         },
 
-        discardChanges() {
-            this.temp = {
-                edit: false,
-                text: '',
-                page: '',
-                index: 0,
-                section: 0,
-                selectedBab: null
-            }
-            this.valid = true
-        },
-
         showDialog(section, index) {
             const { halaman, komentar } = this.corrections[section].items[index]
             this.dialog = { show: true, section, index, text:komentar, page:halaman }
@@ -862,8 +850,8 @@ export default {
         },
 
         resetNewCorrection() {
-            this.newCorrection = {halaman: '', komentar: '', index: 0}
-            this.temp = {edit: false, komentar: '', halaman: '', index: 0, selectedBab: null, section: 0}
+            this.newCorrection = {halaman: null, komentar: '', index: 0}
+            this.temp = {edit: false, komentar: '', halaman: null, index: 0, selectedBab: null, section: 0}
             this.itemIndex = 0
             this.creating = false
             this.selectedBab = null
