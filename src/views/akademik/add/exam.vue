@@ -236,29 +236,14 @@
                                                         :disabled="submitting"
                                                     ></v-text-field>
                                                     <span class="title ml-2 mr-2">/</span>
-                                                    <v-menu
-                                                        v-model="options[index].dateDialog"
-                                                        :close-on-content-click="false"
-                                                        :nudge-right="40"
-                                                        lazy
-                                                        transition="scale-transition"
-                                                        offset-y
-                                                        full-width
+                                                    <v-text-field
+                                                        v-model="mahasiswa['tanggal_lahir']"
+                                                        placeholder="DD-MM-YYYY"
+                                                        prepend-icon="event"
+                                                        :rules="[...rules.required, ...rules.date2]"
                                                         :disabled="submitting"
-                                                        min-width="290px">
-                                                        <template v-slot:activator="{ on }">
-                                                            <v-text-field
-                                                                v-model="mahasiswa['tanggal_lahir']"
-                                                                placeholder="YYYY-MM-DD"
-                                                                prepend-icon="event"
-                                                                :rules="[...rules.required, ...rules.date]"
-                                                                v-on="on"
-                                                                :disabled="submitting"
-                                                                lazy-validation
-                                                            ></v-text-field>
-                                                        </template>
-                                                        <v-date-picker :disabled="submitting" v-model="mahasiswa['tanggal_lahir']" @input="tanggal_dialog = false"></v-date-picker>
-                                                    </v-menu>
+                                                        lazy-validation
+                                                    ></v-text-field>
                                                 </v-layout>
                                             </td>
                                         </tr>
@@ -298,8 +283,10 @@
                             class="pt-0"
                         ></v-text-field>
                     </v-layout>
-                    <p v-if="dosenValidation" class="mb-0 mt-2 error--text">{{ dosenValidation }}</p>
-                    <p>Dosen terpilih: <span v-text="dosenStr"></span></p>
+                    <template class="mt-4 mb-1">
+                        <p v-if="dosenValidation" class="mb-0 mt-2 error--text">{{ dosenValidation }}</p>
+                        <p>Dosen terpilih: <span v-text="dosenStr"></span></p>
+                    </template>
                     <v-data-table
                         :headers="dosenHeaders"
                         :items="dosen"
@@ -360,9 +347,9 @@
                         <wizard-button :disabled="submitting" v-if="props.activeTabIndex > 0" @click.native="props.prevTab()" :style="props.fillButtonStyle">Kembali</wizard-button>
                     </div>
                     <div class="wizard-footer-right">
-                        <wizard-button :disabled="submitting" v-if="!props.isLastStep" @click.native="props.nextTab()" class="wizard-footer-right" :style="props.fillButtonStyle">Lanjut</wizard-button>
+                        <wizard-button :disabled="submitting" :loading="props.activeTabIndex == 1 ? loadingDosen : false" v-if="!props.isLastStep" @click.native="props.activeTabIndex == 1 ? fetchDosen(props.nextTab) : props.nextTab()" class="wizard-footer-right" :style="props.fillButtonStyle">Lanjut</wizard-button>
                         <v-layout column align-end v-else>
-                            <wizard-button v-if="!submitting" :disabled="submitting" @click.native="createExam()" class="wizard-footer-right finish-button" :style="props.fillButtonStyle">  {{props.isLastStep ? 'Simpan' : 'Lanjut'}}</wizard-button>
+                            <wizard-button v-if="!submitting" :disabled="submitting" @click.native="createExam" class="wizard-footer-right finish-button" :style="props.fillButtonStyle">  {{props.isLastStep ? 'Simpan' : 'Lanjut'}}</wizard-button>
                             <v-layout row align-center v-else>
                                 <span>sedang menyimpan</span>
                                 <v-progress-circular
@@ -493,7 +480,8 @@ export default {
                 isBool: [v => (v == false || v == true) || 'Bidang isian ujian harus diisi'],
                 is_capstone: [v => (v == false || v == true) || 'Tipe ujian harus diisi'],
                 isNumber: [v => !isNaN(v) || 'Hanya dapat berisi angka'],
-                date: [v => /^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}$/g.test(v) || 'Tanggal format YYYY-MM-DD']
+                date: [v => /^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}$/g.test(v) || 'Tanggal format YYYY-MM-DD'],
+                date2: [v => /^[0-9]{2}-[0-9]{2}-[1-9][0-9]{3}$/g.test(v) || 'Tanggal format DD-MM-YYYY'],
             },
             dosenStr: 'belum dipilih'
         }
@@ -510,7 +498,7 @@ export default {
             let errors = []
             if (this.exam.skripsi.pembimbing_satu == null) errors.push('Pembimbing satu belum dipilih')
             if (this.exam.skripsi.pembimbing_dua == null) errors.push('Pembimbing dua belum dipilih')
-            if (this.exam.penguji.length < 2) errors.push('Penguji kurang ' + (2 - this.exam.penguji.length) + ' dosen')
+            if (this.exam.penguji.length == 0 && !this.exam.penguji[0]) errors.push('Penguji belum dipilih')
             if (errors.length > 0) return errors.join(', ')
             return false
         },
@@ -697,12 +685,23 @@ export default {
             this.options.splice(index, 1)
             this.closeDialog()
         },
-        async fetchDosen() {
+        assignDosen() {
+            this.selectedPenguji.forEach((id, i) => {
+                if (id) {
+                    const dosenIndex = this.dosen.findIndex(dosen => dosen.id == id)
+                    if (i <= 1) this.dosen[dosenIndex].selectedType = this.dosenTypes[i]
+                    else this.dosen[dosenIndex].selectedType = this.dosenTypes[2]
+                }
+            })
+        },
+        async fetchDosen(nextTab = null) {
             this.loadingDosen = true
             try {
                 const response = await this.$thessa.getAllDosen('page=all')
                 this.dosen = response.data
                 this.loadingDosen = false
+                this.assignDosen()
+                if (nextTab !== null) nextTab()
             } catch (error) {
                 this.showSnackbar(error)
                 this.loadingDosen = false
@@ -755,9 +754,17 @@ export default {
 				this.pdfUrl = ''
             }
         },
+        formatMahasiswaBornDate() {
+            this.exam.skripsi.mahasiswa.forEach((mahasiswa, i) => {
+                let bornDate = this.exam.skripsi.mahasiswa[i].tanggal_lahir
+                let formated = this.formatDate(bornDate, 'YYYY-MM-DD', 'DD-MM-YYYY')
+                this.exam.skripsi.mahasiswa[i].tanggal_lahir = formated
+            })
+        },
         async createExam() {
             if (!!this.dosenValidation) return false
             this.submitting = true
+            this.formatMahasiswaBornDate()
             try {
                 await this.$thessa.createNewExam(this.exam)
                 this.showSnackbar({
@@ -806,7 +813,6 @@ export default {
 
     created() {
         if(this.$store.state.auth.token) {
-            this.fetchDosen()  
             this.fetchRoomSessions()
         } 
     }
