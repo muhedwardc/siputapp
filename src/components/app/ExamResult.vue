@@ -78,6 +78,9 @@ export default {
             try {
                 this.generatingDocument = true
                 this.documentObj = documentGenerator(this.recap)
+                let current_datetime = new Date()
+                let title = this.recap.rekap_ujian.skripsi.judul
+                let fileName = 'Thessa-' + current_datetime.getTime() + '-' + title.slice(0, 30) + '.pdf'
                 if (this.documentObj) {
                     if (pdfMake.vfs == undefined) {
                         pdfMake.vfs = pdfFonts.pdfMake.vfs
@@ -96,7 +99,7 @@ export default {
         
                     let pdf = pdfMake.createPdf(this.docDefinition)
                     if (type == 'print') pdf.print()
-                    else pdf.download()
+                    else pdf.download(fileName)
                 }
                 this.generatingDocument = false
             } catch (error) {
