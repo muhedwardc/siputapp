@@ -12,6 +12,9 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             nip=nip
         )
+        if password:
+            user.set_password(password)
+
         user.save(using=self._db)
         return user
 
@@ -23,6 +26,7 @@ class UserManager(BaseUserManager):
             nama=nama,
             email=email,
             nip=nip,
+            password=password
         )
         user.is_admin = True
         user.save(using=self._db)
