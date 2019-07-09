@@ -61,9 +61,9 @@
                                     <app-loading :loadingState="fetchingComments"></app-loading>
                                     <v-layout align-center v-if="errorFetchingComments" column>
                                         <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat komentar</p>
-                                        <v-btn flat class="primary--text" @click="fetchComments">
+                                        <v-btn class="primary" @click="fetchComments">
                                             <v-icon left small>refresh</v-icon>
-                                            <span class="text-lowercase">muat ulang komentar</span>
+                                            <span class="text-capitalize">muat ulang</span>
                                         </v-btn>
                                     </v-layout>
                                     <template v-else-if="!fetchingComments">
@@ -92,11 +92,19 @@
                                         </v-layout>
                                     </template>
                                 </v-layout>
-                                <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
+                                <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating && !errorFetchingComments">Tambah komentar</v-btn>
                             </v-layout>
                         </v-tab-item>
                         <v-tab-item class="tab-container">
-                            <template v-show="!addingGrade">
+                            <app-loading :loadingState="fetchingGrades"></app-loading>
+                            <v-layout align-center v-if="errorFetchingGrades" column>
+                                <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat nilai</p>
+                                <v-btn class="primary" @click="fetchGrades">
+                                    <v-icon left small>refresh</v-icon>
+                                    <span class="text-capitalize">muat ulang</span>
+                                </v-btn>
+                            </v-layout>
+                            <template v-else-if="!addingGrade && !errorFetchingGrades">
                                 <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 0">
                                     <p class="mb-0"><b>Mahasiswa</b></p>
                                     <ol class="mb-3">
@@ -156,19 +164,29 @@
                             </v-layout>
                         </v-tab-item>
                         <v-tab-item class="tab-container" v-if="isLeader">
-                            <h3 class="font-weight-medium">Apakah ada revisi judul?</h3>
-                            <p class="font-weight-medium ma-0" v-text="'Judul: ' + exam.ujian.skripsi.judul"></p>
-                            <v-radio-group class="pa-0 mt-2" v-model="revisionTemp.revisi" :mandatory="false">
-                                <v-radio color="primary" label="Tidak ada revisi judul" :value="false"></v-radio>
-                                <v-radio color="primary" label="Ada, revisi judulnya:" :value="true"></v-radio>
-                            </v-radio-group>
-                            <p>Masukkan revisi judul</p>
-                            <v-textarea :disabled="!revisionTemp.revisi" box v-model="revisionTemp.konten"></v-textarea>
-                            <v-layout>
-                                <v-spacer></v-spacer>
-                                <v-btn v-show="revisionHasChanged" class="default ma-0 mr-2" :disabled="saving" @click="resetRevision">hapus perubahan</v-btn>
-                                <v-btn v-show="revisionHasChanged" class="success ma-0" :loading="saving" @click="addRevision">simpan revisi</v-btn>
+                            <app-loading :loadingState="fetchingRevision"></app-loading>
+                            <v-layout align-center v-if="errorFetchingRevision" column>
+                                <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat revisi judul</p>
+                                <v-btn class="primary" @click="fetchRevision">
+                                    <v-icon left small>refresh</v-icon>
+                                    <span class="text-capitalize">muat ulang</span>
+                                </v-btn>
                             </v-layout>
+                            <template v-else-if="!errorFetchingRevision">
+                                <h3 class="font-weight-medium">Apakah ada revisi judul?</h3>
+                                <p class="font-weight-medium ma-0" v-text="'Judul: ' + exam.ujian.skripsi.judul"></p>
+                                <v-radio-group class="pa-0 mt-2" v-model="revisionTemp.revisi" :mandatory="false">
+                                    <v-radio color="primary" label="Tidak ada revisi judul" :value="false"></v-radio>
+                                    <v-radio color="primary" label="Ada, revisi judulnya:" :value="true"></v-radio>
+                                </v-radio-group>
+                                <p>Masukkan revisi judul</p>
+                                <v-textarea :disabled="!revisionTemp.revisi" box v-model="revisionTemp.konten"></v-textarea>
+                                <v-layout>
+                                    <v-spacer></v-spacer>
+                                    <v-btn v-show="revisionHasChanged" class="default ma-0 mr-2" :disabled="saving" @click="resetRevision">hapus perubahan</v-btn>
+                                    <v-btn v-show="revisionHasChanged" class="success ma-0" :loading="saving" @click="addRevision">simpan revisi</v-btn>
+                                </v-layout>
+                            </template>
                         </v-tab-item>
                     </v-tabs-items>
                 </v-navigation-drawer>
@@ -351,7 +369,6 @@ export default {
             sync: false,
             selectedSO: 0,
             loaded: false,
-            hasRevision: false,
             revisionTemp: {
                 revisi: false,
                 konten: null
@@ -602,7 +619,6 @@ export default {
             } catch (error) {
                 this.errorFetchingComments = true
                 this.fetchingComments = false
-                this.showSnackbar(error)
             }
         },
 
@@ -623,6 +639,7 @@ export default {
 
         async fetchGrades() {
             this.fetchingGrades = true
+            this.errorFetchingGrades = false
             try {
                 const response = await this.$thessa.getExamGrades(this.$router.currentRoute.params.id)
                 this.grades = this.fillNullGrades(response.data)
@@ -631,7 +648,7 @@ export default {
             } catch (error) {
                 this.errorFetchingGrades = true
                 this.fetchGrades = false
-                this.showSnackbar(error)
+                this.fetchingGrades = false
             }
         },
 
@@ -644,6 +661,7 @@ export default {
                 this.fetchComments()
                 this.fetchGrades()
                 this.loaded = true
+                this.isLeader ? this.fetchRevision() : null
                 if (this.exam.ujian.status == 3) {
                     this.time = 5
                     window.redirectInterval = setInterval(() => {
@@ -664,6 +682,7 @@ export default {
         },
 
         async fetchRevision() {
+            this.fetchingRevision = true
             this.errorFetchingRevision = false
             try {
                 const res = await this.$thessa.getExamRevision(this.$router.currentRoute.params.id)
@@ -671,8 +690,10 @@ export default {
                 this.revisionTemp.konten = res.data.konten
                 this.revision.revisi = res.data.revisi
                 this.revision.konten = res.data.konten
+                this.fetchingRevision = false
             } catch (error) {
                 this.errorFetchingRevision = true
+                this.fetchingRevision = false
             }
         },
 
@@ -713,7 +734,7 @@ export default {
                 this.saving = true
                 try {
                     const {id, halaman, komentar, bab} = this.newCorrection
-                    const comments = await this.$thessa.getExamComments(this.$router.currentRoute.params.id)
+                    const comments = await this.$thessa.editComment(this.$router.currentRoute.params.id, {id, halaman: halaman?halaman:null, komentar, bab})
                     this.constructComment(comments.data)
                     this.resetNewCorrection()
                     this.saving = false
@@ -730,7 +751,7 @@ export default {
                 this.saving = true
                 try {
                     const { halaman, komentar, index } = this.newCorrection
-                    const comments = await this.$thessa.submitComments(this.$router.currentRoute.params.id, {bab: index, halaman, komentar})
+                    const comments = await this.$thessa.submitComments(this.$router.currentRoute.params.id, {bab: index, halaman:halaman?halaman:null, komentar})
                     this.constructComment(comments.data)
                     this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
                     this.updateLocalStorage()
@@ -891,7 +912,6 @@ export default {
 
         if (this.$store.state.auth.token) {
             this.fetchExam()
-            this.isLeader ? this.fetchRevision() : null
             this.syncRecap()
         } else {
             return this.$router.push('/login')
