@@ -16,7 +16,7 @@ class Comment(models.Model):
     skripsi = models.ForeignKey(Essay, related_name='comments', on_delete=models.CASCADE)
     penguji = models.ForeignKey(Penguji, related_name='comments', on_delete=models.CASCADE)
     bab = models.IntegerField(choices=BAB_CHOICES)
-    halaman = models.IntegerField()
+    halaman = models.IntegerField(null=True, blank=True)
     komentar = models.TextField()
 
     def __str__(self):
