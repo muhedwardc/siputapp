@@ -80,7 +80,7 @@ export default {
                 this.documentObj = documentGenerator(this.recap)
                 let current_datetime = new Date()
                 let title = this.recap.rekap_ujian.skripsi.judul
-                let fileName = 'Thessa-' + current_datetime.getTime() + '-' + title.slice(0, 30) + '.pdf'
+                let fileName = 'Thessa-' + current_datetime.getTime() + '-' + title.slice(0, 50) + '.pdf'
                 if (this.documentObj) {
                     if (pdfMake.vfs == undefined) {
                         pdfMake.vfs = pdfFonts.pdfMake.vfs
