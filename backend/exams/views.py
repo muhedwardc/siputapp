@@ -3,6 +3,9 @@ import datetime
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Count, Q, Avg, Count, Min, Sum, FloatField
 from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.http import Http404
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework import viewsets, views, permissions, status, mixins
 from rest_framework.response import Response
@@ -33,7 +36,17 @@ class ExamViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
- 
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        try:
+            obj = queryset.select_related('skripsi').get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            raise Http404
+
+        self.check_object_permissions(self.request, obj)
+        return obj
+
     def list(self, request, *args, **kwargs):
         exams = self.get_queryset()
         
