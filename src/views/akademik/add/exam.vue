@@ -394,6 +394,7 @@
 <script>
 import { FormWizard, TabContent, WizardButton } from 'vue-form-wizard'
 import 'vue-form-wizard/dist/vue-form-wizard.min.css'
+import departement from '@/documents/partials/departement'
 import moment from 'moment'
 
 export default {
@@ -434,15 +435,14 @@ export default {
             sessions: [],
             options: [
                 {
-                    prodiOptions: ['TE', 'TI'],
+                    prodiOptions: null,
                     prodiSelected: 0,
-                    konsentrasiOptions: [
-                        ['TTL', 'SIE'],
-                        ['RSI', 'RPL', 'RSK']
-                    ],
+                    konsentrasiOptions: null,
                     dateDialog: false
                 }
             ],
+            prodiList: null,
+            konsentrasiList: null,
             indexItem: null,
             search: '',
             loadingDosen: false,
@@ -656,11 +656,8 @@ export default {
                         tanggal_lahir: '',
                     })
                     this.options.push({
-                        prodiOptions: ['TE', 'TI'],
-                        konsentrasiOptions: [
-                            ['TTL', 'SIE'],
-                            ['RSI', 'RPL', 'RSK']
-                        ],
+                        prodiOptions: this.prodiList,
+                        konsentrasiOptions: this.konsentrasiList,
                         dateDialog: false
                     })
                 }
@@ -812,6 +809,10 @@ export default {
     },
 
     created() {
+        this.prodiList = departement.getProdiList()
+        this.konsentrasiList = departement.getKonsentrasiList()
+        this.options[0].prodiOptions = this.prodiList
+        this.options[0].konsentrasiOptions = this.konsentrasiList
         if(this.$store.state.auth.token) {
             this.fetchRoomSessions()
         } 
