@@ -23,7 +23,7 @@
                         :value="'tab-' + i"
                         :transition="false" 
                         :reverse-transition="false">
-                        <h3 class="mb-2">{{ i == days.length-1 ? day.name : readableDate(day.date) }}</h3>
+                        <h3 class="mb-2">{{ i == days.length-1 ? day.name : formatDate(day.date, 'dddd, DD MMMM YYYY') }}</h3>
                         <app-loading></app-loading>
                         <template v-if="!$store.state.loadViewContent">
                             <template v-if="day.exams.length > 0">
@@ -57,7 +57,6 @@
 
 
 <script>
-import { mapActions } from 'vuex'
 import moment from 'moment'
 export default {
     data() {
@@ -127,10 +126,6 @@ export default {
     },
 
     methods: {
-        ...mapActions([
-            'showSnackbar'
-        ]),
-
         assignDates() {
             const startOfWeek = moment().startOf('isoWeek').toDate();
             this.days.map((day, i) => {
@@ -140,19 +135,6 @@ export default {
             const index = this.days.findIndex(day => day.date == this.todayDate)
             if (index !== -1) this.activeTab = 'tab-' + index
             else this.activeTab = 'tab-' + (this.days.length - 1)
-        },
-
-        readableString(arr, par) {
-            let res = ''
-            for (let i = 0; i < arr.length; i ++ ){
-                res += arr[i][par] + (i == arr.length-1 ? '' : ', ')
-            }
-            return res
-        },
-
-        readableDate(date) {
-            moment.locale('id')
-            return moment(date, 'DD/MM/YYYY').format('dddd, DD MMMM YYYY')
         },
 
         classifyExamsByDate(exams){
@@ -170,11 +152,6 @@ export default {
                     assigned = false
                 }
             })
-        },
-
-        isToday(date) {
-            moment.locale('id')
-            return moment().format('DD/MM/YYYY') === date
         },
 
         async fetchUjian() {

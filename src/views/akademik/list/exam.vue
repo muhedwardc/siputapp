@@ -27,7 +27,7 @@
                     </v-layout>
                 </template>
                 <template v-slot:items="props">
-                    <td class="text-xs-left">{{ readableDate(props.item.tanggal) }}</td>
+                    <td class="text-xs-left">{{ formatDate(props.item.tanggal) }}</td>
                     <td style="cursor: pointer;"><router-link :to="`/ujian/${props.item.id}`" class="text-xs-left" style="text-decoration: none; color: black;"><b>{{ props.item.skripsi.judul}}</b> <br> oleh: {{listMahasiswa(props.item.skripsi.mahasiswa)}}</router-link></td>
                     <td class="text-xs-left">{{ props.item.sesi }}</td>
                     <td class="text-xs-left">{{ props.item.ruang }}</td>
@@ -42,7 +42,6 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
 import moment from 'moment'
 export default {
     data() {
@@ -82,17 +81,8 @@ export default {
     },
 
     methods: {
-        ...mapActions([
-			'showSnackbar'
-        ]),
-
         jsdateformat(date, time) {
             return moment(date + ' ' + time, 'DD/MM/YYYY HH:mm::ss').format()
-        },
-
-        readableDate(date) {
-            moment.locale('id')
-            return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
         },
 
         async onSearch (text = '') {

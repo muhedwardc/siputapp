@@ -16,15 +16,6 @@ function convertGrade(numGrade) {
     return 'Tidak valid'
 }
 
-function getAverages(dosenIndex, rekap_nilai) {
-    let sum = 0
-    rekap_nilai.forEach(item => {
-        sum += Number(item.nilai[dosenIndex].rerata)
-    })
-    let average = sum/rekap_nilai.length
-    return convertGrade(average)
-}
-
 export default function (ujian, rekap_nilai) {
     moment.locale('id')
     let doc = []
@@ -48,7 +39,7 @@ export default function (ujian, rekap_nilai) {
         e.nilai.forEach(grade => row.push({ text: grade.rerata, alignment: 'center' }))
         row.push({ text: e.jumlah_rerata, alignment: 'center' })
         row.push({ text: e.rerata_total, alignment: 'center' })
-        row.push({ text: getAverages(i, rekap_nilai), alignment: 'center' })
+        row.push({ text: convertGrade(e.rerata_total), alignment: 'center' })
         mahasiswaGrade.push(row)
     })
     let dosenTabel = [

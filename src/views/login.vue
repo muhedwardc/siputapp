@@ -1,16 +1,17 @@
 <template>
     <v-layout row wrap>
-        <v-flex hidden-sm-and-down md7 class="banner">
+        <v-flex xs12 sm7 class="banner">
             <v-layout column class="welcome" pa-4>
                 <h2>Selamat datang!</h2>
                 <h3 class="font-weight-light">Silahkan masuk menggunakan akun UGM Anda</h3>
             </v-layout>
         </v-flex>
-        <v-flex sm12 md5>
+        <v-flex xs12 sm5 md5>
             <v-container class="form-container">
                 <v-layout align-center>
-                    <v-layout column>
-                        <h2 class="mb-4">Login to App</h2>
+                    <v-layout column class="text-xs-center">
+                        <h1 class="mb-0 primary--text font-italic">THESSA</h1>
+                        <h3 class="mb-4 font-weight-regular black--text">Silahkan masuk dengan akun UGM Anda</h3>
                         <app-google-auth></app-google-auth>
                     </v-layout>
                 </v-layout>
@@ -24,7 +25,7 @@
         position: relative;
 
         &:before {
-            background-image: url('https://images.unsplash.com/photo-1551289140-01081581fb36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1500&q=80');
+            background-image: url('~@/assets/banner.jpg');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -33,16 +34,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            filter: brightness(20%);
+            filter: brightness(100%);
             content: "";
-        }
-
-        .welcome {
-            font-size: 20px;
-            color: white;
-            position: absolute;
-            bottom: 40%;
-            left: 40px;
         }
     }
 
@@ -51,7 +44,7 @@
         height: 100%;
         padding-left: 10%;
         padding-right: 10%;
-        background-color: #f0f0f0;
+        background-color: white;
 
         > div {
             height: 100%;

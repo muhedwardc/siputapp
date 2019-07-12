@@ -27,6 +27,7 @@ export default {
 
     editExamItem: async(id, payload) => await axios.put(`/exams/${id}/edit_exam/`, payload),
     editEssayItem: async(id, payload) => await axios.put(`/exams/${id}/edit_essay/`, payload),
+    editComment: async(id, payload) => await axios.put(`/me/exams/${id}/comments/`, payload),
 
     deleteExam: async (id) => await axios.delete(`/exams/${id}/`)
 }

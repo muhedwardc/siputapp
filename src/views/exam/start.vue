@@ -18,7 +18,7 @@
                         </v-toolbar-side-icon>
                         <v-toolbar-title class="white--text" v-text="title"></v-toolbar-title>
                         <v-spacer></v-spacer>
-                        <v-btn class="white red--text text-uppercase" @click="fetchRecap"><b>Selesai</b></v-btn>
+                        <v-btn class="white primary--text text-uppercase" @click="fetchRecap"><b>Selesai</b></v-btn>
                     </v-toolbar>
                     <v-tabs
                         v-model="step"
@@ -45,7 +45,7 @@
                                                 solo
                                                 placeholder="Pilih Bab"
                                                 class="mr-2"></v-select>
-                                            <v-text-field :rules="[v => !!v || 'Harus diisi', v => !isNaN(v) && v >= 0 || 'Halaman berisi angka']" style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
+                                            <v-text-field style="width: 80px; flex-shrink: 0; flex-grow: 0" solo v-model="newCorrection.halaman" placeholder="hal" type="number" min="0"></v-text-field>
                                         </v-layout>
                                         <v-textarea :rules="[v => !!v || 'Harus diisi']" rows="3" solo v-model="newCorrection.komentar" placeholder="Masukkan komentar"></v-textarea>
                                         <v-layout>
@@ -61,9 +61,9 @@
                                     <app-loading :loadingState="fetchingComments"></app-loading>
                                     <v-layout align-center v-if="errorFetchingComments" column>
                                         <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat komentar</p>
-                                        <v-btn flat class="primary--text" @click="fetchComments">
+                                        <v-btn class="primary" @click="fetchComments">
                                             <v-icon left small>refresh</v-icon>
-                                            <span class="text-lowercase">muat ulang komentar</span>
+                                            <span class="text-capitalize">muat ulang</span>
                                         </v-btn>
                                     </v-layout>
                                     <template v-else-if="!fetchingComments">
@@ -74,7 +74,7 @@
                                                     <v-layout class="correction-item mb-2 pa-2" column v-for="(item, index) in correction.items" :key="index">
                                                         <p class="mb-0" style="word-break: break-word;" v-text="item.komentar"></p>
                                                         <v-layout row align-center>
-                                                            <span class="font-weight-bold" style="color: #9C9C9C">Halaman {{item.halaman}}</span>
+                                                            <span class="font-weight-bold" style="color: #9C9C9C">Halaman {{item.halaman ? item.halaman : '-'}}</span>
                                                             <v-spacer></v-spacer>
                                                             <v-btn icon flat :ripple="false" @click="editCorrection(section, index)">
                                                                 <v-icon class="grey--text" small>edit</v-icon>
@@ -92,11 +92,19 @@
                                         </v-layout>
                                     </template>
                                 </v-layout>
-                                <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating">Tambah komentar</v-btn>
+                                <v-btn class="primary ma-0 mt-2 mb-2" @click="creating = true" v-if="!creating && !errorFetchingComments">Tambah komentar</v-btn>
                             </v-layout>
                         </v-tab-item>
                         <v-tab-item class="tab-container">
-                            <template v-show="!addingGrade">
+                            <app-loading :loadingState="fetchingGrades"></app-loading>
+                            <v-layout align-center v-if="errorFetchingGrades" column>
+                                <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat nilai</p>
+                                <v-btn class="primary" @click="fetchGrades">
+                                    <v-icon left small>refresh</v-icon>
+                                    <span class="text-capitalize">muat ulang</span>
+                                </v-btn>
+                            </v-layout>
+                            <template v-else-if="!addingGrade && !errorFetchingGrades">
                                 <template v-if="exam.ujian && exam.ujian.skripsi.mahasiswa.length > 0">
                                     <p class="mb-0"><b>Mahasiswa</b></p>
                                     <ol class="mb-3">
@@ -156,19 +164,29 @@
                             </v-layout>
                         </v-tab-item>
                         <v-tab-item class="tab-container" v-if="isLeader">
-                            <h3 class="font-weight-medium">Apakah ada revisi judul?</h3>
-                            <p class="font-weight-medium ma-0" v-text="'Judul: ' + exam.ujian.skripsi.judul"></p>
-                            <v-radio-group class="pa-0 mt-2" v-model="revisionTemp.revisi" :mandatory="false">
-                                <v-radio color="primary" label="Tidak ada revisi judul" :value="false"></v-radio>
-                                <v-radio color="primary" label="Ada, revisi judulnya:" :value="true"></v-radio>
-                            </v-radio-group>
-                            <p>Masukkan revisi judul</p>
-                            <v-textarea :disabled="!revisionTemp.revisi" box v-model="revisionTemp.konten"></v-textarea>
-                            <v-layout>
-                                <v-spacer></v-spacer>
-                                <v-btn v-show="revisionHasChanged" class="default ma-0 mr-2" :disabled="saving" @click="resetRevision">hapus perubahan</v-btn>
-                                <v-btn v-show="revisionHasChanged" class="success ma-0" :loading="saving" @click="addRevision">simpan revisi</v-btn>
+                            <app-loading :loadingState="fetchingRevision"></app-loading>
+                            <v-layout align-center v-if="errorFetchingRevision" column>
+                                <p class="error--text text-xs-center mb-0">Ada kesalahan dalam memuat revisi judul</p>
+                                <v-btn class="primary" @click="fetchRevision">
+                                    <v-icon left small>refresh</v-icon>
+                                    <span class="text-capitalize">muat ulang</span>
+                                </v-btn>
                             </v-layout>
+                            <template v-else-if="!errorFetchingRevision">
+                                <h3 class="font-weight-medium">Apakah ada revisi judul?</h3>
+                                <p class="font-weight-medium ma-0" v-text="'Judul: ' + exam.ujian.skripsi.judul"></p>
+                                <v-radio-group class="pa-0 mt-2" v-model="revisionTemp.revisi" :mandatory="false">
+                                    <v-radio color="primary" label="Tidak ada revisi judul" :value="false"></v-radio>
+                                    <v-radio color="primary" label="Ada, revisi judulnya:" :value="true"></v-radio>
+                                </v-radio-group>
+                                <p>Masukkan revisi judul</p>
+                                <v-textarea :disabled="!revisionTemp.revisi" box v-model="revisionTemp.konten"></v-textarea>
+                                <v-layout>
+                                    <v-spacer></v-spacer>
+                                    <v-btn v-show="revisionHasChanged" class="default ma-0 mr-2" :disabled="saving" @click="resetRevision">hapus perubahan</v-btn>
+                                    <v-btn v-show="revisionHasChanged" class="success ma-0" :loading="saving" @click="addRevision">simpan revisi</v-btn>
+                                </v-layout>
+                            </template>
                         </v-tab-item>
                     </v-tabs-items>
                 </v-navigation-drawer>
@@ -258,34 +276,30 @@
                                     <tr class="text-xs-center">
                                         <td rowspan="2">Dosen</td>
                                         <td :colspan="recap.rekap_ujian.skripsi.mahasiswa.length">Nilai</td>
-                                        <td rowspan="2">Keterangan</td>
                                     </tr>
                                     <tr class="text-xs-center">
                                         <td class="mahasiswa-cell" v-for="(nilai, i) in recap.rekap_nilai" :key="i" v-text="nilai.mahasiswa"></td>
                                     </tr>
-                                    <tr v-for="(penguji, i) in recap.rekap_ujian.penguji" :key="i" :class="penguji.dosen == $store.state.auth.user.nama ? 'success lighten-4' : ''">
+                                    <tr v-for="(penguji, i) in recap.rekap_ujian.penguji" :key="i" :class="penguji.dosen == $store.state.auth.user.nama ? 'primary lighten-4' : ''">
                                         <td class="dosen-cell" v-text="penguji.dosen"></td>
                                         <td v-for="(mahasiswa, j) in recap.rekap_nilai" :key="j">{{ mahasiswa.nilai[i].rerata ? mahasiswa.nilai[i].rerata : 0 }}</td>
-                                        <td v-text="getAverageByDosen(i)"></td>
                                     </tr>
                                     <tr>
                                         <td><b>Total</b></td>
                                         <td v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.jumlah_rerata"></td>
-                                        <td></td>
                                     </tr>
                                     <tr>
                                         <td><b>Rerata</b></td>
                                         <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="mahasiswa.rerata_total"></td>
-                                        <td></td>
                                     </tr>
                                     <tr>
                                         <td><b>Konversi</b></td>
                                         <td class="font-weight-bold" v-for="(mahasiswa, i) in recap.rekap_nilai" :key="i" v-text="convertGrade(mahasiswa.rerata_total)"></td>
-                                        <td></td>
                                     </tr>
                                 </table>
                             </div>
-                            <h3 class="mt-4 mb-2">REKAP KOMENTAR</h3>
+                            <hr class="mt-4 mb-4">
+                            <h3 class="mb-2">REKAP KOMENTAR</h3>
                             <v-tabs
                                 v-model="recapBab"
                                 color="white"
@@ -345,11 +359,9 @@
 </template>
 
 <script>
-import {mapActions} from 'vuex'
 import moment from 'moment'
 import socs from './socs'
-import { POINT_CONVERSION_COMPRESSED } from 'constants';
-import { setTimeout, setInterval, clearInterval } from 'timers';
+import { setInterval, clearInterval } from 'timers';
 export default {
     data() {
         return {
@@ -357,7 +369,6 @@ export default {
             sync: false,
             selectedSO: 0,
             loaded: false,
-            hasRevision: false,
             revisionTemp: {
                 revisi: false,
                 konten: null
@@ -388,7 +399,7 @@ export default {
             corrections: [],
             newCorrection: {
                 komentar: '',
-                halaman: '',
+                halaman: null,
                 index: 0,
                 rules: {
                     required: [v => !!v && v.length > 0 || 'Harus diisi'],
@@ -475,18 +486,6 @@ export default {
                     recapByBab.push(recapByDosenByBab)
                 }
                 return recapByBab
-            }
-        },
-
-        getAverageByDosen() {
-            return function(dosenIndex) {
-                const mahasiswa = this.recap.rekap_nilai
-                let sum = 0
-                mahasiswa.forEach(item => {
-                    sum += Number(item.nilai[dosenIndex].rerata)
-                })
-                let average = sum/mahasiswa.length
-                return this.convertGrade(average)
             }
         },
 
@@ -583,8 +582,6 @@ export default {
     },
 
     methods: {
-        ...mapActions(['showSnackbar']),
-
         redirectHome() {
             this.$store.state.finishedExam = this.exam.ujian
             this.$store.state.finishedExam.id = this.$router.currentRoute.params.id
@@ -622,7 +619,6 @@ export default {
             } catch (error) {
                 this.errorFetchingComments = true
                 this.fetchingComments = false
-                this.showSnackbar(error)
             }
         },
 
@@ -643,6 +639,7 @@ export default {
 
         async fetchGrades() {
             this.fetchingGrades = true
+            this.errorFetchingGrades = false
             try {
                 const response = await this.$thessa.getExamGrades(this.$router.currentRoute.params.id)
                 this.grades = this.fillNullGrades(response.data)
@@ -651,7 +648,7 @@ export default {
             } catch (error) {
                 this.errorFetchingGrades = true
                 this.fetchGrades = false
-                this.showSnackbar(error)
+                this.fetchingGrades = false
             }
         },
 
@@ -664,6 +661,7 @@ export default {
                 this.fetchComments()
                 this.fetchGrades()
                 this.loaded = true
+                this.isLeader ? this.fetchRevision() : null
                 if (this.exam.ujian.status == 3) {
                     this.time = 5
                     window.redirectInterval = setInterval(() => {
@@ -684,6 +682,7 @@ export default {
         },
 
         async fetchRevision() {
+            this.fetchingRevision = true
             this.errorFetchingRevision = false
             try {
                 const res = await this.$thessa.getExamRevision(this.$router.currentRoute.params.id)
@@ -691,8 +690,10 @@ export default {
                 this.revisionTemp.konten = res.data.konten
                 this.revision.revisi = res.data.revisi
                 this.revision.konten = res.data.konten
+                this.fetchingRevision = false
             } catch (error) {
                 this.errorFetchingRevision = true
+                this.fetchingRevision = false
             }
         },
 
@@ -733,7 +734,7 @@ export default {
                 this.saving = true
                 try {
                     const {id, halaman, komentar, bab} = this.newCorrection
-                    const comments = await this.$thessa.getExamComments(this.$router.currentRoute.params.id)
+                    const comments = await this.$thessa.editComment(this.$router.currentRoute.params.id, {id, halaman: halaman?halaman:null, komentar, bab})
                     this.constructComment(comments.data)
                     this.resetNewCorrection()
                     this.saving = false
@@ -750,7 +751,7 @@ export default {
                 this.saving = true
                 try {
                     const { halaman, komentar, index } = this.newCorrection
-                    const comments = await this.$thessa.submitComments(this.$router.currentRoute.params.id, {bab: index, halaman, komentar})
+                    const comments = await this.$thessa.submitComments(this.$router.currentRoute.params.id, {bab: index, halaman:halaman?halaman:null, komentar})
                     this.constructComment(comments.data)
                     this.corrections[index].items.sort((a, b) => (a.page > b.page) ? 1 : -1)
                     this.updateLocalStorage()
@@ -845,18 +846,6 @@ export default {
             this.creating = true
         },
 
-        discardChanges() {
-            this.temp = {
-                edit: false,
-                text: '',
-                page: '',
-                index: 0,
-                section: 0,
-                selectedBab: null
-            }
-            this.valid = true
-        },
-
         showDialog(section, index) {
             const { halaman, komentar } = this.corrections[section].items[index]
             this.dialog = { show: true, section, index, text:komentar, page:halaman }
@@ -882,8 +871,8 @@ export default {
         },
 
         resetNewCorrection() {
-            this.newCorrection = {halaman: '', komentar: '', index: 0}
-            this.temp = {edit: false, komentar: '', halaman: '', index: 0, selectedBab: null, section: 0}
+            this.newCorrection = {halaman: null, komentar: '', index: 0}
+            this.temp = {edit: false, komentar: '', halaman: null, index: 0, selectedBab: null, section: 0}
             this.itemIndex = 0
             this.creating = false
             this.selectedBab = null
@@ -923,7 +912,6 @@ export default {
 
         if (this.$store.state.auth.token) {
             this.fetchExam()
-            this.isLeader ? this.fetchRevision() : null
             this.syncRecap()
         } else {
             return this.$router.push('/login')

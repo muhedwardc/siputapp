@@ -27,8 +27,8 @@
                     </v-layout>
                 </template>
                 <template v-slot:items="props">
-                    <td>{{ readableData(props.item.ujian.tanggal) }}</td>
-                    <td style="cursor: pointer;"><router-link :to="`/ujian/${props.item.id}`" style="text-decoration: none; color: black;"><b>{{ props.item.ujian.skripsi.judul}}</b> <br> oleh: {{listMahasiswa(props.item.ujian.skripsi.mahasiswa)}}</router-link></td>
+                    <td>{{ formatDate(props.item.ujian.tanggal) }}</td>
+                    <td style="cursor: pointer;"><router-link :to="`/ujian/${props.item.id}`" style="text-decoration: none; color: black;"><b>{{ props.item.ujian.skripsi.judul}}</b> <br> oleh: {{ joinToString(props.item.ujian.skripsi.mahasiswa, 'nama') }}</router-link></td>
                     <td>{{ props.item.ujian.sesi }}</td>
                     <td>{{ props.item.ujian.ruang }}</td>
                     <td>{{ props.item.ujian.penguji[0].dosen == $store.state.auth.user.nama ? 'Ketua' : 'Anggota' }}</td>
@@ -43,7 +43,6 @@
 </template>
 
 <script>
-import {mapActions} from 'vuex'
 import moment from 'moment'
 
 export default {
@@ -102,28 +101,10 @@ export default {
         thisMonth() {
             moment.locale('id')
             return moment().format('MMMM')
-        },
-
-        examStatus() {
-            return function(s) {
-                return s == 3 ? 'Selesai' : s == 2 ? 'Sedang Berlangsung' : 'Belum Mulai'
-            }
-        },
-
-        listMahasiswa() {
-            return function(mahasiswa) {
-                let str = []
-                mahasiswa.forEach(m => str.push(m.nama))
-                return str.join(', ')
-            }
         }
     },
 
     methods: {
-        ...mapActions([
-            'showSnackbar'
-        ]),
-
         async onSearch (text = '') {
             this.page = 1
             this.textSearch = text
@@ -147,11 +128,6 @@ export default {
             }
         },
 
-        readableData(date) {
-            if (moment().format('DD/MM/YYYY') == date) return 'Hari ini'
-            return moment(date, 'DD/MM/YYYY').format('DD MMMM YYYY')
-        },
-
         async fetchExams(page = 1, sort = null) {
             this.loading = true
             if (sort) this.sort = sort
@@ -170,10 +146,6 @@ export default {
                 this.loading = false
             }
         },
-
-        getStatus(status) {
-            return status.ujian.is_finish ? 'green' : status.is_attending == null ? 'gray' : status.is_attending ? 'primary' : 'red'
-        }
     },
 
     mounted() {

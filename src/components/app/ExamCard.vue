@@ -8,7 +8,7 @@
                             <span class="warning--text" v-if="item.ujian.skripsi.is_capstone">Capstone: </span>{{ item.ujian.skripsi.judul }}
                         </p>
                         <v-spacer></v-spacer>
-                        <v-tooltip v-if="item.ujian.penguji[0].dosen == $store.state.auth.user.nama" top>
+                        <v-tooltip v-if="isLeader(item.ujian.skripsi.pembimbing_satu)" top>
                             <template v-slot:activator="{ on }">
                                 <v-avatar color="warning" style="flex-shrink: 0" size=24 v-on="on">
                                     <i class="fas fa-crown fa-sm" style="color: white;"></i>
@@ -22,7 +22,7 @@
                     <v-layout class="mb-1">
                         <v-icon class="mr-1" small>event</v-icon>
                         <span>
-                            <span class="mr-2" :class="isToday ? 'purple--text' : null"><b>{{ item.ujian.status == 3 ? 'SEDANG BERLANGSUNG' : isToday ? 'HARI INI' : dateUjian }}</b></span>
+                            <span class="mr-2" :class="isToday(item.ujian.tanggal) ? 'purple--text' : null"><b>{{ isToday(item.ujian.tanggal) ? 'HARI INI' : formatDate(item.ujian.tanggal) }}</b></span>
                             <v-icon class="mr-1" small>access_time</v-icon>
                             <span :class="item.ujian.status == 2 ? 'purple--text font-weight-bold' : null">{{ item.ujian.status == 1 ? item.ujian.sesi : 'Sedang Berlangsung' }}</span>
                         </span>
@@ -33,27 +33,38 @@
                     </v-layout>
                     <v-layout class="mb-1">
                         <v-icon class="mr-1" small>person</v-icon>
-                        <span>{{ readableString(item.ujian.skripsi.mahasiswa, 'nama') }}</span>
+                        <span>{{ joinToString(item.ujian.skripsi.mahasiswa, 'nama') }}</span>
                     </v-layout>
-                    <!-- <span><span :class="isToday ? 'indigo--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : dateUjian }}</span> - {{ item.ujian.sesi }} - Ruang {{ item.ujian.ruang }}</span> -->
                 </v-card-text>
             </v-layout>
         </v-card>
         <v-card v-if="type == 1" flat class="exam-item mb-3" column @click="$router.push(`/ujian/${item.id}`)">
             <v-layout class="ml-0 mr-0" row justify-space-between align-start>
                 <h4><span class="warning--text" v-if="item.skripsi.is_capstone">Capstone: </span>{{item.skripsi.judul}}</h4>
-                <v-chip label class="ma-0 exam-status" :color="item.status == 1 ? 'primary' : item.status == 2 ? 'warning' : 'error'" text-color="white">{{status[item.status-1]}}</v-chip>
+                <v-chip label class="ma-0 exam-status" :color="item.status == 1 ? 'primary' : item.status == 2 ? 'warning' : 'success'" text-color="white">{{examStatus(item.status)}}</v-chip>
             </v-layout>
-            <p class="mb-0"><span :class="isToday ? 'purple--text font-weight-bold' : ''">{{ isToday ? 'Hari ini' : readableDate }}</span> - {{ item.sesi }} - {{ item.ruang }}</p>
-            <p class="mb-0">Mahasiswa: {{ readableString(item.skripsi.mahasiswa, 'nama') }}</p>
-            <p class="mb-0">Penguji: {{ readableString(item.penguji, 'dosen') }}</p>
+            <v-layout class="mb-1">
+                <v-icon class="mr-1" small>event</v-icon>
+                <span>
+                    <span class="mr-2" :class="isToday(item.tanggal) ? 'purple--text' : null"><b>{{ isToday(item.tanggal) ? 'HARI INI' : formatDate(item.tanggal) }}</b></span>
+                    <v-icon class="mr-1" small>access_time</v-icon>
+                    <span :class="item.status == 2 ? 'purple--text font-weight-bold' : null">{{ item.status == 1 ? item.sesi : 'Sedang Berlangsung' }}</span>
+                </span>
+            </v-layout>
+            <v-layout class="mb-1">
+                <v-icon class="mr-1" small>location_on</v-icon>
+                <span v-text="item.ruang"></span>
+            </v-layout>
+            <v-layout class="mb-1">
+                <v-icon class="mr-1" small>person</v-icon>
+                <span>{{ joinToString(item.skripsi.mahasiswa, 'nama') }}</span>
+            </v-layout>
+            <p class="mb-0">Penguji: {{ joinToString(item.penguji, 'dosen') }}</p>
         </v-card>
     </transition>
 </template>
 
 <script>
-import moment from 'moment'
-import {mapActions} from 'vuex'
 export default {
     props: {
         item: {
@@ -69,43 +80,6 @@ export default {
             default: 0
         }
     },
-
-    data() {
-        return {
-            status: ['Belum mulai', 'Sedang berlangsung', 'Selesai']
-        }
-    },
-
-    computed: {
-        isToday() {
-            moment.locale('id')
-            return this.item.tanggal ? moment().format('DD/MM/YYYY') === this.item.tanggal : this.item.ujian.tanggal == moment().format('L')
-        },
-
-        dateUjian() {
-            return moment(this.item.ujian.tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
-            // return moment(this.item.ujian.tanggal).format('LLLL')
-        },
-
-        readableDate() {
-            moment.locale('id')
-            return moment(this.item.tanggal, 'DD/MM/YYYY').format('dddd, DD MMMM YYYY')
-        },
-
-        readableString() {
-            return function (arr, par) {
-                let res = ''
-                for (let i = 0; i < arr.length; i ++ ){
-                    res += arr[i][par] + (i == arr.length-1 ? '' : ', ')
-                }
-                return res
-            }
-        },
-    },
-
-    created() {
-        moment.locale('id')
-    }
 }
 </script>
 

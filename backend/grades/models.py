@@ -4,7 +4,7 @@ from backend.essays.models import Student
 from backend.exams.models import Penguji
 
 class StudentOutcome(models.Model):
-    judul = models.CharField(max_length=5)
+    judul = models.CharField(max_length=100)
     deskripsi = models.TextField()
 
     def __str__(self):

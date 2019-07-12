@@ -103,7 +103,6 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
 export default {
     data() {
         return {
@@ -165,14 +164,6 @@ export default {
     },
 
     methods: {
-        ...mapActions([
-			'showSnackbar'
-        ]),
-
-        async sort (key = '') {
-
-        },
-
         async onSearch (text = '') {
             this.page = 1
             this.textSearch = text

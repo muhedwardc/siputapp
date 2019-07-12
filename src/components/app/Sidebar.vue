@@ -120,7 +120,6 @@ export default {
 	methods: {
 		...mapActions([
 			'logUserOut',
-			'showSnackbar'
 		]),
 
 		async logout() {

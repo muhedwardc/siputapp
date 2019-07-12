@@ -55,7 +55,6 @@
                                         <div v-for="(mahasiswa, index) in editTemp.value" :key="index" class="mb-4">
                                             <v-layout row wrap align-center class="mb-2">
                                                 <h3>Mahasiswa {{ index + 1 }}</h3>
-                                                <!-- <v-btn color="error" v-if="index > 0" @click="openDialog(mahasiswa['nama'].trim().length > 0 ? mahasiswa['nama'] : 'Mahasiswa ' + (index + 1), index)">Hapus mahasiswa</v-btn>                                             -->
                                             </v-layout>
                                             <table class="mahasiswa-table">
                                                 <tr>
@@ -193,7 +192,14 @@
                                     item-text="mulai"
                                     :rules="[v => !!v || 'Bidang isian harus diisi']"
                                     :disabled="submitting"
-                                    ></v-select>
+                                    >
+                                    <template slot="selection" slot-scope="data">
+                                        {{ data.item.mulai }} - {{ data.item.selesai }}
+                                    </template>
+                                    <template slot="item" slot-scope="data">
+                                        {{ data.item.mulai }} - {{ data.item.selesai }}
+                                    </template>    
+                                </v-select>
                             </v-layout>
                             <v-layout column v-if="editTemp.type == 'dosen'">
                                 <v-text-field
@@ -210,7 +216,7 @@
                                     :headers="[{ text: 'Nama', align: 'left', value: 'nama' },{ text: 'Aksi', align: 'left', sortable: false, value: 'selectedType', width: '200px' }]"
                                     :items="dosen"
                                     :search="search"
-                                    :rows-per-page-items='[ 10, 15, 25, { "text": "$vuetify.dataIterator.rowsPerPageAll", "value": -1 } ]'
+                                    :rows-per-page-items='[ 10 ]'
                                     :loading="loading">
                                     <template v-slot:items="props">
                                         <td>{{ props.item.nama || props.item.email }}</td>
@@ -241,7 +247,6 @@
                                                         <v-list-tile-title v-else-if="i === 0">
                                                             <v-layout align-center>
                                                                 {{ type }}
-                                                                <span class="ml-2 success white--text" style="display: flex; justify-content: center; align-items: center; width: 22px; height: 22px; border-radius: 50%;"></span>
                                                             </v-layout>
                                                         </v-list-tile-title>
                                                     </v-list-tile>
@@ -259,8 +264,8 @@
                         </v-card-text>
                         <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn class="font-weight-bold" color="red darken-1" flat @click="discard" :disabled="submitting">Batal</v-btn>
-                        <v-btn class="font-weight-bold" color="green darken-1" v-if="hasChanged" :loading="submitting" @click="saveEdit" flat>Ya</v-btn>
+                        <v-btn class="font-weight-bold" color="error" @click="discard" :disabled="submitting">Batal</v-btn>
+                        <v-btn class="font-weight-bold" color="success" v-if="hasChanged" :loading="submitting" @click="saveEdit">Ya</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -300,7 +305,8 @@
                             </v-layout>
                             <v-dialog persistent v-model="agreementDialog" max-width="600px">
                                 <v-card class="pa-4">
-                                    <p>Saat ini ujian skripsi belum dimulai. Dengan menekan tombol <b>mulai</b>, Anda akan mengubah status ujian menjadi mulai sehingga semua dosen terkait dapat memasuki ujian.</p>
+                                    <h2 class="mb-2">Mulai ujian?</h2>
+                                    <p>Saat ini ujian skripsi belum dimulai. Dengan menekan tombol <b>mulai</b>, Anda akan mengubah status ujian menjadi mulai sehingga semua dosen terkait dapat memasuki ujian.<br>Pastikan jumlah dosen yang hadir telah <b>memenuhi syarat</b> ujian skripsi.</p>
                                     <v-layout row>
                                         <v-spacer></v-spacer>
                                         <v-btn color="error" :disabled="startingExam" @click="agreementDialog = false">batal</v-btn>
@@ -309,8 +315,8 @@
                                 </v-card>
                             </v-dialog>
                             <v-btn v-if="!isAdmin && exam.status == 2" depressed color="primary" class="ma-0 mt-2" @click="joinExam(examId)"><v-icon left>send</v-icon>Masuk Ujian</v-btn>
-                            <v-btn v-if="!isAdmin && isPembimbing && exam.status == 1" depressed color="primary" class="ma-0 mt-2" @click="checkExamStatus(examId)" :loading="checkingStatus"><v-icon left>send</v-icon>Mulai Ujian</v-btn>
-                            <v-btn v-if="!isAdmin && !isPembimbing && exam.status == 1" depressed color="primary" class="ma-0 mt-2" @click="joinExam(examId)"><v-icon left>send</v-icon>Masuk Ujian</v-btn>
+                            <v-btn v-if="!isAdmin && pembimbing && exam.status == 1" depressed color="primary" class="ma-0 mt-2" @click="checkExamStatus(examId)" :loading="checkingStatus"><v-icon left>send</v-icon>Mulai Ujian</v-btn>
+                            <v-btn v-if="!isAdmin && !pembimbing && exam.status == 1" depressed color="primary" class="ma-0 mt-2" @click="joinExam(examId)"><v-icon left>send</v-icon>Masuk Ujian</v-btn>
                             <v-btn v-if="!isAdmin && exam.status == 3" depressed color="success" class="ma-0 mt-2"><v-icon left>check_circle</v-icon>Ujian Selesai</v-btn>
                             <v-btn v-if="isAdmin" depressed color="error" class="ma-0 mt-2" @click="dialogDelete = true"><v-icon left>delete</v-icon>hapus ujian</v-btn>
                         </v-layout>
@@ -326,23 +332,23 @@
                             </v-layout>
                         </v-layout>
                         <v-layout class="mt-2" row justify-start align-center wrap>
-                            <v-chip v-if="isLeader && !isAdmin" color="warning" class="white--text ml-0">
+                            <v-chip v-if="isLeader(exam.skripsi.pembimbing_satu) && !isAdmin" color="warning" class="white--text ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon>verified_user</v-icon>
                                 </v-avatar>
                                 Ketua
                             </v-chip>
-                            <v-chip v-if="!isLeader && !isAdmin && isPembimbing" color="success" class="white--text ml-0">
+                            <v-chip v-if="!isLeader(exam.skripsi.pembimbing_satu) && !isAdmin && pembimbing" color="success" class="white--text ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon>verified_user</v-icon>
                                 </v-avatar>
                                 Pembimbing 2
                             </v-chip>
-                            <v-chip class="ml-0" :class="isToday ? 'white--text' : ''" :color="isToday ? 'purple' : ''">
+                            <v-chip class="ml-0" :class="isToday(exam.tanggal) ? 'white--text' : ''" :color="isToday(exam.tanggal) ? 'purple' : ''">
                                 <v-avatar class="mr-0">
                                     <v-icon class="subheading">calendar_today</v-icon>
                                 </v-avatar>
-                                {{ isToday ? date + ' (Hari Ini)' : date }}
+                                {{ isToday(exam.tanggal) ? date + ' (Hari Ini)' : date }}
                                 <span class="edit--text" @click="edit('tanggal', 'date', 'Tanggal Ujian')" v-if="isAdmin">[EDIT]</span>
                             </v-chip>
                             <v-chip class="ml-0">
@@ -388,7 +394,7 @@
                                     <td>{{ props.item.nim }}</td>
                                     <td>{{ props.item.prodi }}</td>
                                     <td>{{ props.item.konsentrasi }}</td>
-                                    <td>{{ props.item.tempat_lahir + ', ' + readableDate(props.item.tanggal_lahir)}}</td>
+                                    <td>{{ props.item.tempat_lahir + ', ' + formatDate(props.item.tanggal_lahir, 'LL')}}</td>
                                     <td>{{ props.item.telepon }}</td>
                                 </template>
                             </v-data-table>
@@ -428,7 +434,6 @@ import pdfMake from 'pdfmake/build/pdfmake.js'
 import pdfFonts from 'pdfmake/build/vfs_fonts.js'
 import moment from 'moment'
 import doc from '@/documents'
-import { mapActions } from 'vuex'
 export default {
     data() {
         return {
@@ -519,7 +524,9 @@ export default {
             objDocument: null,
             pdfDocGenerator: null,
             generating: false,
-            checkingStatus: false
+            checkingStatus: false,
+            leader: false,
+            admin: false,
         }
     },
 
@@ -535,24 +542,10 @@ export default {
             }
         },
 
-        isAdmin() {
-            return this.$store.state.auth.user.is_admin
+        pembimbing() {
+            return this.isPembimbing(this.exam.skripsi.pembimbing_dua, this.exam.skripsi.pembimbing_dua)
         },
 
-        isLeader() {
-            return this.$store.state.auth.user.id == this.exam.skripsi.pembimbing_satu
-        },
-
-        isPembimbing() {
-            const userId = this.$store.state.auth.user.id
-            const skripsi = this.exam.skripsi
-            return userId == skripsi.pembimbing_dua || userId == skripsi.pembimbing_satu
-        },
-
-        isToday() {
-            const today = moment().format('DD/MM/YYYY')
-            return this.exam.tanggal === today
-        },
         hasChanged() {
             let changed = false
             let { value, oldValue, type } = this.editTemp
@@ -566,19 +559,9 @@ export default {
             
             return changed
         },
-        readableDate() {
-            return function (date) {
-                moment.locale('id')
-                return moment(date, 'DD/MM/YYYY').format('LL')
-            }
-        }
     },
 
     methods: {
-        ...mapActions([
-            'showSnackbar'
-        ]),
-
         async checkExamStatus(examId) {
             this.checkingStatus = true
             try {
@@ -683,7 +666,7 @@ export default {
         },
 
         async saveEdit() {
-            if (this.editTemp.key == 'penguji') this.assignNewDosen({dosen: this.selectedPenguji.nama})
+            if (this.editTemp.key == 'penguji') this.assignNewDosen({dosen: this.selectedPenguji.id})
             else {
                 const isSkripsi = /skripsi\..+/.test(this.editTemp.key)
                 if (isSkripsi) {
@@ -883,6 +866,7 @@ export default {
     },
 
     created() {
+        this.admin = this.isAdmin
         this.examId = this.$router.currentRoute.params.id
         this.$store.state.auth.token ? this.getExam() : null
     }

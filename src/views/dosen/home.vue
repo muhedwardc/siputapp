@@ -21,39 +21,31 @@
                 </v-layout>
             </v-container>
         </v-layout>
-        <v-dialog v-model="hasFinisedExam" persistent max-width="600px">
-            <v-card v-if="hasFinisedExam">
-                <v-toolbar color="primary">
-                    <span class="white--text">Ujian Tugas Akhir telah diselesaikan</span>
-                </v-toolbar>
-                <v-card-text>
-                    <p>Anda telah menyelesaikan ujian:</p>
-                    <v-layout class="exam-detail mb-2" column>
-                        <p class="mb-1" v-text="finishedExam.skripsi.judul"></p>
-                        <v-layout class="mb-1">
-                            <v-icon class="mr-1" small>event</v-icon>
-                            <span v-text="finishedExam.tanggal"></span>
-                        </v-layout>
-                        <v-layout class="mb-1">
-                            <v-icon class="mr-1" small>access_time</v-icon>
-                            <span v-text="finishedExam.sesi"></span>
-                        </v-layout>
-                        <v-layout class="mb-1">
-                            <v-icon class="mr-1" small>location_on</v-icon>
-                            <span v-text="finishedExam.ruang"></span>
-                        </v-layout>
-                        <v-layout class="mb-1">
-                            <v-icon class="mr-1" small>person</v-icon>
-                            <span>{{ readableString(finishedExam.skripsi.mahasiswa, 'nama') }}</span>
-                        </v-layout>
+        <app-info-box @close="hasFinisedExam = false" :appear="hasFinisedExam" title="Ujian Tugas Akhir telah diselesaikan">
+            <template v-slot:content>
+                <p>Anda telah menyelesaikan ujian:</p>
+                <v-layout class="exam-detail mb-2" column>
+                    <p class="mb-1" v-text="finishedExam.skripsi.judul"></p>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>event</v-icon>
+                        <span v-text="finishedExam.tanggal"></span>
                     </v-layout>
-                    <p class="mb-0">Untuk melihat berkas hasil ujian skripsi dapat dilihat di halaman <router-link :to="'/ujian/' + finishedExam.id">deskripsi ujian</router-link> ketika Ketua Sidang telah menyelesaikan ujian.</p>
-                </v-card-text>
-                <v-layout justify-center>
-                    <v-btn class="primary text-capitalize mb-2" @click="hasFinisedExam = false">selesai</v-btn>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>access_time</v-icon>
+                        <span v-text="finishedExam.sesi"></span>
+                    </v-layout>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>location_on</v-icon>
+                        <span v-text="finishedExam.ruang"></span>
+                    </v-layout>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>person</v-icon>
+                        <span>{{ joinToString(finishedExam.skripsi.mahasiswa, 'nama') }}</span>
+                    </v-layout>
                 </v-layout>
-            </v-card>
-        </v-dialog>
+                <p class="mb-0">Untuk melihat berkas hasil ujian skripsi dapat dilihat di halaman <router-link :to="'/ujian/' + finishedExam.id">detail ujian</router-link> ketika Ketua Sidang telah menyelesaikan ujian.</p>
+            </template>
+        </app-info-box>
     </div>
 </template>
 
@@ -77,7 +69,6 @@ export default {
 
     methods: {
         ...mapActions([
-            'showSnackbar',
             'logUserOut'
         ]),
 
@@ -88,15 +79,7 @@ export default {
                 this.nextExams.push(e)
             })
         },
-
-        readableString(arr, par) {
-            let res = ''
-            for (let i = 0; i < arr.length; i ++ ){
-                res += arr[i][par] + (i == arr.length-1 ? '' : ', ')
-            }
-            return res
-        },
-
+        
         async getExams() {
             this.$store.state.loadViewContent = true
             try {
