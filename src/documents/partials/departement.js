@@ -49,7 +49,6 @@ export default {
     getProdiWithKonsentrasi: function() {
         return listProdiWithKonsentrasi
     },
-
     getName: function (prodi, konsentrasi) {
         let result = null
         if (prodi) {
@@ -62,11 +61,9 @@ export default {
         } 
         return result
     },
-
     getProdiList: function () {
         return listProdiWithKonsentrasi.map(prodi => prodi.inisial)
     },
-
     getKonsentrasiList: function(type = null) {
         if (type) {
             const prodi = listProdiWithKonsentrasi.find(prodi => prodi.nama == type)

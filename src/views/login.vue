@@ -9,7 +9,7 @@
         <v-flex xs12 sm5 md5>
             <v-container class="form-container">
                 <v-layout align-center>
-                    <v-layout column class="text-xs-center">
+                    <v-layout column>
                         <h1 class="mb-0 primary--text font-italic">THESSA</h1>
                         <h3 class="mb-4 font-weight-regular black--text">Silahkan masuk dengan akun UGM Anda</h3>
                         <app-google-auth></app-google-auth>
