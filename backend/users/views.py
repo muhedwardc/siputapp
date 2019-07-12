@@ -7,6 +7,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from knox.models import AuthToken
 from django.db.models import Q
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer, PengelolaSerializer
 from .models import User, Pengelola
@@ -83,6 +84,31 @@ class PengelolaViewSet(viewsets.ModelViewSet):
     serializer_class = PengelolaSerializer
     queryset = Pengelola.objects.all()
 
+    def create(self, request, *args, **kwargs):
+        jabatan = request.data.get('jabatan')
+        daftar_jabatan = [
+            'Kepala Departemen',
+            'Sekretaris'
+        ]
+
+        if jabatan not in daftar_jabatan:
+            return Response({
+                "message": "Jabatan salah."
+            }, status=400)
+
+        pengelola = Pengelola.objects.filter(jabatan=jabatan).first()
+        if pengelola:
+            serializer = self.get_serializer(pengelola, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=200)
+            return Response(serializer.errors, status=400)
+        else:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=201)
+            return Response(serializer.errors, status=400)
 
 class LoginAPI(views.APIView):
     permission_classes = (permissions.AllowAny, )
