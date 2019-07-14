@@ -5,7 +5,7 @@ export default function(data) {
     const { mahasiswa } = data.skripsi
     const hari = moment(tanggal, 'DD/MM/YYYY').format('dddd')
     const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
-    const mahasiswaList = mahasiswa.map(mhs => { return [{text: mhs.nama + '\n' + mhs.nim, alignment: 'center', fontSize: 20, margin: [0, 0, 0, 10]}] })
+    const mahasiswaList = mahasiswa.map(mhs => { return [{text: [ { text: mhs.nama + '\n', decoration: 'underline' }, {text: mhs.nim}], alignment: 'center', fontSize: 20, margin: [0, 0, 0, 10]}] })
     let doc = [
         {
             table: {

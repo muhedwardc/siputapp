@@ -5,7 +5,6 @@ import scoreBoard from './partials/score-board';
 
 function generateRubrik(rekap_ujian, dosen) {
     let doc = []
-    // const { tanggal, hari, judul, ruang, waktu, dosen, sekretaris, mahasiswa, nilai } = data
     const { tanggal, sesi, ruang, skripsi } = rekap_ujian
     const mahasiswa = skripsi.mahasiswa[0]
     const kopVertical = KOP.portrait()

@@ -6,6 +6,7 @@ import LEMBAR_REVISI from './lembar-revisi'
 import REKAP_PENILAIAN from './rekap-penilaian'
 import RUBRIK_INDIVIDU from './rubrik-individu'
 import RUBRIK_CAPSTONE from './rubrik-capstone'
+import PENILAIAN_NASKAH from './penilaian-naskah'
 
 export default function index(data) {
     const { rekap_komentar, rekap_nilai, rekap_ujian, revisi_judul, kadep, sekretaris } = data
@@ -20,10 +21,11 @@ export default function index(data) {
         doc.push(
             ...BERITA_ACARA(rekap_ujian, Number(rekap_nilai[i].rerata_total), kadep, i),
             ...DAFTAR_HADIR(rekap_ujian, sekretaris, i),
-            ...RUBRIK(mahasiswa > 1, i),
             ...LEMBAR_REVISI(rekap_ujian, revisi_judul, i),
+            ...LEMBAR_KOREKSI(rekap_ujian, rekap_komentar, i),
+            ...RUBRIK(mahasiswa > 1, i),
             ...REKAP_PENILAIAN(rekap_ujian, rekap_nilai),
-            ...LEMBAR_KOREKSI(rekap_ujian, rekap_komentar, i)
+            ...PENILAIAN_NASKAH(rekap_ujian, i)
         )
     }
 

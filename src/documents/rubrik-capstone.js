@@ -1,4 +1,6 @@
-function generateRubrik(rekap_ujian, rekap_nilai, dosenIndex) {
+import moment from 'moment'
+
+function generateRubrik(rekap_ujian, rekap_nilai, dosenIndex, i) {
     let socs = [
         [
             'SO(c): Engineering Design',
@@ -374,6 +376,8 @@ function generateRubrik(rekap_ujian, rekap_nilai, dosenIndex) {
     ]
     let mhsGrade = []
     let averages = []
+    let mahasiswa = rekap_ujian.skripsi.mahasiswa.map((mhs, i) => [{ text: 'Mhs ' + (i+1), margin: [0, 0, 4, 0] }, { text: mhs.nama, margin: [2, 0, 2, 0] }])
+    const formatedDate = moment(rekap_ujian.tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
     rekap_nilai.forEach((e, i) => averages.push(
         { text: 'Mhs ' + (i+1) + ': ' + (e.nilai[dosenIndex].rerata), margin: [0, 8, 0, 8], fontSize: 12, bold: true }
     ))
@@ -432,17 +436,27 @@ function generateRubrik(rekap_ujian, rekap_nilai, dosenIndex) {
             },
             fontSize: 7.8,
         },
-        { text: 'Keterangan:', margin: [0, 10, 0, 10] },
         {
-            table: {
-                body: [
-                    [{ text: 'Mhs 1', margin: [0, 0, 4, 0] }, { text: 'MUHAMMAD EDWARD CHAKIM', margin: [2, 0, 2, 0] }],
-                    [{ text: 'Mhs 2', margin: [0, 0, 4, 0] }, { text: 'MUHAMMAD ASHIL AL LATIEF', margin: [2, 0, 2, 0] }],
-                    [{ text: 'Mhs 3', margin: [0, 0, 4, 0] }, { text: 'STEVEN AMADEUS UYANTO', margin: [2, 0, 2, 0] }]
+            columns: [
+                [
+                    { text: 'Keterangan:', margin: [0, 10, 0, 10] },
+                    {
+                        table: {
+                            body: mahasiswa
+                        }
+                    },
+                    { text: 'Semua Dosen menguji semua mahasiswa\nNilai Akhir adalah nilai rata-rata', margin: [0, 10, 0, 0]},
+                ],
+                {
+                    width: '*',
+                    text: ''
+                },
+                [
+                    { text: `Yogyakarta, ${formatedDate}`, margin: [0, 10, 0, 10]},
+                    { text: rekap_nilai[i].nilai[dosenIndex].penguji, margin: [0, 54, 0, 0], bold: true }
                 ]
-            }
-        },
-        { text: 'Semua Dosen menguji semua mahasiswa\nNilai Akhir adalah nilai rata-rata', margin: [0, 10, 0, 0]},
+            ]
+        }
     ]
     return doc
 }
@@ -450,7 +464,7 @@ function generateRubrik(rekap_ujian, rekap_nilai, dosenIndex) {
 export default function (rekap_ujian, rekap_nilai, i) {
     let doc = []
     for (let j = 0; j < rekap_nilai[i].nilai.length; j ++) {
-        doc.push(...generateRubrik(rekap_ujian, rekap_nilai, j))
+        doc.push(...generateRubrik(rekap_ujian, rekap_nilai, j, i))
     }
     return doc
 }
