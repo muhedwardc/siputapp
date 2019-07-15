@@ -447,14 +447,14 @@ function generateRubrik(rekap_ujian, rekap_nilai, dosenIndex, i) {
                     },
                     { text: 'Semua Dosen menguji semua mahasiswa\nNilai Akhir adalah nilai rata-rata', margin: [0, 10, 0, 0]},
                 ],
-                {
-                    width: '*',
-                    text: ''
-                },
-                [
-                    { text: `Yogyakarta, ${formatedDate}`, margin: [0, 10, 0, 10]},
-                    { text: rekap_nilai[i].nilai[dosenIndex].penguji, margin: [0, 54, 0, 0], bold: true }
-                ]
+                // {
+                //     width: '*',
+                //     text: ''
+                // },
+                // [
+                //     { text: `Yogyakarta, ${formatedDate}`, margin: [0, 10, 0, 10]},
+                //     { text: rekap_nilai[i].nilai[dosenIndex].penguji, margin: [0, 54, 0, 0], bold: true }
+                // ]
             ]
         }
     ]

@@ -129,7 +129,7 @@
                                 <v-layout column>
                                     <b>{{ socs[gradeTemp.so-1].name }}</b>
                                     <p class="mb-1">{{ socs[gradeTemp.so-1].description }}</p>
-                                    <v-form v-model="validGrades">
+                                    <v-form ref="grade" v-model="validGrades" lazy-validation>
                                         <table class="mt-2 grade-list">
                                             <template v-for="(mahasiswa, index) in exam.ujian.skripsi.mahasiswa">
                                                 <div :key="mahasiswa.nim">
@@ -639,7 +639,7 @@ export default {
             try {
                 const response = await this.$thessa.getExamGrades(this.$router.currentRoute.params.id)
                 this.grades = this.fillNullGrades(response.data)
-                this.fetchingGrades = true
+                this.fetchingGrades = false
             } catch (error) {
                 this.errorFetchingGrades = true
                 this.fetchGrades = false
@@ -705,22 +705,26 @@ export default {
         },
 
         async saveGrades() {
-            const { so, daftar_nilai } = this.gradeTemp
-            this.saving = true
-            let tempGrades = JSON.parse(JSON.stringify(this.grades))
-            this.exam.ujian.skripsi.mahasiswa.forEach((mahasiswa, i) => {
-                tempGrades[i].daftar_nilai.splice(so-1, 1, {so: so, nilai: Number(Number(daftar_nilai[i]).toFixed(2))})
-            })
-            try {
-                const response = await this.$thessa.submitGrades(this.$router.currentRoute.params.id, tempGrades)
-                this.grades = this.fillNullGrades(response.data.result)
-                this.fetchGrades()
-                this.saving = false
-            } catch (error) {
-                this.showSnackbar(error)
-                this.saving = false
+            if (this.$refs.grade.validate()) {
+                const { so, daftar_nilai } = this.gradeTemp
+                this.saving = true
+                let tempGrades = JSON.parse(JSON.stringify(this.grades))
+                this.exam.ujian.skripsi.mahasiswa.forEach((mahasiswa, i) => {
+                    tempGrades[i].daftar_nilai.splice(so-1, 1, {so: so, nilai: Number(Number(daftar_nilai[i]).toFixed(2))})
+                })
+                try {
+                    const response = await this.$thessa.submitGrades(this.$router.currentRoute.params.id, tempGrades)
+                    this.grades = this.fillNullGrades(response.data.result)
+                    this.fetchGrades()
+                    this.saving = false
+                } catch (error) {
+                    this.showSnackbar(error)
+                    this.saving = false
+                }
+                this.discardGrades()
+            } else {
+                this.showSnackbar('Input salah')
             }
-            this.discardGrades()
         },
         
         async saveChanges() {
