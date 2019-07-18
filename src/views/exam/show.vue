@@ -543,7 +543,7 @@ export default {
         },
 
         pembimbing() {
-            return this.isPembimbing(this.exam.skripsi.pembimbing_dua, this.exam.skripsi.pembimbing_dua)
+            return this.isPembimbing(this.exam.skripsi.pembimbing_satu, this.exam.skripsi.pembimbing_dua)
         },
 
         hasChanged() {

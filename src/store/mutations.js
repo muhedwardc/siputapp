@@ -25,10 +25,12 @@ const mutations = {
     async logUserOut(state) {
         state.auth.token = null
         state.auth.user = null
-        state.auth.google ? await state.auth.google.signOut() : null
         await Object.keys(Cookies.get()).forEach(function(cookieName) {
             Cookies.remove(cookieName)
         })
+        if (state.auth.google) {
+            await state.auth.google.disconnect()
+        }
     },
     updateUser(state, payload) {
         state.auth.user = { ...state.auth.user, ...payload }

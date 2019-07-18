@@ -226,19 +226,16 @@
                     </v-card>
                 </v-dialog>
                 <v-content id="exam-content">
-                    <!-- <object data='https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' id="exam-content-view">
+                    <object :data='exam.ujian.skripsi.naskah' id="exam-content-view">
                         <v-layout column align-center justify-center style="height: 100%">
                             <h1>Maaf,</h1>
                             <p class="ma-0 mt-2 mb-2">Peramban Anda tidak mendukung penampilan PDF</p>
                             <v-btn class="primary">
-                                <a class="white--text text-capitalize" target="_blank" href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf">lihat naskah</a>
+                                <a class="white--text text-capitalize" target="_blank" :href="exam.ujian.skripsi.naskah">lihat naskah</a>
                             </v-btn>
                         </v-layout>
-                    </object> -->
-                    <!-- <embed :src="'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'" id="exam-content-view"> -->
-                    <v-btn style="position: fixed; top: 0; left: 0; width: 100%; border-radius: 0;" v-if="isDesktop && !drawer" class="primary ma-0 text-capitalize" @click="toggleCorrectionSection">Borang Penilaian</v-btn>
-                    <embed :src="'https://docs.google.com/gview?embedded=true&url=https://www.otago.ac.nz/library/pdf/Google_searching.pdf'" id="exam-content-view">
-                    <v-btn v-if="!isDesktop && !drawer" class="primary toggle-button ma-0" @click="toggleCorrectionSection">Borang Penilaian</v-btn>
+                    </object>
+                    <v-btn v-if="!drawer" class="primary toggle-button ma-0" @click="toggleCorrectionSection">Borang Penilaian</v-btn>
                 </v-content>
                 <v-dialog fullscreen v-model="showRecap" transition="dialog-bottom-transition" class="recap-dialog">
                     <v-toolbar fixed dark color="primary">

@@ -8,7 +8,7 @@
                             <span class="warning--text" v-if="item.ujian.skripsi.is_capstone">Capstone: </span>{{ item.ujian.skripsi.judul }}
                         </p>
                         <v-spacer></v-spacer>
-                        <v-tooltip v-if="isLeader(item.ujian.skripsi.pembimbing_satu)" top>
+                        <v-tooltip v-if="isLeader(item.ujian.penguji)" top>
                             <template v-slot:activator="{ on }">
                                 <v-avatar color="warning" style="flex-shrink: 0" size=24 v-on="on">
                                     <i class="fas fa-crown fa-sm" style="color: white;"></i>
