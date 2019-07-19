@@ -20,11 +20,23 @@ class CreateStudentSerializer(serializers.ModelSerializer):
 
 
 class SimpleEssaySerializer(serializers.ModelSerializer):
+    pembimbing_satu = serializers.SerializerMethodField()
+    pembimbing_dua = serializers.SerializerMethodField()
     mahasiswa = ListStudentSerializer(many=True, source='students')
+
+    def get_pembimbing_satu(self, essay):
+        pembimbing_satu = dict()
+        pembimbing_satu.update({'id': essay.pembimbing_satu.pk, 'nama': essay.pembimbing_satu.nama})
+        return pembimbing_satu
+
+    def get_pembimbing_dua(self, essay):
+        pembimbing_dua = dict()
+        pembimbing_dua.update({'id': essay.pembimbing_dua.pk, 'nama': essay.pembimbing_dua.nama})
+        return pembimbing_dua
 
     class Meta:
         model = Essay
-        fields = ('judul', 'mahasiswa', 'is_capstone')
+        fields = ('judul', 'mahasiswa', 'pembimbing_satu', 'pembimbing_dua', 'is_capstone')
 
 class EssaySerializer(serializers.ModelSerializer):
     # pembimbing_satu = serializers.StringRelatedField()

@@ -13,10 +13,12 @@ class SimpleSiputExamSerializer(serializers.ModelSerializer):
     ketua = serializers.SerializerMethodField()
 
     def get_ketua(self, exam):
+        ketua = dict()
         for penguji in exam.penguji.all():
             if penguji.is_leader == True:
                 dosen = penguji.dosen
-                return dosen.pk
+                ketua.update({'id': dosen.pk, 'nama': dosen.nama})
+                return ketua
             else:
                 return None
 
@@ -33,10 +35,12 @@ class SiputExamSerializer(serializers.ModelSerializer):
     ketua = serializers.SerializerMethodField()
 
     def get_ketua(self, exam):
+        ketua = dict()
         for penguji in exam.penguji.all():
             if penguji.is_leader == True:
                 dosen = penguji.dosen
-                return dosen.pk
+                ketua.update({'id': dosen.pk, 'nama': dosen.nama})
+                return ketua
             else:
                 return None
 
