@@ -28,7 +28,7 @@
                 </template>
                 <template v-slot:items="props">
                     <td class="text-xs-left">{{ formatDate(props.item.tanggal) }}</td>
-                    <td style="cursor: pointer;"><router-link :to="`/ujian/${props.item.id}`" class="text-xs-left" style="text-decoration: none; color: black;"><b>{{ props.item.skripsi.judul}}</b> <br> oleh: {{listMahasiswa(props.item.skripsi.mahasiswa)}}</router-link></td>
+                    <router-link tag="td" :to="`/ujian/${props.item.id}`" class="text-xs-left" style="cursor: pointer; text-decoration: none; color: black;"><b>{{ props.item.skripsi.judul}}</b> <br> oleh: {{listMahasiswa(props.item.skripsi.mahasiswa)}}</router-link>
                     <td class="text-xs-left">{{ props.item.sesi }}</td>
                     <td class="text-xs-left">{{ props.item.ruang }}</td>
                     <td class="text-xs-left" :class="props.item.status == 3 ? 'success--text' : props.item.status == 2 ? 'warning--text' : null">{{ props.item.status ? status[props.item.status-1] : status[0] }}</td>
@@ -42,7 +42,6 @@
 </template>
 
 <script>
-import moment from 'moment'
 export default {
     data() {
         return {
@@ -81,10 +80,6 @@ export default {
     },
 
     methods: {
-        jsdateformat(date, time) {
-            return moment(date + ' ' + time, 'DD/MM/YYYY HH:mm::ss').format()
-        },
-
         async onSearch (text = '') {
             this.page = 1
             this.textSearch = text

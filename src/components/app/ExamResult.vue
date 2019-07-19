@@ -105,6 +105,7 @@ export default {
             } catch (error) {
                 this.$store.dispatch('showSnackbar', error)
                 this.generatingDocument = false
+                console.log(error)
             }
         }
     }

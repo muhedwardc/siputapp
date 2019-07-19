@@ -5,7 +5,7 @@ import moment from 'moment'
 export default function (data, nilai, kadep, i) {
     moment.locale('id')
     let doc = []
-    const { tanggal, ruang, sesi, penguji, skripsi } = data
+    const { tanggal, ruang, sesi, penguji, skripsi, ketua } = data
     const { mahasiswa, judul } = skripsi
     const hari = moment(tanggal, 'DD/MM/YYYY').format('dddd')
     const p = [
@@ -20,7 +20,7 @@ export default function (data, nilai, kadep, i) {
         ]
     ]
     penguji.forEach((dosen, i) => {
-        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center' }, dosen.dosen, (dosen.is_leader ? 'Ketua Tim *)' : 'Anggota'), `${i+1}.`])
+        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center' }, dosen.dosen, (ketua.nama === dosen.dosen ? 'Ketua Tim *)' : 'Anggota'), `${i+1}.`])
     })
     let examresult = []
     if (nilai < 54.6 ) {
@@ -65,8 +65,8 @@ export default function (data, nilai, kadep, i) {
             table: {
                 widths: [ 100, 15, 'auto' ],
                 body: [
-                    [ 'Pembimbing I', {text: ':', alignment: 'right'}, penguji[0].dosen],
-                    [ 'Pembimbing II', {text: ':', alignment: 'right'}, penguji[1].dosen ]
+                    [ 'Pembimbing I', {text: ':', alignment: 'right'}, skripsi.pembimbing_satu.nama ],
+                    [ 'Pembimbing II', {text: ':', alignment: 'right'}, skripsi.pembimbing_dua.nama ]
                 ]
             },
             layout: 'noBorders',
@@ -124,7 +124,7 @@ export default function (data, nilai, kadep, i) {
                     text: [
                         'Ketua Tim Penguji',
                         '\n\n\n\n',
-                        { text: penguji[0].dosen, bold: true }
+                        { text: ketua.nama, bold: true }
                     ]
                 },
                 {

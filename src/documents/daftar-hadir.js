@@ -4,7 +4,7 @@ import moment from 'moment'
 export default function (data, sekretaris, i) {
     moment.locale('id')
     let doc = []
-    const { tanggal, sesi, penguji, ruang, skripsi } = data
+    const { tanggal, sesi, penguji, ruang, skripsi, ketua } = data
     const { mahasiswa } = skripsi
     const hari = moment(tanggal, 'DD/MM/YYYY').format('dddd')
     const formatedDate = moment(tanggal, 'DD/MM/YYYY').format('DD MMMM YYYY')
@@ -18,7 +18,7 @@ export default function (data, sekretaris, i) {
         ],
     ]
     penguji.forEach((dosen, i) => {
-        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen.dosen, margin: [0, 10, 0, 10]}, { text: (dosen.is_leader ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
+        dosenTabel.push([{ text: `${i+1}.`, alignment: 'center', margin: [0, 10, 0, 0] }, {text: dosen.dosen, margin: [0, 10, 0, 10]}, { text: (dosen.dosen == ketua.nama ? 'Ketua' : 'Anggota'), margin: [0, 10, 0, 0]}, ''])
     })
     let kopVertical = KOP.portrait()
     doc.push(

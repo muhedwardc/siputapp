@@ -86,12 +86,12 @@ function documentByMahasiswa(rekap_ujian, komentar_dosen, i) {
                     [
                         'Pembimbing I',
                         ':',
-                        dosen[0].dosen
+                        skripsi.pembimbing_satu.nama
                     ],
                     [
                         'Pembimbing II',
                         ':',
-                        dosen[1].dosen
+                        skripsi.pembimbing_dua.nama
                     ],
                     [
                         'Dikoreksi Oleh',

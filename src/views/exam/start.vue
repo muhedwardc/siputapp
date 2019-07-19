@@ -440,7 +440,7 @@ export default {
     computed: {
         isLeader() {
             if (this.exam.ujian) {
-                return this.$store.state.auth.user.id == this.exam.ujian.skripsi.pembimbing_satu
+                return this.$store.state.auth.user.id == this.exam.ujian.ketua
             }
 
             return false

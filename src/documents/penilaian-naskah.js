@@ -28,8 +28,8 @@ export default function (data, i) {
                         { text: ':', margin: [0, 10, 0, 0]},
                         { 
                             ol: [
-                                { text: penguji[0].dosen, lineHeight: 1.25 },
-                                { text: penguji[1].dosen, lineHeight: 1.25 }
+                                { text: skripsi.pembimbing_satu.nama, lineHeight: 1.25 },
+                                { text: skripsi.pembimbing_dua.nama, lineHeight: 1.25 }
                             ],
                             margin: [0, 10, 0, 10]
                         }
@@ -47,7 +47,7 @@ export default function (data, i) {
         {
             columns: [
                 { text: '', width: '*' },
-                { text: `Yogyakarta, ${formatedDate}\n\nPembimbing I\n\n\n\n\n\n${penguji[0].dosen}`, margin: [50, 0, 0, 0]},
+                { text: `Yogyakarta, ${formatedDate}\n\nPembimbing I\n\n\n\n\n\n${skripsi.pembimbing_satu.nama}`, margin: [50, 0, 0, 0]},
             ],
             margin: [0, 10, 0, 10]
         },

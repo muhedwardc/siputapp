@@ -12,15 +12,11 @@ Vue.mixin({
 
     computed: {
         isLeader() {
-            return function(id) {
+            return function(ketua) {
+                const id = ketua.id
                 if (typeof id == 'string' || typeof id == 'number') {
                     if (this.userId) {
                         return id == this.userId
-                    }
-                } else {
-                    const is_leader = id.find(dosen => dosen.is_leader)
-                    if (is_leader) {
-                        return store.state.auth.user.nama == is_leader.dosen
                     }
                 }
                 return false
@@ -43,7 +39,6 @@ Vue.mixin({
 
         isPembimbing() {
             return function(a, b) {
-                console.log(a, b, this.userId)
                 if (this.userId) {
                     return this.userId == a || this.userId == b
                 }

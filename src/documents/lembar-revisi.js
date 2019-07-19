@@ -91,8 +91,8 @@ export default function (data, revisi_judul, i) {
         },
         {
             columns: [
-                `Pembimbing I\n\n\n\n\n${penguji[0].dosen}`,
-                { text: `Pembimbing II\n\n\n\n\n${penguji[1].dosen}`, margin: [50, 0, 0, 0]}
+                `Pembimbing I\n\n\n\n\n${skripsi.pembimbing_satu.nama}`,
+                { text: `Pembimbing II\n\n\n\n\n${skripsi.pembimbing_dua.nama}`, margin: [50, 0, 0, 0]}
             ],
             margin: [0, 0, 0, 10]
         },

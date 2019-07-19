@@ -110,7 +110,7 @@ export default function (ujian, rekap_nilai) {
                     width: 300,
                     text: [
                         `Yogyakarta, ${formatedDate}\nDosen Pembimbing I\n\n\n\n\n`,
-                        { text: penguji[0].dosen, bold: true }
+                        { text: skripsi.pembimbing_satu.nama, bold: true }
                     ],
                 }
             ],

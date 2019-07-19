@@ -332,13 +332,13 @@
                             </v-layout>
                         </v-layout>
                         <v-layout class="mt-2" row justify-start align-center wrap>
-                            <v-chip v-if="isLeader(exam.skripsi.pembimbing_satu) && !isAdmin" color="warning" class="white--text ml-0">
+                            <v-chip v-if="isLeader(exam.ketua) && !isAdmin" color="warning" class="white--text ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon>verified_user</v-icon>
                                 </v-avatar>
                                 Ketua
                             </v-chip>
-                            <v-chip v-if="!isLeader(exam.skripsi.pembimbing_satu) && !isAdmin && pembimbing" color="success" class="white--text ml-0">
+                            <v-chip v-if="!isLeader(exam.ketua) && !isAdmin && pembimbing" color="success" class="white--text ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon>verified_user</v-icon>
                                 </v-avatar>

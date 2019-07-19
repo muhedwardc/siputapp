@@ -63,7 +63,7 @@ export default [
         ]
     },
     {
-        name: 'SO(g) Effective Communicaion',
+        name: 'SO(g): Effective Communicaion',
         description: 'Mampu menyampaikan komunikasi dan presentasi secara baik dan benar',
         indicators: [
             ['Kualitas presentasi tugas akhir oleh mahasiswa sangat rendah. Penguji mendapat kesan seolah-olah mahasiswa tidak menguasai  materi dari tugas akhir yang dilakukan.'],
@@ -73,7 +73,7 @@ export default [
         ]
     },
     {
-        name: 'SO(i) Professional and Ethical Responsibility',
+        name: 'SO(i): Professional and Ethical Responsibility',
         description: 'Mahasiswa mampu menerapkan etika yang baik untuk menjawab pertanyaan',
         indicators: [
             ['Mahasiswa menjawab pertanyaan dengan memotong pertanyaan penguji.'],
@@ -83,7 +83,7 @@ export default [
         ]
     },
     {
-        name: 'SO(k) Sustainable Learning',
+        name: 'SO(k): Sustainable Learning',
         description: 'Mahasiswa mampu mendemonstrasikan apa yang akan mereka lakukan dan mengikuti kebaruan yang terkait dengan tesis mereka',
         indicators: [
             [

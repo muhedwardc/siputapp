@@ -28,10 +28,10 @@
                 </template>
                 <template v-slot:items="props">
                     <td>{{ formatDate(props.item.ujian.tanggal) }}</td>
-                    <td style="cursor: pointer;"><router-link :to="`/ujian/${props.item.id}`" style="text-decoration: none; color: black;"><b>{{ props.item.ujian.skripsi.judul}}</b> <br> oleh: {{ joinToString(props.item.ujian.skripsi.mahasiswa, 'nama') }}</router-link></td>
+                    <router-link style="cursor: pointer; text-decoration: none; color: black;" tag="td" :to="`/ujian/${props.item.id}`"><b>{{ props.item.ujian.skripsi.judul}}</b> <br> oleh: {{ joinToString(props.item.ujian.skripsi.mahasiswa, 'nama') }}</router-link>
                     <td>{{ props.item.ujian.sesi }}</td>
                     <td>{{ props.item.ujian.ruang }}</td>
-                    <td>{{ props.item.ujian.penguji[0].dosen == $store.state.auth.user.nama ? 'Ketua' : 'Anggota' }}</td>
+                    <td>{{ isLeader(props.item.ujian.ketua) ? 'Ketua' : 'Anggota' }}</td>
                     <td :class="props.item.ujian.status == 3 ? 'success--text font-weight-bold' : props.item.ujian.status == 2 ? 'warning--text' : null">{{ examStatus(props.item.ujian.status) }}</td>
                 </template>
                 <template v-slot:footer>
