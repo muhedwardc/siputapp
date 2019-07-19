@@ -2,6 +2,7 @@
 node_modules
 /dist
 /skripsi
+/media
 /public/uploads/
 db.sqlite3
 
