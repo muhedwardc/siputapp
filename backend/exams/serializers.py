@@ -139,7 +139,18 @@ class RecapExamSerializer(serializers.ModelSerializer):
     sesi = serializers.StringRelatedField()
     ruang = serializers.StringRelatedField()
     skripsi = SimpleEssaySerializer()
+    ketua = serializers.SerializerMethodField()
     penguji = serializers.SerializerMethodField()
+
+    def get_ketua(self, exam):
+        ketua = dict()
+        for penguji in exam.penguji.all():
+            if penguji.is_leader == True:
+                dosen = penguji.dosen
+                ketua.update({'id': dosen.pk, 'nama': dosen.nama})
+                return ketua
+            else:
+                return None
 
     def get_penguji(self, exam):
         list_penguji = list()
@@ -152,7 +163,7 @@ class RecapExamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'ketua', 'penguji')
 
 class UploadEssaySerializer(serializers.Serializer):
     file = serializers.FileField()
