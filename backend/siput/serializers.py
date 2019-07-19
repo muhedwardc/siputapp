@@ -30,10 +30,19 @@ class SiputExamSerializer(serializers.ModelSerializer):
     ruang = serializers.StringRelatedField()
     skripsi = EssaySerializer()
     penguji = PengujiSerializer(many=True, required=False)
+    ketua = serializers.SerializerMethodField()
+
+    def get_ketua(self, exam):
+        for penguji in exam.penguji.all():
+            if penguji.is_leader == True:
+                dosen = penguji.dosen
+                return dosen.pk
+            else:
+                return None
 
     class Meta:
         model = Exam
-        fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'ketua', 'penguji')
 
 
 class ListSiputPengujiSerializer(serializers.ModelSerializer):
