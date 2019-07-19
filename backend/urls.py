@@ -38,13 +38,12 @@ urlpatterns = [
     path('api/', include(router.urls)),
 
     # http://localhost:8000/api/admin/
-    path('admin/', admin.site.urls),
-
-    # http://localhost:8000/
-    re_path(r'^.*', index_view, name='index'),
+    path('admin/', admin.site.urls)
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns.append(re_path(r'^.*', index_view, name='index'))
 
