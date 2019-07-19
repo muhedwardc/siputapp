@@ -313,10 +313,11 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
         list_comment = []
         for penguji in ujian.penguji.all():
-            comments = {
-                "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else "Anonymus",
-                "komentar": []
-            }
+            if penguji.dosen:
+                comments = {
+                    "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else "Anonymus",
+                    "komentar": []
+                }
             for bab in range(0, 7):
                 comment = {
                     "bab": bab,
