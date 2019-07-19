@@ -294,8 +294,10 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             }
 
             # yang di for penguji yang memberi nilai saja
+            list_penguji = list()
             for penguji in ujian.penguji.all():
                 if penguji.grades.exists():
+                    list_penguji.append(penguji)
                     list_nilai = penguji.grades.filter(mahasiswa=student)
                     nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
                     grade['nilai'].append({
@@ -307,7 +309,7 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
             grade.update({"jumlah_rerata": "%.2f" % jumlah_rerata})
             grades.append(grade)
 
-            rerata_total = jumlah_rerata / len(ujian.penguji.all())
+            rerata_total = jumlah_rerata / len(list_penguji)
             grade.update({"rerata_total": "%.2f" % rerata_total})
         response.update({'rekap_nilai': grades})
 
