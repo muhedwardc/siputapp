@@ -292,15 +292,18 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                 "nilai": [],
                 "jumlah_rerata": jumlah_rerata
             }
+
+            # yang di for penguji yang memberi nilai saja
             for penguji in ujian.penguji.all():
-                list_nilai = penguji.grades.filter(mahasiswa=student)
-                nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
-                grade['nilai'].append({
-                    "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
-                    "detail": RecapGradeSerializer(list_nilai, many=True).data,
-                    "rerata": "%.2f" % nilai.get('rerata') if nilai.get('rerata') else "%.2f" % 0
-                })
-                jumlah_rerata += nilai.get('rerata') if nilai.get('rerata') else 0
+                if penguji.grades.exists():
+                    list_nilai = penguji.grades.filter(mahasiswa=student)
+                    nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
+                    grade['nilai'].append({
+                        "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
+                        "detail": RecapGradeSerializer(list_nilai, many=True).data,
+                        "rerata": "%.2f" % nilai.get('rerata') if nilai.get('rerata') else "%.2f" % 0
+                    })
+                    jumlah_rerata += nilai.get('rerata') if nilai.get('rerata') else 0
             grade.update({"jumlah_rerata": "%.2f" % jumlah_rerata})
             grades.append(grade)
 

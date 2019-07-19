@@ -139,7 +139,16 @@ class RecapExamSerializer(serializers.ModelSerializer):
     sesi = serializers.StringRelatedField()
     ruang = serializers.StringRelatedField()
     skripsi = SimpleEssaySerializer()
-    penguji = PengujiSerializer(many=True, required=False)
+    penguji = serializers.SerializerMethodField()
+
+    def get_penguji(self, exam):
+        list_penguji = list()
+        for penguji in exam.penguji.all():
+            grades = penguji.grades.all()
+            if grades.exists():
+                penguji.append(list_penguji)
+
+        return ListPengujiSerializer(list_penguji, many=True).data
 
     class Meta:
         model = Exam
