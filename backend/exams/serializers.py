@@ -146,7 +146,7 @@ class RecapExamSerializer(serializers.ModelSerializer):
         for penguji in exam.penguji.all():
             grades = penguji.grades.all()
             if grades.exists():
-                penguji.append(list_penguji)
+                list_penguji.append(penguji)
 
         return ListPengujiSerializer(list_penguji, many=True).data
 
