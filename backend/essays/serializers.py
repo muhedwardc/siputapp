@@ -54,6 +54,7 @@ class CreateEssaySerializer(serializers.ModelSerializer):
         instance.judul = validated_data.get('judul', instance.judul)
         instance.intisari = validated_data.get('intisari', instance.intisari)
         instance.is_capstone = validated_data.get('is_capstone', instance.is_capstone)
+        instance.naskah = validated_data.get('naskah', instance.naskah)
         instance.save()
 
         if validated_data.get('mahasiswa'):
