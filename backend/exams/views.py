@@ -114,11 +114,11 @@ class ExamViewSet(viewsets.ModelViewSet):
         exam = self.get_object()
         serializer = EditExamSerializer(exam, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            updated_exam = serializer.save()
             return Response({
                 "status": "OK",
                 "message": "Data ujian berhasil diubah.",
-                "ujian": ExamSerializer(exam).data
+                "ujian": ExamSerializer(updated_exam).data
             }, status=status.HTTP_200_OK)
         return Response({
             "status": "ERROR",
@@ -131,10 +131,10 @@ class ExamViewSet(viewsets.ModelViewSet):
         essay = self.get_object().skripsi
         serializer = CreateEssaySerializer(essay, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            updated_essay = serializer.save()
             return Response({
                 "message": "Data skripsi berhasil diubah.",
-                "ujian": EssaySerializer(essay).data
+                "ujian": EssaySerializer(updated_essay).data
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
