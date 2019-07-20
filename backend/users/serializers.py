@@ -1,3 +1,5 @@
+import datetime
+
 from rest_framework import serializers
 from .models import User, Pengelola
 from django.contrib.auth import authenticate
@@ -6,10 +8,22 @@ from django.contrib.auth import authenticate
 class FullUserSerializer(serializers.ModelSerializer):
     prodi = serializers.CharField(required=False)
     konsentrasi = serializers.CharField(required=False)
+    exams_this_month = serializers.SerializerMethodField()
+
+    def get_exams_this_month(self, user):
+        today = datetime.date.today()
+        next_month = (today.replace(day=28) + datetime.timedelta(days=4)) 
+
+        first = today.replace(day=1)
+        last_day = next_month - datetime.timedelta(days=next_month.day)
+
+        exams = user.exams.filter(ujian__tanggal__gte=first, ujian__tanggal__lte=last_day)
+        exams_this_month = exams.count()
+        return exams_this_month
 
     class Meta:
         model = User
-        fields = ('id', 'nama', 'email', 'prodi', 'konsentrasi', 'nip', 'foto', 'is_admin')
+        fields = ('id', 'nama', 'email', 'prodi', 'konsentrasi', 'nip', 'foto', 'is_admin', 'exams_this_month')
         read_only_fields = ('is_admin', 'foto')
 
 

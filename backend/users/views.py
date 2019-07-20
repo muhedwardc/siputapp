@@ -36,6 +36,16 @@ class UserViewSet(viewsets.ModelViewSet):
         if "ordering" in request.GET:
             list_dosen = list_dosen.order_by(request.GET.get('ordering'))
 
+        if "date" in request.GET and "session" in request.GET:
+            list_dosen_selo = list()
+            for dosen in list_dosen:
+                if dosen.exams.filter(ujian__tanggal=request.GET.get('date'), ujian__sesi=request.GET.get('session')).exists():
+                    pass
+                else:
+                    list_dosen_selo.append(dosen)
+            
+            list_dosen = list_dosen_selo
+
         pagination = request.GET.get('page')
         if pagination == 'all':
             serializer = self.get_serializer(list_dosen, many=True)
