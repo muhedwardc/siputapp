@@ -13,10 +13,12 @@ Vue.mixin({
     computed: {
         isLeader() {
             return function(ketua) {
-                const id = ketua.id
-                if (typeof id == 'string' || typeof id == 'number') {
-                    if (this.userId) {
-                        return id == this.userId
+                if (ketua) {
+                    const id = ketua.id
+                    if (typeof id == 'string' || typeof id == 'number') {
+                        if (this.userId) {
+                            return id == this.userId
+                        }
                     }
                 }
                 return false
