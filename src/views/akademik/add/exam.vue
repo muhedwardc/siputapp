@@ -5,6 +5,7 @@
                 @on-complete="onComplete"
                 class="form-wizard"
                 stepSize="sm"
+                :startIndex="2"
                 errorColor="#FF6666"
                 color="#1996F5">
                 <tab-content title="Informasi Ujian" :before-change="validateExamInfo" @on-validate="validateExamInfo">
@@ -80,84 +81,6 @@
                             accept="application/pdf,application/vnd.ms-excel"
                             @change="onFilePicked"
                         >
-                    </v-form>
-                </tab-content>
-                <tab-content title="Pilih Ruangan" :before-change="validateRoomSession">
-                    <v-form ref="form2" v-model="valid[1]" lazy-validation>
-                    <v-menu
-                        v-model="dateMenu"
-                        :close-on-content-click="false"
-                        :nudge-right="40"
-                        lazy
-                        transition="scale-transition"
-                        offset-y
-                        full-width
-                        solo
-                        :disabled="submitting"
-                        min-width="290px">
-                        <template v-slot:activator="{ on }">
-                            <v-text-field
-                                v-model="exam.tanggal"
-                                :rules="[...rules.required, ...rules.date]"
-                                readonly
-                                placeholder="Pilih Tanggal Ujian"
-                                prepend-icon="event "
-                                :disabled="submitting"
-                                v-on="on"
-                            ></v-text-field>
-                        </template>
-                        <v-date-picker :disabled="submitting" @input="getThisDayExams(exam.tanggal)" v-model="exam.tanggal"></v-date-picker>
-                    </v-menu>
-                    <template v-if="exam.tanggal">
-                        <a @click="getThisDayExams(exam.tanggal)" v-if="errorFetchingSpecificExams" class="error--text">Terjadi kesalahan saat memuat ujian, tekan untuk memuat ulang</a>
-                        <v-container class="pa-0" grid-list-md v-else-if="thisDayExams.length && !errorFetchingSpecificExams">
-                            <p class="mb-1">Daftar ujian ditanggal {{exam.tanggal}}</p>
-                            <v-layout row wrap>
-                                <v-chip v-for="e in thisDayExams" :key="e.id" label class="ml-2 mr-2">{{ e.ruang + ', ' + e.sesi }}</v-chip>
-                            </v-layout>
-                        </v-container>
-                        <p v-else-if="!errorFetchingSpecificExams && !thisDayExams.length">Tidak ada ujian untuk tanggal {{exam.tanggal}}</p>
-                    </template>
-                    <v-container class="no-h-padding" grid-list-md>
-                        <p class="mb-0">Pilih ruangan dan sesi ujian</p>
-                        <a class="error--text" @click="fetchRoomSessions" v-if="errorFetchRoomSessions">Terdapat masalah dalam memuat ruangan dan sesi, tekan untuk memuat ulang</a>
-                        <v-layout justify-center v-if="loadingRoomSessions">
-                            <v-progress-circular
-                                indeterminate
-                                color="purple"
-                                ></v-progress-circular>
-                        </v-layout>
-                        <v-layout v-else-if="!loadingRoomSessions && !errorFetchRoomSessions" row wrap>
-                            <v-flex xs12 sm4>
-                                <v-select
-                                    :items="rooms"
-                                    v-model="exam.ruang"
-                                    item-value="id"
-                                    placeholder="Ruangan"
-                                    item-text="nama"
-                                    :rules="[v => !!v || 'Bidang isian harus diisi']"
-                                    :disabled="submitting || !exam.tanggal"
-                                    ></v-select>
-                            </v-flex>
-                            <v-flex xs12 sm4>
-                                <v-select
-                                    :items="sessions"
-                                    v-model="exam.sesi"
-                                    item-value="id"
-                                    placeholder="Sesi"
-                                    :rules="[v => !!v || 'Bidang isian harus diisi']"
-                                    :disabled="submitting || !exam.tanggal"
-                                    >
-                                    <template slot="selection" slot-scope="data">
-                                        {{ data.item.mulai }} - {{ data.item.selesai }}
-                                    </template>
-                                    <template slot="item" slot-scope="data">
-                                        {{ data.item.mulai }} - {{ data.item.selesai }}
-                                    </template>
-                                </v-select>
-                            </v-flex>
-                        </v-layout>
-                    </v-container>
                     </v-form>
                 </tab-content>
                 <tab-content title="Data Mahasiswa" :before-change="validateMahasiswa">
@@ -268,6 +191,84 @@
                     <p class="error--text mb-0" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa.length <= 1">Jumlah mahasiswa untuk capstone harus lebih dari satu.</p>
                     <v-btn class="ml-0 text-capitalize font-weight bold" style="letter-spacing: .5px" @click="addMahasiswa" color="primary" v-if="exam.skripsi.is_capstone && exam.skripsi.mahasiswa.length < 4"><v-icon small left>add</v-icon> tambah mahasiswa</v-btn>
                 </tab-content>
+                <tab-content title="Pilih Ruangan" :before-change="validateRoomSession">
+                    <v-form ref="form2" v-model="valid[1]" lazy-validation>
+                    <v-menu
+                        v-model="dateMenu"
+                        :close-on-content-click="false"
+                        :nudge-right="40"
+                        lazy
+                        transition="scale-transition"
+                        offset-y
+                        full-width
+                        solo
+                        :disabled="submitting"
+                        min-width="290px">
+                        <template v-slot:activator="{ on }">
+                            <v-text-field
+                                v-model="exam.tanggal"
+                                :rules="[...rules.required, ...rules.date]"
+                                readonly
+                                placeholder="Pilih Tanggal Ujian"
+                                prepend-icon="event "
+                                :disabled="submitting"
+                                v-on="on"
+                            ></v-text-field>
+                        </template>
+                        <v-date-picker :disabled="submitting" @input="getThisDayExams(exam.tanggal)" v-model="exam.tanggal"></v-date-picker>
+                    </v-menu>
+                    <template v-if="exam.tanggal">
+                        <a @click="getThisDayExams(exam.tanggal)" v-if="errorFetchingSpecificExams" class="error--text">Terjadi kesalahan saat memuat ujian, tekan untuk memuat ulang</a>
+                        <v-container class="pa-0" grid-list-md v-else-if="thisDayExams.length && !errorFetchingSpecificExams">
+                            <p class="mb-1">Daftar ujian ditanggal {{exam.tanggal}}</p>
+                            <v-layout row wrap>
+                                <v-chip v-for="e in thisDayExams" :key="e.id" label class="ml-2 mr-2">{{ e.ruang + ', ' + e.sesi }}</v-chip>
+                            </v-layout>
+                        </v-container>
+                        <p v-else-if="!errorFetchingSpecificExams && !thisDayExams.length">Tidak ada ujian untuk tanggal {{exam.tanggal}}</p>
+                    </template>
+                    <v-container class="no-h-padding" grid-list-md>
+                        <p class="mb-0">Pilih ruangan dan sesi ujian</p>
+                        <a class="error--text" @click="fetchRoomSessions" v-if="errorFetchRoomSessions">Terdapat masalah dalam memuat ruangan dan sesi, tekan untuk memuat ulang</a>
+                        <v-layout justify-center v-if="loadingRoomSessions">
+                            <v-progress-circular
+                                indeterminate
+                                color="purple"
+                                ></v-progress-circular>
+                        </v-layout>
+                        <v-layout v-else-if="!loadingRoomSessions && !errorFetchRoomSessions" row wrap>
+                            <v-flex xs12 sm4>
+                                <v-select
+                                    :items="rooms"
+                                    v-model="exam.ruang"
+                                    item-value="id"
+                                    placeholder="Ruangan"
+                                    item-text="nama"
+                                    :rules="[v => !!v || 'Bidang isian harus diisi']"
+                                    :disabled="submitting || !exam.tanggal"
+                                    ></v-select>
+                            </v-flex>
+                            <v-flex xs12 sm4>
+                                <v-select
+                                    :items="sessions"
+                                    v-model="exam.sesi"
+                                    item-value="id"
+                                    placeholder="Sesi"
+                                    :rules="[v => !!v || 'Bidang isian harus diisi']"
+                                    :disabled="submitting || !exam.tanggal"
+                                    >
+                                    <template slot="selection" slot-scope="data">
+                                        {{ data.item.mulai }} - {{ data.item.selesai }}
+                                    </template>
+                                    <template slot="item" slot-scope="data">
+                                        {{ data.item.mulai }} - {{ data.item.selesai }}
+                                    </template>
+                                </v-select>
+                            </v-flex>
+                        </v-layout>
+                    </v-container>
+                    </v-form>
+                </tab-content>
                 <tab-content title="Dosen Penguji" :before-change="validateDosen">
                     <v-form ref="form4" lazy-validation v-model="valid[3]">
                     <v-layout row align-center wrap>
@@ -283,13 +284,16 @@
                             class="pt-0"
                         ></v-text-field>
                     </v-layout>
-                    <template class="mt-4 mb-1">
-                        <p v-if="dosenValidation" class="mb-0 mt-2 error--text">{{ dosenValidation }}</p>
-                        <p>Dosen terpilih: <span v-text="dosenStr"></span></p>
-                    </template>
+                    <v-layout row wrap justify-space-between>
+                        <v-layout column>
+                            <p class="mt-2 mb-0">Dosen terpilih: <span v-text="dosenStr"></span></p>
+                            <p v-if="dosenValidation" class="ma-0 error--text">{{ dosenValidation }}</p>
+                        </v-layout>
+                        <v-btn class="primary ma-0 mb-2 mt-2 text-capitalize" @click="filterDosen = !filterDosen" :loading="loadingDosen"><v-icon left>filter_list</v-icon>{{ !filterDosen ? 'Filter Dosen yang Tersedia' : 'Semua Dosen'}}</v-btn>
+                    </v-layout>
                     <v-data-table
                         :headers="dosenHeaders"
-                        :items="dosen"
+                        :items="filteredDosen"
                         :search="search"
                         :pagination.sync="pagination"
                         :total-items="totalItems"
@@ -347,7 +351,7 @@
                         <wizard-button :disabled="submitting" v-if="props.activeTabIndex > 0" @click.native="props.prevTab()" :style="props.fillButtonStyle">Kembali</wizard-button>
                     </div>
                     <div class="wizard-footer-right">
-                        <wizard-button :disabled="submitting" :loading="props.activeTabIndex == 1 ? loadingDosen : false" v-if="!props.isLastStep" @click.native="props.activeTabIndex == 1 ? fetchDosen(props.nextTab) : props.nextTab()" class="wizard-footer-right" :style="props.fillButtonStyle">Lanjut</wizard-button>
+                        <wizard-button :disabled="submitting" :loading="props.activeTabIndex == 2 ? loadingDosen : false" v-if="!props.isLastStep" @click.native="props.activeTabIndex == 2 ? fetchDosen(props.nextTab, `&date=${exam.tanggal}&session=${exam.sesi}`) : props.nextTab()" class="wizard-footer-right" :style="props.fillButtonStyle">Lanjut</wizard-button>
                         <v-layout column align-end v-else>
                             <wizard-button v-if="!submitting" :disabled="submitting" @click.native="createExam" class="wizard-footer-right finish-button" :style="props.fillButtonStyle">  {{props.isLastStep ? 'Simpan' : 'Lanjut'}}</wizard-button>
                             <v-layout row align-center v-else>
@@ -483,7 +487,9 @@ export default {
                 date: [v => /^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}$/g.test(v) || 'Tanggal format YYYY-MM-DD'],
                 date2: [v => /^[0-9]{2}-[0-9]{2}-[1-9][0-9]{3}$/g.test(v) || 'Tanggal format DD-MM-YYYY'],
             },
-            dosenStr: 'belum dipilih'
+            dosenStr: 'belum dipilih',
+            dosenWithFilter: [],
+            filterDosen: false
         }
     },
 
@@ -502,6 +508,10 @@ export default {
             if (errors.length > 0) return errors.join(', ')
             return false
         },
+
+        filteredDosen() {
+            return this.filterDosen ? this.dosenWithFilter : this.dosen
+        }
     },
 
     methods: {
@@ -691,11 +701,12 @@ export default {
                 }
             })
         },
-        async fetchDosen(nextTab = null) {
+        async fetchDosen(nextTab = null, filter = '') {
             this.loadingDosen = true
             try {
-                const response = await this.$thessa.getAllDosen('page=all')
-                this.dosen = response.data
+                const response = await this.$thessa.getAllDosen('page=all' + filter)
+                if (filter) this.dosenWithFilter = response.data
+                else this.dosen = response.data
                 this.loadingDosen = false
                 this.assignDosen()
                 if (nextTab !== null) nextTab()
@@ -814,6 +825,7 @@ export default {
         this.options[0].prodiOptions = this.prodiList
         this.options[0].konsentrasiOptions = this.konsentrasiList
         if(this.$store.state.auth.token) {
+            this.fetchDosen()
             this.fetchRoomSessions()
         } 
     }

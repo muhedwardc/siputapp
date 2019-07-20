@@ -7,9 +7,17 @@
                         <v-card-title class="title pb-0">Edit {{editTemp.label}}</v-card-title>
                         <v-card-text>
                             <template v-if="editTemp.type == 'file'">
-                                <v-layout align-center>
-                                    <v-btn @click="$refs.pdf.click()">pilih naskah</v-btn>
-                                    <span v-line-clamp:20="1" v-text="editTemp.value.name"></span>
+                                <v-layout row align-center wrap>
+                                    <v-btn
+                                        :disabled="uploadingScript"
+                                        :loading="uploadingScript"
+                                        @click='$refs.pdf.click()'
+                                        class="ma-0 primary"
+                                    >
+                                        <v-icon left dark>attach_file</v-icon>
+                                        pilih naskah
+                                    </v-btn>
+                                    <span v-line-clamp:20="1" v-text="this.editTemp.value.name ? this.editTemp.value.name : naskahFileName" class="pl-2"></span>
                                 </v-layout>
                                 <input
                                     type="file"
@@ -264,8 +272,8 @@
                         </v-card-text>
                         <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn class="font-weight-bold" color="error" @click="discard" :disabled="submitting">Batal</v-btn>
-                        <v-btn class="font-weight-bold" color="success" v-if="hasChanged" :loading="submitting" @click="saveEdit">Ya</v-btn>
+                        <v-btn class="font-weight-bold primary--text" color="white" @click="discard" :disabled="submitting">Batal</v-btn>
+                        <v-btn class="font-weight-bold primary" v-if="hasChanged" :loading="submitting" @click="saveEdit">Ya</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -306,7 +314,7 @@
                             <v-dialog persistent v-model="agreementDialog" max-width="600px">
                                 <v-card class="pa-4">
                                     <h2 class="mb-2">Mulai ujian?</h2>
-                                    <p>Saat ini ujian skripsi belum dimulai. Dengan menekan tombol <b>mulai</b>, Anda akan mengubah status ujian menjadi mulai sehingga semua dosen terkait dapat memasuki ujian.<br>Pastikan jumlah dosen yang hadir telah <b>memenuhi syarat</b> ujian skripsi.</p>
+                                    <p>Saat ini ujian skripsi belum dimulai. Dengan menekan tombol <b>mulai</b>, Anda akan mengubah status ujian menjadi mulai sehingga semua dosen terkait dapat memasuki ujian dan Anda akan menjadi <b>Ketua Sidang</b>.<br>Pastikan jumlah dosen yang hadir telah <b>memenuhi syarat</b> ujian skripsi.</p>
                                     <v-layout row>
                                         <v-spacer></v-spacer>
                                         <v-btn color="error" :disabled="startingExam" @click="agreementDialog = false">batal</v-btn>
@@ -320,65 +328,62 @@
                             <v-btn v-if="!isAdmin && exam.status == 3" depressed color="success" class="ma-0 mt-2"><v-icon left>check_circle</v-icon>Ujian Selesai</v-btn>
                             <v-btn v-if="isAdmin" depressed color="error" class="ma-0 mt-2" @click="dialogDelete = true"><v-icon left>delete</v-icon>hapus ujian</v-btn>
                         </v-layout>
-                        <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }}
+                        <span class="subheading">Tipe: {{ exam.skripsi.is_capstone ? 'Captsone' : 'Individu' }}</span>
                         <!-- <span @click="edit('skripsi.is_capstone', 'radio', 'Tipe Skripsi')" class="edit--text" v-if="isAdmin">[EDIT]</span> -->
-                        </span>
+                        <!-- </span> -->
                         <v-layout column class="mt-2">
                             <span class="font-weight-bold">Naskah Skripsi</span>
                             <v-layout class="mt-2" align-center>
                                 <v-icon flat>file_copy</v-icon>
                                 <span class="ml-2" v-line-clamp:20="1" v-text="naskahFileName"></span>
-                                <span @click="editedit('skripsi.naskah', 'file', 'Naskah')" class="edit--text text-capitalize" v-if="isAdmin">[EDIT]</span>
+                                <v-btn style="box-shadow: none; border-radius: 8px;" @click="edit('skripsi.naskah', 'file', 'Naskah')" class="text-capitalize default ma-0 ml-2" v-if="isAdmin"><v-icon left>attachment</v-icon>unggah ulang</v-btn>
+                                <v-btn style="box-shadow: none; border-radius: 8px;" color="primary" class="ma-0 ml-2 text-capitalize" @click="openNaskah"><v-icon left small>open_in_new</v-icon>lihat naskah</v-btn>
                             </v-layout>
                         </v-layout>
-                        <v-layout class="mt-2" row justify-start align-center wrap>
-                            <v-chip v-if="isLeader(exam.ketua) && !isAdmin" color="warning" class="white--text ml-0">
+                        <hr>
+                        <v-layout column>
+                            <span class="font-weight-bold">Berkas Hasil Ujian <template v-if="exam.status == 3"><v-icon small color="success">check_circle</v-icon><span class="ma-0 font-weight-regular">Ujian sudah selesai</span></template><template v-else><v-icon small color="warning">error</v-icon><span class="ma-0 font-weight-regular">Ujian belum selesai</span></template></span>
+                            <app-exam-result v-if="exam.status == 3" class="mt-2" :examId="examId"></app-exam-result>
+                        </v-layout>
+                        <hr>
+                        <v-layout column align-content-start align-start>
+                            <span class="font-weight-bold">Informasi Ujian</span>
+                            <v-chip label flat v-if="isLeader(exam.ketua) && !isAdmin" color="warning" class="white--text ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon>verified_user</v-icon>
                                 </v-avatar>
                                 Ketua
                             </v-chip>
-                            <v-chip v-if="!isLeader(exam.ketua) && !isAdmin && pembimbing" color="success" class="white--text ml-0">
+                            <v-chip label flat v-if="!isLeader(exam.ketua) && !isAdmin && pembimbing" color="success" class="white--text ml-0">
                                 <v-avatar class="mr-0">
                                     <v-icon>verified_user</v-icon>
                                 </v-avatar>
-                                Pembimbing 2
+                                Pembimbing
                             </v-chip>
-                            <v-chip class="ml-0" :class="isToday(exam.tanggal) ? 'white--text' : ''" :color="isToday(exam.tanggal) ? 'purple' : ''">
-                                <v-avatar class="mr-0">
-                                    <v-icon class="subheading">calendar_today</v-icon>
-                                </v-avatar>
+                            <v-layout align-center class="ml-0 mt-1" :class="isToday(exam.tanggal) ? 'white--text' : ''" :color="isToday(exam.tanggal) ? 'purple' : ''">
+                                <v-icon class="subheading mr-2">calendar_today</v-icon>
                                 {{ isToday(exam.tanggal) ? date + ' (Hari Ini)' : date }}
                                 <span class="edit--text" @click="edit('tanggal', 'date', 'Tanggal Ujian')" v-if="isAdmin">[EDIT]</span>
-                            </v-chip>
-                            <v-chip class="ml-0">
-                                <v-avatar class="mr-0">
-                                    <v-icon class="subheading">access_time</v-icon>
-                                </v-avatar>
+                            </v-layout>
+                            <v-layout align-center class="ml-0 mt-2">
+                                <v-icon class="subheading mr-2">access_time</v-icon>
                                 {{ exam.sesi }}
                                 <span class="edit--text" v-if="isAdmin" @click="edit('sesi', 'sesi', 'Sesi')">[EDIT]</span>
-                            </v-chip>
-                            <v-chip class="ml-0">
-                                <v-avatar class="mr-0">
-                                    <v-icon class="subheading">place</v-icon>
-                                </v-avatar>
+                            </v-layout>
+                            <v-layout align-center class="ml-0 mt-2">
+                                <v-icon class="subheading mr-2">place</v-icon>
                                 {{ exam.ruang }}
                                 <span class="edit--text" v-if="isAdmin" @click="edit('ruang', 'ruang', 'Ruang')">[EDIT]</span>
-                            </v-chip>
+                            </v-layout>
                         </v-layout>
                         <hr>
-                        <v-layout class="mt-3" column>
-                            <span class="font-weight-bold">Berkas Hasil Ujian <template v-if="exam.status == 3"><v-icon small color="success">check_circle</v-icon><span class="ma-0 font-weight-regular">Ujian sudah selesai</span></template><template v-else><v-icon small color="warning">error</v-icon><span class="ma-0 font-weight-regular">Ujian belum selesai</span></template></span>
-                            <app-exam-result v-if="exam.status == 3" class="mt-2" :examId="examId"></app-exam-result>
-                        </v-layout>
-                        <hr>
-                        <v-layout column class="mt-4">
-                            <h6 class="title font-weight-regular mb-2">Intisari<span class="edit--text" v-if="isAdmin" @click="edit('skripsi.intisari', 'text', 'Intisari')">[EDIT]</span></h6>
+                        <v-layout column>
+                            <span class="font-weight-bold mb-2">Intisari<span class="edit--text font-weight-regular" v-if="isAdmin" @click="edit('skripsi.intisari', 'text', 'Intisari')">[EDIT]</span></span>
                             <p class="ma-0 mb-2">{{ exam.skripsi.intisari }}</p>
                         </v-layout>
                         <hr>
-                        <v-layout class="mt-3" column>
-                            <h6 class="title font-weight-regular">Informasi Mahasiswa<span class="edit--text" v-if="isAdmin" @click="edit('skripsi.mahasiswa', 'mahasiswa', 'Mahasiswa')">[EDIT]</span></h6>
+                        <v-layout column>
+                            <span class="font-weight-bold">Informasi Mahasiswa<span class="edit--text font-weight-regular" v-if="isAdmin" @click="edit('skripsi.mahasiswa', 'mahasiswa', 'Mahasiswa')">[EDIT]</span></span>
                             <v-data-table
                                 :headers="headers"
                                 :items="exam.skripsi.mahasiswa"
@@ -402,7 +407,7 @@
                         <hr>
                         <v-layout class="mt-3" column>
                             <v-layout wrap align-center>
-                                <h6 class="title font-weight-regular">Informasi Penguji</h6>
+                                <span class="font-weight-bold">Informasi Penguji</span>
                                 <v-spacer></v-spacer>
                                 <v-btn class="primary ma-0" v-if="isAdmin" @click="edit('penguji', 'dosen', 'Penguji')">Tambah Penguji</v-btn>
                             </v-layout>
@@ -527,6 +532,7 @@ export default {
             checkingStatus: false,
             leader: false,
             admin: false,
+            uploadingScript: false
         }
     },
 
@@ -562,6 +568,10 @@ export default {
     },
 
     methods: {
+        openNaskah() {
+            window.open(this.exam.skripsi.naskah, "_blank");
+        },
+
         async checkExamStatus(examId) {
             this.checkingStatus = true
             try {
@@ -627,6 +637,7 @@ export default {
         },
 
         async saveEditedSkripsiItem(fullKey, newVal) {
+            console.log(fullKey, newVal)
             const key = fullKey.replace('skripsi.', '')
             try {
                 let data = {}
@@ -665,23 +676,32 @@ export default {
             }
         },
 
+        async cancelUpload() {
+            this.$store.state.cancelTokenSource.cancel('Pengunggahan naskah dibatalkan.')
+            this.editTemp.value = null
+        },
+
         async saveEdit() {
             if (this.editTemp.key == 'penguji') this.assignNewDosen({dosen: this.selectedPenguji.id})
             else {
                 const isSkripsi = /skripsi\..+/.test(this.editTemp.key)
                 if (isSkripsi) {
                     if (this.editTemp.key == 'skripsi.naskah') {
+                        this.uploadingScript = true
                         let formData = new FormData()
                         formData.append('file', this.editTemp.value.file)
                         try {
                             const name = + new Date() + '_' + this.editTemp.value.name
-                            return
-                            // const res = await this.$thessa.addThesis(name, formData)
+                            const res = await this.$thessa.addThesis(name, formData)
+                            await this.saveEditedSkripsiItem(this.editTemp.key, res.data.file)
+                            this.uploadingScript = false
                         } catch (error) {
                             this.showSnackbar(error)
+                            this.uploadingScript = false
                         }
+                    } else {
+                        this.saveEditedSkripsiItem(this.editTemp.key, this.editTemp.value)
                     }
-                    this.saveEditedSkripsiItem(this.editTemp.key, this.editTemp.value)
                 }
                 else this.saveEditedExamItem(this.editTemp.key, this.editTemp.value)
             }
@@ -704,10 +724,6 @@ export default {
                     this.$store.dispatch('showSnackbar', error.message)
                 }
             }
-        },
-
-        openThesis() {
-            window.open('http://www.africau.edu/images/default/sample.pdf', '_blank')
         },
 
         joinExam() {
@@ -878,7 +894,7 @@ export default {
         padding: 0
     
     hr
-        margin: 20px 0
+        margin: 14px 0
         color: #A7A7A7
 
     .edit--text

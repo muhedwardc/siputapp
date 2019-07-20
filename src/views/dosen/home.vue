@@ -90,7 +90,7 @@ export default {
                 if (!Cookie.get('visit_home')) {
                     this.showSnackbar({
                         message,
-                        type: 'info'
+                        type: 'warning'
                     })
                     Cookie.set('visit_home', true)
                 }
