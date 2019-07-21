@@ -14,16 +14,16 @@ class FullUserSerializer(serializers.ModelSerializer):
         today = datetime.date.today()
         next_month = (today.replace(day=28) + datetime.timedelta(days=4)) 
 
-        first = today.replace(day=1)
+        first_day = today.replace(day=1)
         last_day = next_month - datetime.timedelta(days=next_month.day)
 
-        exams = user.exams.filter(ujian__tanggal__gte=first, ujian__tanggal__lte=last_day)
+        exams = user.exams.filter(ujian__tanggal__gte=first_day, ujian__tanggal__lte=last_day)
         exams_this_month = exams.count()
         return exams_this_month
 
     class Meta:
         model = User
-        fields = ('id', 'nama', 'email', 'prodi', 'konsentrasi', 'nip', 'foto', 'is_admin', 'exams_this_month')
+        exclude = ('password', 'last_login')
         read_only_fields = ('is_admin', 'foto')
 
 

@@ -1,27 +1,49 @@
 import jwt
 import traceback
+import datetime
+
+from knox.models import AuthToken
+
 from rest_framework import views, viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter, OrderingFilter
-from knox.models import AuthToken
-from django.db.models import Q
-from django.conf import settings
-from django.shortcuts import get_object_or_404
 
-from .serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer, PengelolaSerializer
-from .models import User, Pengelola
+from backend.users.serializers import FullUserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordSerializer, PengelolaSerializer
+from backend.users.models import User, Pengelola
 from backend.pagination import CustomPagination
 
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = FullUserSerializer
     queryset = User.objects.all()
-    # permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
-    filter_backends = (SearchFilter, OrderingFilter)
-    ordering_fields = ('email', 'nama')
-    search_fields = ('nama',)
+    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
     pagination_class = CustomPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search = self.request.GET.get('search')
+        ordering = self.request.GET.get('ordering')
+
+        # filter search dan order
+        if search:
+            queryset = queryset.filter(nama__icontains=search)
+        if ordering:
+            queryset = queryset.order_by(ordering)
+
+        date = self.request.GET.get('date')
+        session = self.request.GET.get('session')
+
+        # filter dosen yang tidak menguji hari tertentu
+        if date and session:
+            list_available_dosen = list()
+            for obj in queryset:
+                exams_today = obj.exams.filter(ujian__tanggal=date, ujian__sesi=session)
+                if not exams_today.exists():
+                    list_available_dosen.append(obj)
+
+            queryset = list_available_dosen
+
+        return queryset
 
     def create(self, request, *args, **kwargs):
         # Menghilangkan metode 'create' diganti dengan register dosen/akademik dibawah.
@@ -30,21 +52,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def dosen(self, request, *args, **kwargs):
         list_dosen = self.get_queryset().filter(is_admin=False)
-        if "search" in request.GET:
-            list_dosen = list_dosen.filter(nama__icontains=request.GET.get('search'))
-
-        if "ordering" in request.GET:
-            list_dosen = list_dosen.order_by(request.GET.get('ordering'))
-
-        if "date" in request.GET and "session" in request.GET:
-            list_dosen_selo = list()
-            for dosen in list_dosen:
-                if dosen.exams.filter(ujian__tanggal=request.GET.get('date'), ujian__sesi=request.GET.get('session')).exists():
-                    pass
-                else:
-                    list_dosen_selo.append(dosen)
-            
-            list_dosen = list_dosen_selo
 
         pagination = request.GET.get('page')
         if pagination == 'all':
@@ -58,15 +65,15 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def akademik(self, request, *args, **kwargs):
         list_akademik = self.get_queryset().filter(is_admin=True)
-        if "search" in request.GET:
-            list_akademik = list_akademik.filter(nama__icontains=request.GET.get('search'))
-
-        if "ordering" in request.GET:
-            list_akademik = list_akademik.order_by(request.GET.get('ordering'))
         
-        page = self.paginate_queryset(list_akademik)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        pagination = request.GET.get('page')
+        if pagination == 'all':
+            serializer = self.get_serializer(list_akademik, many=True)
+            return Response(serializer.data)
+        else:
+            page = self.paginate_queryset(list_akademik)
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
     @dosen.mapping.post
     def register_dosen(self, request, *args, **kwargs):
@@ -121,6 +128,7 @@ class PengelolaViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class LoginAPI(views.APIView):
+    serializer_class = FullUserSerializer
     permission_classes = (permissions.AllowAny, )
 
     def post(self, request, format=None):
@@ -129,9 +137,47 @@ class LoginAPI(views.APIView):
         user = serializer.validated_data
         instance, token = AuthToken.objects.create(user)
         return Response({
-            "user": FullUserSerializer(user).data,
+            "user": self.serializer_class(user).data,
             "token": token
         })
+
+class LoginGoogle(views.APIView):
+    serializer_class = FullUserSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, format=None):
+        user_token = request.data['token']
+        try:
+            user_data = jwt.decode(user_token, algorithms='RS256', verify=False)
+        except Exception:
+            traceback.print_exc()
+            return Response({
+                "message": "Invalid token."
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = user_data.get('email')
+        foto = user_data.get('picture')
+        if email:
+            try:
+                user = User.objects.get(email=email)
+                instance, token = AuthToken.objects.create(user)
+
+                # save picture from google to user
+                if foto:
+                    user.foto = foto
+                    user.save()
+                
+                user.last_login = datetime.datetime.today()
+                user.save()
+                
+                return Response({
+                    "user": self.serializer_class(user).data,
+                    "token": token
+                }, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({
+                    "message": "Pengguna dengan email %s tidak terdaftar. Silahkan menghubungi bagian Akademik." % email
+                }, status=status.HTTP_404_NOT_FOUND)
 
 class ChangePasswordAPI(views.APIView):
     permission_classes = (permissions.IsAuthenticated, )
@@ -142,35 +188,5 @@ class ChangePasswordAPI(views.APIView):
         self.request.user.set_password(serializer.validated_data['password1'])
         self.request.user.save()
         return Response({
-            "msg": "User password has been changed."
+            "message": "Password pengguna berhasil diperbaharui."
         })
-        
-class LoginGoogle(views.APIView):
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request, format=None):
-        token = request.data['token']
-        try:    
-            user_data = jwt.decode(token, algorithms='RS256', verify=False)
-        except Exception:
-            traceback.print_exc()
-        
-        email = user_data.get('email', None)
-        picture = user_data.get('picture', None)
-        if email:
-            try:
-                user = User.objects.get(email=email)
-                instance, token = AuthToken.objects.create(user)
-
-                # save picture from google to user
-                user.foto = picture
-                user.save()
-
-                return Response({
-                    "user": FullUserSerializer(user).data,
-                    "token": token
-                }, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
-                return Response({
-                    "message": "Pengguna dengan email {} tidak terdaftar".format(email)
-                }, status=status.HTTP_404_NOT_FOUND)
