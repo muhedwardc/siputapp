@@ -2,19 +2,19 @@
     <div class="dosen-home">
         <app-loading></app-loading>
         <v-layout column v-if="!$store.state.loadViewContent">
-            <h3 class="mb-1">Ujian Tugas Akhir Hari Ini</h3>
-            <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
-            <v-container v-else grid-list-lg class="no-padding mt-2">
-                <v-layout row wrap>
+            <v-container grid-list-lg class="no-padding mt-2">
+                <h3 class="mb-1">Ujian Tugas Akhir Hari Ini</h3>
+                <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
+                <v-layout v-else row wrap>
                     <v-flex xs12 sm6 v-for="e in todayExams.slice(0, 3)" :key="e.id">
                         <app-exam-card :item="e"/>
                     </v-flex>
                 </v-layout>
             </v-container>
-            <h3 class="mb-1 mt-4">Ujian Tugas Akhir yang akan datang</h3>
-            <span v-if="nextExams.length === 0">Tidak ada ujian lagi</span>
-            <v-container v-else grid-list-lg class="no-padding mt-2">
-                <v-layout row wrap>
+            <v-container grid-list-lg class="no-padding mt-2">
+                <h3 class="mb-1 mt-4">Ujian Tugas Akhir yang akan datang</h3>
+                <span v-if="nextExams.length === 0">Tidak ada ujian lagi</span>
+                <v-layout v-else row wrap>
                     <v-flex xs12 sm6 v-for="e in nextExams" :key="e.id">
                         <app-exam-card :item="e"/>
                     </v-flex>
@@ -90,7 +90,7 @@ export default {
                 if (!Cookie.get('visit_home')) {
                     this.showSnackbar({
                         message,
-                        type: 'warning'
+                        type: 'success'
                     })
                     Cookie.set('visit_home', true)
                 }

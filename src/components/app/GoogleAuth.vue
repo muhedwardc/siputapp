@@ -28,6 +28,8 @@ export default {
             isSignIn: null,
             submitting: false,
             message: '',
+            isInit: false,
+            isSignIn: false,
         }
     },
 
@@ -35,9 +37,13 @@ export default {
         googleAuth: state => state.auth.google
     }),
 
-    mounted() {
-        this.loadGapi()
-    },
+    created() {
+        let that = this;
+        let checkGauthLoad = setInterval(function() {
+            that.isInit = that.$gAuth.isInit;
+        if (that.isInit) clearInterval(checkGauthLoad);
+        }, 1000);
+    },  
 
     methods: {
         loadGapi() {
@@ -52,16 +58,13 @@ export default {
         },
 
         async signInWithGoogle() {
-            this.message = '' 
-            this.googleAuth ? this.googleAuth.disconnect() : await this.loadGapi()
-            try {
-                this.googleAuth.signIn().then(() => {
-                    const token = this.googleAuth.currentUser.get().getAuthResponse().id_token
-                    this.logUserIn(token)
+            this.$gAuth.signIn()
+                .then(GoogleUser => {
+                    this.logUserIn(GoogleUser.getAuthResponse().id_token)
                 })
-            } catch (error) {
-                if (error.error == 'network_error') this.message = 'Terdapat kesalahan dalam jaringan, mohon coba lagi.'
-            }
+                .catch(error  => {
+                    if (error.error == 'network_error') this.message = 'Terdapat kesalahan dalam jaringan, mohon coba lagi.'
+                })
         },
 
         async logUserIn(id_token) {

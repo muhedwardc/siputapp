@@ -360,7 +360,7 @@
                                 </v-avatar>
                                 Pembimbing
                             </v-chip>
-                            <v-layout align-center class="ml-0 mt-1" :class="isToday(exam.tanggal) ? 'white--text' : ''" :color="isToday(exam.tanggal) ? 'purple' : ''">
+                            <v-layout align-center class="ml-0 mt-1" :class="isToday(exam.tanggal) ? 'purple--text' : ''" :color="isToday(exam.tanggal) ? 'purple' : ''">
                                 <v-icon class="subheading mr-2">calendar_today</v-icon>
                                 {{ isToday(exam.tanggal) ? date + ' (Hari Ini)' : date }}
                                 <span class="edit--text" @click="edit('tanggal', 'date', 'Tanggal Ujian')" v-if="isAdmin">[EDIT]</span>
