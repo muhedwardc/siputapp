@@ -227,6 +227,7 @@
                 </v-dialog>
                 <v-content id="exam-content">
                     <object :data='exam.ujian.skripsi.naskah' id="exam-content-view">
+                        <embed :src="exam.ujian.skripsi.naskah" type="application/pdf" />
                         <v-layout column align-center justify-center style="height: 100%">
                             <h1>Maaf,</h1>
                             <p class="ma-0 mt-2 mb-2">Peramban Anda tidak mendukung penampilan PDF</p>
@@ -439,11 +440,7 @@ export default {
 
     computed: {
         isLeader() {
-            if (this.exam.ujian) {
-                return this.$store.state.auth.user.id == this.exam.ujian.ketua
-            }
-
-            return false
+            return this.$store.state.auth.user.id == this.exam.ujian.ketua.id
         },
         getCurrentAverage() {
             return function(index) {
