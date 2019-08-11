@@ -42,7 +42,7 @@ class Exam(models.Model):
         verbose_name_plural = 'Exams'
 
 class Penguji(models.Model):
-    dosen = models.ForeignKey(User, related_name='exams', on_delete=models.SET_NULL, null=True, blank=True)
+    dosen = models.ForeignKey(User, related_name='exams', on_delete=models.CASCADE, null=True, blank=True)
     ujian = models.ForeignKey(Exam, related_name='penguji', on_delete=models.CASCADE)
     is_leader = models.BooleanField(default=False)
     is_present = models.BooleanField(default=False)
