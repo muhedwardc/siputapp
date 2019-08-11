@@ -155,10 +155,12 @@ class RecapExamSerializer(serializers.ModelSerializer):
     def get_penguji(self, exam):
         list_penguji = list()
         for penguji in exam.penguji.all():
-            grades = penguji.grades.all()
-            if grades.exists():
+            if exam.status == 3:
+                grades = penguji.grades.all()
+                if grades.exists():
+                    list_penguji.append(penguji)
+            else:
                 list_penguji.append(penguji)
-
         return ListPengujiSerializer(list_penguji, many=True).data
 
     class Meta:

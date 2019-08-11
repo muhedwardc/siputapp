@@ -280,9 +280,13 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
     def recap(self, request, *args, **kwargs):
         response = dict()
         ujian = self.get_object().ujian
+        students = ujian.skripsi.students.all()
+        examiners = ujian.penguji.all()
+
+        # Data ujian
         response.update({'rekap_ujian': RecapExamSerializer(ujian).data})
 
-        students = self.get_object().ujian.skripsi.students.all()
+        # Data nilai
         grades = []
         for student in students:
             jumlah_rerata = 0
@@ -295,8 +299,11 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
             # yang di for penguji yang memberi nilai saja
             list_penguji = list()
-            for penguji in ujian.penguji.all():
-                if penguji.grades.exists():
+            for penguji in examiners:
+                # Jika status ujian sudah selesai,
+                # maka data rekap yang ditampilkan hanya data penguji yang memberikan nilai
+                # Keperluan Print Berkas
+                if ujian.status == 3 and penguji.grades.exists():
                     list_penguji.append(penguji)
                     list_nilai = penguji.grades.filter(mahasiswa=student)
                     nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
@@ -306,15 +313,29 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
                         "rerata": "%.2f" % nilai.get('rerata') if nilai.get('rerata') else "%.2f" % 0
                     })
                     jumlah_rerata += nilai.get('rerata') if nilai.get('rerata') else 0
+                else:
+                    # Jika status ujian belum selesai,
+                    # maka data rekap ditampilkan seluruhnya.
+                    # Keperluan halaman rekap ujian
+                    list_nilai = penguji.grades.filter(mahasiswa=student)
+                    rerata = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
+                    grade['nilai'].append({
+                        "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
+                        "detail": RecapGradeSerializer(list_nilai, many=True).data,
+                        "rerata": "%.2f" % rerata.get('rerata') if rerata.get('rerata') else "%.2f" % 0
+                    })
+                    jumlah_rerata += rerata.get('rerata') if rerata.get('rerata') else 0
+                    rerata_total = jumlah_rerata / len(ujian.penguji.all())
+
             grade.update({"jumlah_rerata": "%.2f" % jumlah_rerata})
             grades.append(grade)
 
-            rerata_total = jumlah_rerata / len(list_penguji)
             grade.update({"rerata_total": "%.2f" % rerata_total})
         response.update({'rekap_nilai': grades})
 
+        # Data komentar
         list_comment = []
-        for penguji in ujian.penguji.all():
+        for penguji in examiners:
             if penguji.dosen:
                 comments = {
                     "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else "Anonymus",

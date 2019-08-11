@@ -93,11 +93,17 @@ class ExamViewSet(viewsets.ModelViewSet):
         exam = self.get_object()
         serializer = CreatePengujiSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(ujian=exam)
+            new_penguji = serializer.save(ujian=exam)
             return Response({
-                "msg": "penguji berhasil ditambahkan"
+                "status": "OK",
+                "message": "penguji berhasil ditambahkan",
+                "penguji_id": new_penguji.pk
             }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "status": "ERROR",
+            "message": "Gagal menambahkan penguji",
+            "error": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     def upload_skripsi(self, request, filename, format=None):
         upload_location = settings.ESSAY_FILE_LOCATION
@@ -106,6 +112,8 @@ class ExamViewSet(viewsets.ModelViewSet):
         filename = fs.save(essay_file.name, essay_file)
         file_url = fs.url(filename)
         return Response({
+            "status": "OK",
+            "message": "Berhasil upload file.",
             "file": settings.BASE_URL + file_url
         }, status=status.HTTP_201_CREATED)
 
@@ -133,20 +141,27 @@ class ExamViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             updated_essay = serializer.save()
             return Response({
+                "status": "OK",
                 "message": "Data skripsi berhasil diubah.",
                 "ujian": EssaySerializer(updated_essay).data
             }, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "status": "ERROR",
+            "message": "Data skripsi berhasil diubah.",
+            "error": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True)
     def recap(self, request, *args, **kwargs):
         response = dict()
-        # Data Ujian
         ujian = self.get_object()
+        students = ujian.skripsi.students.all()
+        examiners = ujian.penguji.all()
+        
+        # Data Ujian
         response.update({"rekap_ujian": RecapExamSerializer(ujian).data})
 
         # Data Nilai
-        students = ujian.skripsi.students.all()
         grades = []
         for student in students:
             jumlah_rerata = 0
@@ -156,25 +171,46 @@ class ExamViewSet(viewsets.ModelViewSet):
                 "nilai": [],
                 "jumlah_rerata": jumlah_rerata
             }
-            for penguji in ujian.penguji.all():
-                list_nilai = penguji.grades.filter(mahasiswa=student)
-                rerata = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
-                grade['nilai'].append({
-                    "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
-                    "detail": RecapGradeSerializer(list_nilai, many=True).data,
-                    "rerata": "%.2f" % rerata.get('rerata') if rerata.get('rerata') else "%.2f" % 0
-                })
-                jumlah_rerata += rerata.get('rerata') if rerata.get('rerata') else 0
+
+            # yang di for penguji yang memberi nilai saja
+            list_penguji = list()
+            for penguji in examiners:
+                # Jika status ujian sudah selesai,
+                # maka data rekap yang ditampilkan hanya data penguji yang memberikan nilai
+                # Keperluan Print Berkas
+                if ujian.status == 3 and penguji.grades.exists():
+                    list_penguji.append(penguji)
+                    list_nilai = penguji.grades.filter(mahasiswa=student)
+                    nilai = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
+                    grade['nilai'].append({
+                        "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
+                        "detail": RecapGradeSerializer(list_nilai, many=True).data,
+                        "rerata": "%.2f" % nilai.get('rerata') if nilai.get('rerata') else "%.2f" % 0
+                    })
+                    jumlah_rerata += nilai.get('rerata') if nilai.get('rerata') else 0
+                else:
+                    # Jika status ujian belum selesai,
+                    # maka data rekap ditampilkan seluruhnya.
+                    # Keperluan halaman rekap ujian
+                    list_nilai = penguji.grades.filter(mahasiswa=student)
+                    rerata = penguji.grades.filter(mahasiswa=student).aggregate(rerata=Avg('nilai'))
+                    grade['nilai'].append({
+                        "penguji": penguji.dosen.nama if penguji.dosen.nama is not None else 'Anonymous',
+                        "detail": RecapGradeSerializer(list_nilai, many=True).data,
+                        "rerata": "%.2f" % rerata.get('rerata') if rerata.get('rerata') else "%.2f" % 0
+                    })
+                    jumlah_rerata += rerata.get('rerata') if rerata.get('rerata') else 0
+                    rerata_total = jumlah_rerata / len(ujian.penguji.all())
+
             grade.update({"jumlah_rerata": "%.2f" % jumlah_rerata})
             grades.append(grade)
 
-            rerata_total = jumlah_rerata / len(ujian.penguji.all())
             grade.update({"rerata_total": "%.2f" % rerata_total})
-        response.update({"rekap_nilai": grades})
+        response.update({'rekap_nilai': grades})
 
         # Data Komentar
         list_comment = []
-        for penguji in ujian.penguji.all():
+        for penguji in examiners:
             comments = {
                 "penguji": penguji.dosen.nama if penguji.dosen.nama else "Anonymus",
                 "komentar": []
