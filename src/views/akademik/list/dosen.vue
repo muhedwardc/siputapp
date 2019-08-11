@@ -188,7 +188,7 @@ export default {
             return this.editedItem.prodi == this.prodiOptions[0] ? this.konsentrasiOptions[0] : this.konsentrasiOptions[1]
         },
         hasChanged() {
-            return this.editTemp.nama.trim() !== this.editedItem.nama.trim() || this.editTemp.email.trim() !== this.editedItem.email.trim() || this.editTemp.nip.trim() !== this.editedItem.nip.trim() || this.editTemp.prodi.trim() !== this.editedItem.prodi.trim() || this.editTemp.konsentrasi.trim() !== this.editedItem.konsentrasi.trim()
+            return (this.editTemp.nama && (this.editTemp.nama.trim() !== this.editedItem.nama.trim())) || (this.editTemp.email && (this.editedTemp.email.trim() !== this.editedItem.email.trim())) || (this.editTemp.nip && (this.editTemp.nip.trim() !== this.editedItem.nip.trim())) || (this.editTemp.prodi && (this.editTemp.prodi.trim() !== this.editedItem.prodi.trim())) || (this.editTemp.konsentrasi && (this.editTemp.konsentrasi.trim() !== this.editedItem.konsentrasi.trim()))
         }
     },
 

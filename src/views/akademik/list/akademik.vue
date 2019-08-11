@@ -149,7 +149,7 @@ export default {
         },
 
         hasChanged() {
-            return this.editTemp.nama.trim() !== this.editedItem.nama.trim() || this.editTemp.email.trim() !== this.editedItem.email.trim() || this.editTemp.nip.trim() !== this.editedItem.nip.trim()
+            return (this.editTemp.nama && (this.editTemp.nama.trim() !== this.editedItem.nama.trim())) || (this.editTemp.email && (this.editTemp.email.trim() !== this.editedItem.email.trim())) || (this.editTemp.nip && (this.editTemp.nip.trim() !== this.editedItem.nip.trim()))
         }
     },
 

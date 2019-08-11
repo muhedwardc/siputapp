@@ -7,7 +7,7 @@
                 <h3 class="ma-0 mr-2">Kepala Departemen</h3>
                 <v-icon small @click="editKadep">edit</v-icon>
             </v-layout>
-            <p class="ma-0" v-text="kadep ? kadep.nama : ''"></p>
+            <p class="ma-0" v-text="kadep && kadep.nama ? kadep.nama : 'Kepala departemen belum dipilih.'"></p>
             <v-layout v-if="editingKadep">
                 <v-autocomplete return-object item-text="nama" placeholder="Cari Dosen" v-model="kadepTemp" :items="dosen" :loading="loading" no-data-text="Data tidak ditemukan" :search-input.sync="search"></v-autocomplete>
                 <template :disabled="assigning" v-if="kadepTemp.id && kadep.user !== kadepTemp.id && !isDuplicate(0)">
@@ -20,7 +20,7 @@
                 <h3 class="ma-0 mr-2">Sekretaris Departemen</h3>
                 <v-icon small @click="editSekretaris">edit</v-icon>
             </v-layout>
-            <p class="ma-0" v-text="sekretaris ? sekretaris.nama : ''"></p>
+            <p class="ma-0" v-text="sekretaris && sekretaris.nama ? sekretaris.nama : 'Sekretaris departemen belum dipilih.'"></p>
             <v-layout v-if="editingSekretaris">
                 <v-autocomplete return-object item-text="nama" placeholder="Cari Dosen" v-model="sekretarisTemp" :items="dosen" :loading="loading" no-data-text="Data tidak ditemukan" :search-input.sync="search"></v-autocomplete>
                 <template :disabled="assigning" v-if="sekretarisTemp.id && sekretaris.user !== sekretarisTemp.id && !isDuplicate(1)">
@@ -57,11 +57,11 @@ export default {
         isDuplicate() {
             return function(type) {
                 if (type == 0) {
-                    if (this.kadepTemp) {
+                    if (this.kadepTemp && this.kadepTemp.id && this.sekretaris.user) {
                         return this.kadepTemp.id == this.sekretaris.user
                     }
                 } else if (type == 1) {
-                    if (this.sekretarisTemp) {
+                    if (this.sekretarisTemp && this.sekretarisTemp.id && this.kadep.user) {
                         return this.sekretarisTemp.id == this.kadep.user
                     }
                 }
