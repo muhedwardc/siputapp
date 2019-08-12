@@ -10,9 +10,9 @@
             <p class="ma-0" v-text="kadep && kadep.nama ? kadep.nama : 'Kepala departemen belum dipilih.'"></p>
             <v-layout v-if="editingKadep">
                 <v-autocomplete return-object item-text="nama" placeholder="Cari Dosen" v-model="kadepTemp" :items="dosen" :loading="loading" no-data-text="Data tidak ditemukan" :search-input.sync="search"></v-autocomplete>
-                <template :disabled="assigning" v-if="kadepTemp.id && kadep.user !== kadepTemp.id && !isDuplicate(0)">
+                <template :disabled="assigning" v-if="kadep ? kadepTemp && (kadep.user !== kadepTemp.id) && !isDuplicate(0) : true">
                     <v-btn :disabled="assigning" class="error" @click="reset">batal</v-btn>
-                    <v-btn :loading="assigning" class="primary" @click="assignDosen('Kepala Departemen', kadepTemp.id)">simpan</v-btn>
+                    <v-btn :loading="assigning" v-if="kadepTemp && kadepTemp.id" class="primary" @click="assignDosen('Kepala Departemen', kadepTemp.id)">simpan</v-btn>
                 </template>
             </v-layout>
             <p v-if="isDuplicate(0)" class="red--text">Dosen ini telah didaftarkan menjadi Sekretaris.</p>
@@ -23,9 +23,9 @@
             <p class="ma-0" v-text="sekretaris && sekretaris.nama ? sekretaris.nama : 'Sekretaris departemen belum dipilih.'"></p>
             <v-layout v-if="editingSekretaris">
                 <v-autocomplete return-object item-text="nama" placeholder="Cari Dosen" v-model="sekretarisTemp" :items="dosen" :loading="loading" no-data-text="Data tidak ditemukan" :search-input.sync="search"></v-autocomplete>
-                <template :disabled="assigning" v-if="sekretarisTemp.id && sekretaris.user !== sekretarisTemp.id && !isDuplicate(1)">
+                <template :disabled="assigning" v-if="sekretaris ? sekretarisTemp && (sekretaris.user !== sekretarisTemp.id) && !isDuplicate(1) : true">
                     <v-btn :disabled="assigning" class="error" @click="reset">batal</v-btn>
-                    <v-btn :loading="assigning" class="primary" @click="assignDosen('Kepala Departemen', sekretarisTemp.id)">simpan</v-btn>
+                    <v-btn :loading="assigning" v-if="sekretarisTemp && sekretarisTemp.id" class="primary" @click="assignDosen('Sekretaris', sekretarisTemp.id)">simpan</v-btn>
                 </template>
             </v-layout>
             <p v-if="isDuplicate(1)" class="red--text">Dosen ini telah didaftarkan menjadi Kepala Departemen.</p>
@@ -57,11 +57,11 @@ export default {
         isDuplicate() {
             return function(type) {
                 if (type == 0) {
-                    if (this.kadepTemp && this.kadepTemp.id && this.sekretaris.user) {
+                    if (this.kadepTemp && this.kadepTemp.id && this.sekretaris && this.sekretaris.user) {
                         return this.kadepTemp.id == this.sekretaris.user
                     }
                 } else if (type == 1) {
-                    if (this.sekretarisTemp && this.sekretarisTemp.id && this.kadep.user) {
+                    if (this.sekretarisTemp && this.sekretarisTemp.id && this.kadep && this.kadep.user) {
                         return this.sekretarisTemp.id == this.kadep.user
                     }
                 }
