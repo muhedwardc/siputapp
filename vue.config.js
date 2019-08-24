@@ -7,7 +7,7 @@ module.exports = {
     outputDir: 'dist',
     assetsDir: 'static',
     publicPath: IS_PRODUCTION
-      ? 'http://localhost:8000'
+      ? 'https://thessa-dev.azurewebsites.net'
       : '/',
     // For Production, replace set baseUrl to CDN
     // And set the CDN origin to `yourdomain.com/static`
