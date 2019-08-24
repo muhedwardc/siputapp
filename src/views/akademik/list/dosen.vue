@@ -15,19 +15,19 @@
                             <v-form ref="form" v-model="valid" lazy-validation>
                             <v-layout wrap>
                             <v-flex xs12>
-                                <v-text-field :disabled="creating" v-model="editedItem.nama" label="Nama"></v-text-field>
+                                <v-text-field :disabled="creating" :rules="rules.required" v-model="editedItem.nama" label="Nama"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
-                                <v-text-field :disabled="creating" v-model="editedItem.email" label="Email"></v-text-field>
+                                <v-text-field :disabled="creating" :rules="rules.required && rules.email" v-model="editedItem.email" label="Email"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
-                                <v-text-field :disabled="creating" v-model="editedItem.nip" label="NIP"></v-text-field>
+                                <v-text-field :disabled="creating" :rules="rules.required && rules.number" v-model="editedItem.nip" label="NIP"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
                                 <v-select
                                     v-model="editedItem.prodi"
                                     :items="prodiOptions"
-                                    :rules="[v => !!v || 'Item is required']"
+                                    :rules="rules.required"
                                     label="Prodi"
                                     required
                                     :disabled="creating"
@@ -37,7 +37,7 @@
                                 <v-select
                                     v-model="editedItem.konsentrasi"
                                     :items="konsentrasi"
-                                    :rules="[v => !!v || 'Item is required']"
+                                    :rules="rules.required"
                                     label="Konsentrasi"
                                     :disabled="!editedItem.prodi || creating"
                                     required
@@ -51,8 +51,8 @@
                     <v-card-actions class="pa-4">
                         <v-spacer></v-spacer>
                         <v-btn :disabled="creating" color="error" @click="close">Batal</v-btn>
-                        <v-btn :loading="creating" v-if="!editTemp.id" color="success" @click="save">Simpan</v-btn>
-                        <v-btn :loading="creating" v-else-if="hasChanged && editTemp.id" color="success" @click="update">Edit</v-btn>
+                        <v-btn :loading="creating" v-if="!editTemp" color="success" @click="save">Simpan</v-btn>
+                        <v-btn :loading="creating" v-else-if="hasChanged && editedItem" color="success" @click="update">Edit</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -157,12 +157,17 @@ export default {
             },
             users: [],
             editedIndex: -1,
-            editTemp: {},
+            editTemp: null,
+            rules: {
+                required: [v => !!v || 'Borang isian tidak boleh kosong.'],
+                email: [v => /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(v) || 'Email harus valid.'],
+                number: [v => /^[\d ]+$/.test(v) || 'Borang isian harus berisi hanya angka.']
+            },
             editedItem: {
                 nama: '',
+                email: '',
                 prodi: '',
                 konsentrasi: '',
-                email: '',
                 nip: '',
             },
             defaultItem: {
@@ -188,8 +193,20 @@ export default {
             return this.editedItem.prodi == this.prodiOptions[0] ? this.konsentrasiOptions[0] : this.konsentrasiOptions[1]
         },
         hasChanged() {
-            return this.editTemp.nama.trim() !== this.editedItem.nama.trim() || this.editTemp.email.trim() !== this.editedItem.email.trim() || this.editTemp.nip.trim() !== this.editedItem.nip.trim() || this.editTemp.prodi.trim() !== this.editedItem.prodi.trim() || this.editTemp.konsentrasi.trim() !== this.editedItem.konsentrasi.trim()
-        }
+            let notChanged = true
+            const a = this.editedItem
+            const b = this.editTemp
+            if (a && b) {
+                for (const key in a) {
+                    let tempA = a[key], tempB = b[key]
+                    if (a[key]) tempA = tempA.trim()
+                    if (b[key]) tempB = tempB.trim()
+
+                    notChanged = notChanged && (tempA === tempB)
+                }
+            }
+            return !notChanged
+        }   
     },
 
     watch: {
@@ -256,6 +273,7 @@ export default {
 
         editItem (props) {
             this.dialog = true
+            this.valid = true
             const { nama, prodi, konsentrasi, email, nip } = props.item
             this.editTemp = props.item
             this.editedItem = {
@@ -288,6 +306,7 @@ export default {
 
         close () {
             this.dialog = false
+            this.valid = true
             setTimeout(() => {
                 this.editedItem = Object.assign({}, this.defaultItem)
                 this.editedIndex = -1

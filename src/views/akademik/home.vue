@@ -37,20 +37,6 @@
                 </v-tabs>
             </v-layout>
         </v-flex>
-        <v-flex class="notifications pl-4" hidden-md-and-down lg4>
-            <!-- <h3 class="mb-2">Rekap {{ thisMonth }}</h3> -->
-            <v-layout column>
-                <!-- <app-home-notification
-                    v-for="n in notifications"
-                    :key="n.id"
-                    :id="n.id"
-                    :time="n.time"
-                    :room="n.room"
-                    :text="n.text"
-                    :type="n.type">
-                </app-home-notification> -->
-            </v-layout>
-        </v-flex>
     </v-layout>
 </v-container>
 </template>
@@ -96,22 +82,6 @@ export default {
                     name: 'Selanjutnya',
                     exams: []
                 }
-            ],
-            notifications: [
-                {
-                    text: 'Ujian Sedang Berlangsung',
-                    room: 'E6',
-                    time: '08.00 WIB',
-                    type: 'info',
-                    id: 1
-                },
-                {
-                    text: 'Dosen Kurang',
-                    room: 'E8',
-                    time: '08.00 WIB',
-                    type: 'error',
-                    id: 2
-                },
             ],
             todayDate: '',
             activeTab: 0,
@@ -196,11 +166,7 @@ export default {
     .v-tabs__container .v-tabs__div:last-of-type {
         border-right: none;
     }
-
-    .notifications .layout.column:not(:only-child) {
-        margin: unset !important;
-    }
-
+    
     .v-tabs__bar {
         border-radius: 4px;
         overflow: hidden;

@@ -13,13 +13,13 @@
                             <v-form ref="form" v-model="valid" lazy-validation>
                             <v-layout wrap>
                                 <v-flex xs12>
-                                    <v-text-field :disabled="creating" v-model="editedItem.nama" label="Nama"></v-text-field>
+                                    <v-text-field :rules="rules.required" :disabled="creating" v-model="editedItem.nama" label="Nama"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>
-                                    <v-text-field :disabled="creating" v-model="editedItem.email" label="Email"></v-text-field>
+                                    <v-text-field :rules="rules.required && rules.email" :disabled="creating" v-model="editedItem.email" label="Email"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>
-                                    <v-text-field :disabled="creating" v-model="editedItem.nip" label="NIP"></v-text-field>
+                                    <v-text-field :rules="rules.required && rules.number" :disabled="creating" v-model="editedItem.nip" label="NIP"></v-text-field>
                                 </v-flex>
                             </v-layout>
                             </v-form>
@@ -29,8 +29,8 @@
                     <v-card-actions class="pa-4">
                         <v-spacer></v-spacer>
                         <v-btn :disabled="creating" color="error" @click="close">Batal</v-btn>
-                        <v-btn :loading="creating" v-if="!editTemp.id" color="success" @click="save">Simpan</v-btn>
-                        <v-btn :loading="creating" v-else-if="hasChanged && editTemp.id" color="success" @click="update">Edit</v-btn>
+                        <v-btn :loading="creating" v-if="!editTemp" color="success" @click="save">Simpan</v-btn>
+                        <v-btn :loading="creating" v-else-if="hasChanged && editTemp" color="success" @click="update">Edit</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -124,11 +124,16 @@ export default {
             },
             users: [],
             editedIndex: -1,
-            editTemp: {},
+            editTemp: null,
             editedItem: {
                 nama: '',
                 email: '',
                 nip: '',
+            },
+            rules: {
+                required: [v => !!v || 'Borang isian tidak boleh kosong.'],
+                email: [v => /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(v) || 'Email harus valid.'],
+                number: [v => /^[\d ]+$/.test(v) || 'Borang isian harus berisi hanya angka.']
             },
             defaultItem: {
                 nama: '',
@@ -149,7 +154,19 @@ export default {
         },
 
         hasChanged() {
-            return this.editTemp.nama.trim() !== this.editedItem.nama.trim() || this.editTemp.email.trim() !== this.editedItem.email.trim() || this.editTemp.nip.trim() !== this.editedItem.nip.trim()
+            let notChanged = true
+            const a = this.editedItem
+            const b = this.editTemp
+            if (a && b) {
+                for (const key in a) {
+                    let tempA = a[key], tempB = b[key]
+                    if (a[key]) tempA = tempA.trim()
+                    if (b[key]) tempB = tempB.trim()
+
+                    notChanged = notChanged && (tempA === tempB)
+                }
+            }
+            return !notChanged
         }
     },
 
