@@ -18,7 +18,7 @@ DATABASES = {
 # SECURITY #
 ############
 
-DEBUG = bool(os.getenv('DJANGO_DEBUG', ''))
+DEBUG = True
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', SECRET_KEY)
 
