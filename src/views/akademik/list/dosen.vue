@@ -11,23 +11,23 @@
                     </v-card-title>
 
                     <v-card-text class="pt-2 pb-0">
-                        <v-container v-if="editedItem">
+                        <v-container>
                             <v-form ref="form" v-model="valid" lazy-validation>
                             <v-layout wrap>
                             <v-flex xs12>
-                                <v-text-field :disabled="creating" v-model="editedItem.nama" label="Nama"></v-text-field>
+                                <v-text-field :disabled="creating" :rules="rules.required" v-model="editedItem.nama" label="Nama"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
-                                <v-text-field :disabled="creating" v-model="editedItem.email" label="Email"></v-text-field>
+                                <v-text-field :disabled="creating" :rules="rules.required && rules.email" v-model="editedItem.email" label="Email"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
-                                <v-text-field :disabled="creating" v-model="editedItem.nip" label="NIP"></v-text-field>
+                                <v-text-field :disabled="creating" :rules="rules.required && rules.number" v-model="editedItem.nip" label="NIP"></v-text-field>
                             </v-flex>
                             <v-flex xs12>
                                 <v-select
                                     v-model="editedItem.prodi"
                                     :items="prodiOptions"
-                                    :rules="[v => !!v || 'Item is required']"
+                                    :rules="rules.required"
                                     label="Prodi"
                                     required
                                     :disabled="creating"
@@ -37,7 +37,7 @@
                                 <v-select
                                     v-model="editedItem.konsentrasi"
                                     :items="konsentrasi"
-                                    :rules="[v => !!v || 'Item is required']"
+                                    :rules="rules.required"
                                     label="Konsentrasi"
                                     :disabled="!editedItem.prodi || creating"
                                     required
@@ -158,7 +158,18 @@ export default {
             users: [],
             editedIndex: -1,
             editTemp: null,
-            editedItem: null,
+            rules: {
+                required: [v => !!v || 'Borang isian tidak boleh kosong.'],
+                email: [v => /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(v) || 'Email harus valid.'],
+                number: [v => /^[\d ]+$/.test(v) || 'Borang isian harus berisi hanya angka.']
+            },
+            editedItem: {
+                nama: '',
+                email: '',
+                prodi: '',
+                konsentrasi: '',
+                nip: '',
+            },
             defaultItem: {
                 nama: '',
                 email: '',
@@ -295,6 +306,7 @@ export default {
 
         close () {
             this.dialog = false
+            this.valid = true
             setTimeout(() => {
                 this.editedItem = Object.assign({}, this.defaultItem)
                 this.editedIndex = -1
