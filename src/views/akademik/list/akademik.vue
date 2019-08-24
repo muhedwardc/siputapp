@@ -10,16 +10,16 @@
 
                     <v-card-text class="pt-2 pb-0">
                         <v-container>
-                            <v-form v-if="editedItem" ref="form" v-model="valid" lazy-validation>
+                            <v-form ref="form" v-model="valid" lazy-validation>
                             <v-layout wrap>
                                 <v-flex xs12>
-                                    <v-text-field :disabled="creating" v-model="editedItem.nama" label="Nama"></v-text-field>
+                                    <v-text-field :rules="rules.required" :disabled="creating" v-model="editedItem.nama" label="Nama"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>
-                                    <v-text-field :disabled="creating" v-model="editedItem.email" label="Email"></v-text-field>
+                                    <v-text-field :rules="rules.required && rules.email" :disabled="creating" v-model="editedItem.email" label="Email"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>
-                                    <v-text-field :disabled="creating" v-model="editedItem.nip" label="NIP"></v-text-field>
+                                    <v-text-field :rules="rules.required && rules.number" :disabled="creating" v-model="editedItem.nip" label="NIP"></v-text-field>
                                 </v-flex>
                             </v-layout>
                             </v-form>
@@ -125,7 +125,16 @@ export default {
             users: [],
             editedIndex: -1,
             editTemp: null,
-            editedItem: null,
+            editedItem: {
+                nama: '',
+                email: '',
+                nip: '',
+            },
+            rules: {
+                required: [v => !!v || 'Borang isian tidak boleh kosong.'],
+                email: [v => /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(v) || 'Email harus valid.'],
+                number: [v => /^[\d ]+$/.test(v) || 'Borang isian harus berisi hanya angka.']
+            },
             defaultItem: {
                 nama: '',
                 email: '',
