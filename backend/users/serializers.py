@@ -1,16 +1,30 @@
+import datetime
+
 from rest_framework import serializers
-from .models import User
+from .models import User, Pengelola
 from django.contrib.auth import authenticate
 
 
 class FullUserSerializer(serializers.ModelSerializer):
     prodi = serializers.CharField(required=False)
     konsentrasi = serializers.CharField(required=False)
+    exams_this_month = serializers.SerializerMethodField()
+
+    def get_exams_this_month(self, user):
+        today = datetime.date.today()
+        next_month = (today.replace(day=28) + datetime.timedelta(days=4)) 
+
+        first_day = today.replace(day=1)
+        last_day = next_month - datetime.timedelta(days=next_month.day)
+
+        exams = user.exams.filter(ujian__tanggal__gte=first_day, ujian__tanggal__lte=last_day)
+        exams_this_month = exams.count()
+        return exams_this_month
 
     class Meta:
         model = User
-        fields = ('id', 'nama', 'email', 'prodi', 'konsentrasi', 'nip', 'is_admin')
-        read_only_fields = ('is_admin',)
+        exclude = ('password', 'last_login')
+        read_only_fields = ('is_admin', 'foto')
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
@@ -25,7 +39,6 @@ class RegisterUserSerializer(serializers.Serializer):
     prodi = serializers.CharField(required=False, allow_null=True)
     konsentrasi = serializers.CharField(required=False, allow_null=True)
     nip = serializers.CharField()
-    password = serializers.CharField(write_only=True)
 
     def create(self, validated_data):
         if validated_data['is_admin']:
@@ -33,7 +46,6 @@ class RegisterUserSerializer(serializers.Serializer):
                 nama=validated_data['nama'],
                 email=validated_data['email'],
                 nip=validated_data['nip'],
-                password=validated_data['password']
             )
             # user.prodi = validated_data['prodi']
             # user.konsentrasi = validated_data['konsentrasi']
@@ -43,7 +55,6 @@ class RegisterUserSerializer(serializers.Serializer):
                 nama=validated_data['nama'],
                 email=validated_data['email'],
                 nip=validated_data['nip'],
-                password=validated_data['password']
             )
             user.prodi = validated_data['prodi']
             user.konsentrasi = validated_data['konsentrasi']
@@ -70,3 +81,16 @@ class PasswordSerializer(serializers.Serializer):
         if data['password1'] != data['password2']:
             raise serializers.ValidationError("Password doesn't match!")
         return data
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('nama', 'prodi', 'konsentrasi', 'nip', 'foto')
+
+class PengelolaSerializer(serializers.ModelSerializer):
+    nama = serializers.CharField(source='user.nama', required=False)
+    nip = serializers.CharField(source='user.nip', required=False)
+
+    class Meta:
+        model = Pengelola
+        exclude = ('id',)

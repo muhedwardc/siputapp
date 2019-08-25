@@ -1,30 +1,31 @@
 from rest_framework import serializers
 
 from .models import Grade
-from backend.essays.serializers import StudentSerializer
-
+from backend.essays.models import Student
 
 class GradeSerializer(serializers.ModelSerializer):
-    mahasiswa = StudentSerializer()
-
     class Meta:
         model = Grade
-        fields = ('mahasiswa', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
+        fields = ('so', 'nilai')
 
 class CreateGradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
-        fields = ('mahasiswa', 'so1', 'so2', 'so3', 'so4', 'so5', 'so6')
+        fields = ('mahasiswa', 'penguji', 'so', 'nilai')
 
-    def save(self, penguji):
-        new_grade = Grade.objects.create(
-                penguji=penguji,
-                mahasiswa=self.validated_data['mahasiswa'],
-                so1 = self.validated_data['so1'],
-                so2 = self.validated_data['so2'],
-                so3 = self.validated_data['so3'],
-                so4 = self.validated_data['so4'],
-                so5 = self.validated_data['so5'],
-                so6 = self.validated_data['so6']
-            )
-        return new_grade
+    def create(self, validated_data):
+        # cek apakah nilai sudah ada. jika ya maka update nilai, jika belum maka buat nilai baru
+        try:
+            grade = Grade.objects.get(mahasiswa=validated_data.get('mahasiswa'), penguji=validated_data.get('penguji'), so=validated_data.get('so'))
+            grade.__dict__.update(**validated_data)
+            grade.save()
+        except Grade.DoesNotExist:
+            grade = Grade.objects.create(**validated_data)
+
+        return grade
+
+class RecapGradeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Grade
+        fields = ('so', 'nilai')

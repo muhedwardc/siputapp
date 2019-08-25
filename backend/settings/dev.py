@@ -1,5 +1,6 @@
 import os
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 SETTINGS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(SETTINGS_DIR)
@@ -15,6 +16,7 @@ SECRET_KEY = 'verybadsecret!!!'
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
+BASE_URL = "http://localhost:8000"
 
 # Application definition
 
@@ -82,13 +84,28 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+# Local Dev
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
+# Live Dev
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('DATABASE_NAME', ''),
+        'USER': os.getenv('DATABASE_USER', ''),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+        'HOST': os.getenv('DATABASE_HOST', ''),
+        'PORT': os.getenv('DATABASE_PORT', ''),
+        'OPTIONS': {
+            'sslmode': 'disable',
+        }
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -136,7 +153,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'dist', 'static')
 STATICFILES_DIRS = []
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'uploads')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+ESSAY_FILE_LOCATION = os.path.join(MEDIA_ROOT, 'pdf')
 
 
 ##########
@@ -156,10 +174,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'DATE_FORMAT': '%d/%m/%Y',
+    'TIME_FORMAT': '%H:%M',
+    # 'DATE_INPUT_FORMATS': ["%d/%m/%Y"],
     'DEFAULT_PARSER_CLASSES': ('rest_framework.parsers.JSONParser', 'rest_framework.parsers.FormParser', 'rest_framework.parsers.MultiPartParser'),
 }
 
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8080',
-    '127.0.0.1:8080'
-)
+CORS_ORIGIN_ALLOW_ALL = True
+
+GOOGLE_CLIENT_ID = "163398113242-5v00mct894p9rmt75gu34hbod2c4o8id.apps.googleusercontent.com"

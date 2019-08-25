@@ -10,10 +10,21 @@ class SimpleSiputExamSerializer(serializers.ModelSerializer):
     ruang = serializers.StringRelatedField()
     skripsi = SimpleEssaySerializer()
     penguji = PengujiSerializer(many=True, required=False)
+    ketua = serializers.SerializerMethodField()
+
+    def get_ketua(self, exam):
+        ketua = dict()
+        for penguji in exam.penguji.all():
+            if penguji.is_leader == True:
+                dosen = penguji.dosen
+                ketua.update({'id': dosen.pk, 'nama': dosen.nama})
+                return ketua
+            else:
+                return None
 
     class Meta:
         model = Exam
-        fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'ketua', 'penguji')
 
 
 class SiputExamSerializer(serializers.ModelSerializer):
@@ -21,10 +32,21 @@ class SiputExamSerializer(serializers.ModelSerializer):
     ruang = serializers.StringRelatedField()
     skripsi = EssaySerializer()
     penguji = PengujiSerializer(many=True, required=False)
+    ketua = serializers.SerializerMethodField()
+
+    def get_ketua(self, exam):
+        ketua = dict()
+        for penguji in exam.penguji.all():
+            if penguji.is_leader == True:
+                dosen = penguji.dosen
+                ketua.update({'id': dosen.pk, 'nama': dosen.nama})
+                return ketua
+            else:
+                return None
 
     class Meta:
         model = Exam
-        fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'ketua', 'penguji')
 
 
 class ListSiputPengujiSerializer(serializers.ModelSerializer):

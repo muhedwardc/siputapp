@@ -1,21 +1,24 @@
 <template>
   <v-app>
     <app-snackbar></app-snackbar>
-    <template v-if="$store.state.auth.token && $store.state.auth.user">
-      <app-sidebar v-if="!$router.currentRoute.meta.exam"></app-sidebar>
-      <app-top-navbar v-if="!$router.currentRoute.meta.exam"></app-top-navbar>
-      <v-content v-if="!$router.currentRoute.meta.exam">
-        <app-dashboard>
-          <app-error v-if="$store.state.loadError.show"></app-error>
-          <router-view v-else></router-view>
-        </app-dashboard>
-      </v-content>
-      <template v-else>
+    <template>
+      <template v-if="$router.currentRoute.meta.noMenu">
         <app-error v-if="$store.state.loadError.show"></app-error>
         <router-view v-else></router-view>
       </template>
+      <template v-else>
+        <v-content>
+          <app-dashboard>
+            <app-error v-if="$store.state.loadError.show"></app-error>
+            <router-view v-else></router-view>
+          </app-dashboard>
+        </v-content>
+        <template>
+          <app-sidebar></app-sidebar>
+          <app-top-navbar></app-top-navbar>
+        </template>
+      </template>
     </template>
-    <router-view v-else></router-view>
   </v-app>
 </template>
 
@@ -27,6 +30,6 @@ export default {
 
 <style lang="sass">
   main.v-content
-    background: #fff;
+    background: #F8F8F8;
 </style>
 

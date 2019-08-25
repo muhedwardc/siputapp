@@ -76,7 +76,7 @@ class ListExamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ('id', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('id', 'status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
 
 class ExamSerializer(serializers.ModelSerializer):
     sesi = serializers.StringRelatedField()
@@ -86,7 +86,7 @@ class ExamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
+        fields = ('status', 'tanggal', 'sesi', 'ruang', 'skripsi', 'penguji')
 
 class CreateExamSerializer(serializers.ModelSerializer):
     skripsi = CreateEssaySerializer()
@@ -129,6 +129,46 @@ class CreateExamSerializer(serializers.ModelSerializer):
             )
         
         return new_ujian
+
+class EditExamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exam
+        fields = ('tanggal', 'sesi', 'ruang')
+
+class RecapExamSerializer(serializers.ModelSerializer):
+    sesi = serializers.StringRelatedField()
+    ruang = serializers.StringRelatedField()
+    skripsi = SimpleEssaySerializer()
+    ketua = serializers.SerializerMethodField()
+    penguji = serializers.SerializerMethodField()
+
+    def get_ketua(self, exam):
+        ketua = dict()
+        for penguji in exam.penguji.all():
+            if penguji.is_leader == True:
+                dosen = penguji.dosen
+                ketua.update({'id': dosen.pk, 'nama': dosen.nama})
+                return ketua
+            else:
+                return None
+
+    def get_penguji(self, exam):
+        list_penguji = list()
+        for penguji in exam.penguji.all():
+            if exam.status == 3:
+                grades = penguji.grades.all()
+                if grades.exists():
+                    list_penguji.append(penguji)
+            else:
+                list_penguji.append(penguji)
+        return ListPengujiSerializer(list_penguji, many=True).data
+
+    class Meta:
+        model = Exam
+        fields = ('tanggal', 'sesi', 'ruang', 'skripsi', 'ketua', 'penguji')
+
+class UploadEssaySerializer(serializers.Serializer):
+    file = serializers.FileField()
 
 
 

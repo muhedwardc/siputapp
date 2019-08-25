@@ -1,9 +1,12 @@
 from rest_framework import routers
 from django.urls import path, include
 
-from .views import SiputExamViewSet
+from .views import SiputExamViewSet, SiputProfileViewSet
 
 router = routers.DefaultRouter()
-router.register('exams', SiputExamViewSet, base_name='siput')
+router.register('exams', SiputExamViewSet, base_name='exams')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+    path('profile/', SiputProfileViewSet.as_view({"get": "profile", "put": "edit_profile"}))
+]

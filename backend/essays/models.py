@@ -4,10 +4,11 @@ from backend.users.models import User
 class Essay(models.Model):
     judul = models.CharField(max_length=250)
     intisari = models.TextField()
-    naskah = models.FileField(upload_to='skripsi/%Y/%m/%d/', blank=True, null=True)
-    pembimbing_satu = models.ForeignKey(User, related_name='pembimbing_satu', on_delete=models.DO_NOTHING)
-    pembimbing_dua = models.ForeignKey(User, related_name='pembimbing_dua', on_delete=models.DO_NOTHING)
+    naskah = models.CharField(max_length=250, blank=True, null=True)
+    pembimbing_satu = models.ForeignKey(User, related_name='pembimbing_satu', on_delete=models.SET_NULL, null=True, blank=True)
+    pembimbing_dua = models.ForeignKey(User, related_name='pembimbing_dua', on_delete=models.SET_NULL, null=True, blank=True)
     is_capstone = models.BooleanField()
+    title_revision = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -38,3 +39,9 @@ class Student(models.Model):
         verbose_name = 'Student'
         verbose_name_plural = 'Students'
 
+class TitleRevision(models.Model):
+    skripsi = models.OneToOneField(Essay, null=True, blank=True, related_name='revision', on_delete=models.SET_NULL)
+    revisi = models.TextField()
+
+    def __str__(self):
+        return self.skripsi.judul

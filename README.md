@@ -224,13 +224,12 @@ Endpoint untuk umum:
 
 1. **GET** /api/me/exams/
 1. **GET** /api/me/exams/\<id>\/
-1. **POST** /api/me/exams/\<id>\/terima/ atau /api/me/exams/\<id>\/tolak/
 1. **GET** /api/me/exams/\<id>\/essays/ : retrieve essays detail for selected exam
 1. **GET** /api/me/exams/\<id>\/comments/ : list all comments
 1. **POST** /api/me/exams/\<id>\/comments/ : create a comment
 ```JSON
 {
-	"bab": "hasil dan pembahasan",
+	"bab": 0,
 	"halaman": 105,
 	"komentar": "Grafik kurang detail dan belum ada penjelasan."
 }
@@ -249,8 +248,40 @@ Endpoint untuk umum:
 1. **GET** /api/me/exams/\<id>\/grades/ : list all grades
 1. **POST** /api/me/exams/\<id>\/grades/ : create grades for students
 ```JSON
-	....
+	[
+		{
+			"mahasiswa": 35,
+			"daftar_nilai": [
+				{
+					"so": 1,
+					"nilai" :87
+				},
+				{
+					"so": 2,
+					"nilai": 92
+				},
+				{
+					"so": 3,
+					"nilai": 85,
+				},
+				...
+			]
+		}
+	]
 ```
+1. **POST** /api/me/exams/\<id>\/revision/ : create revisi judul
+```JSON
+	{
+		"revisi": true, // jika ada revisi judul, jika tidak maka nilai false
+		"konten": "Pengembangan Aplikasi Tesis" // revisi judul, jika revisi: true. jika false maka tidak ada.
+	}
+```
+
+1. **GET** /api/me/exams/\<id>\/recap/ : get exam recap data
+1. **GET** /api/exams/\<id>\/recap/ : get full exam recap data (kebutuhan cetak berkas hasil pendadaran)
+
+1. **POST** /api/me/exams/\<id>\/start_exam/ : API untuk mengubah status ujian menjadi dimulai (yang bisa cuma ketua (sementara))
+1. **POST** /api/me/exams/\<id>\/finish_exam/ : API untuk mengubah status ujian menjadi selesai (yang bisa cuma ketua (sementara))
 
 1. **GET** /api/me/profile/ 
 1. **PUT** /api/me/profile/
