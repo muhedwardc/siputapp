@@ -15,10 +15,7 @@ DATABASES = {
         'USER': os.getenv('DATABASE_USER', ''),
         'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
         'HOST': os.getenv('DATABASE_HOST', ''),
-        'PORT': os.getenv('DATABASE_PORT', ''),
-        'OPTIONS': {
-            'sslmode': 'disable',
-        }
+        'PORT': os.getenv('DATABASE_PORT', '')
     }
 }
 
@@ -32,6 +29,4 @@ DEBUG = False
 SECRET_KEY = os.getenv('SECRET_KEY', SECRET_KEY)
 
 # Set to your Domain here (eg. 'django-vue-template-demo.herokuapp.com')
-ALLOWED_HOSTS = [
-    'https://thessa-dev.azurewebsites.net'
-]
+ALLOWED_HOSTS = ['*']
