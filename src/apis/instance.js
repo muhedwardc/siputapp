@@ -2,7 +2,7 @@ import axios from 'axios'
 import store from '../store'
 
 let config = {
-    baseURL: process.env.VUE_APP_API,
+    baseURL: 'https://thessa-dev.azurewebsites.net/api',
     headers: {
       'Content-Type': 'application/json',
     }

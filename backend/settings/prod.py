@@ -1,16 +1,22 @@
 """ Production Settings """
 
 import os
-import dj_database_url
 from .dev import *
+
+BASE_URL = "https://thessa-dev.azurewebsites.net"
 
 ############
 # DATABASE #
 ############
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL')
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('DATABASE_NAME', ''),
+        'USER': os.getenv('DATABASE_USER', ''),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+        'HOST': os.getenv('DATABASE_HOST', ''),
+        'PORT': os.getenv('DATABASE_PORT', '')
+    }
 }
 
 
@@ -18,9 +24,9 @@ DATABASES = {
 # SECURITY #
 ############
 
-DEBUG = bool(os.getenv('DJANGO_DEBUG', ''))
+DEBUG = False
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', SECRET_KEY)
+SECRET_KEY = os.getenv('SECRET_KEY', SECRET_KEY)
 
 # Set to your Domain here (eg. 'django-vue-template-demo.herokuapp.com')
 ALLOWED_HOSTS = ['*']

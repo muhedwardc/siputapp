@@ -7,7 +7,7 @@ module.exports = {
     outputDir: 'dist',
     assetsDir: 'static',
     publicPath: IS_PRODUCTION
-      ? 'http://localhost:8000'
+      ? 'https://thessa-dev.azurewebsites.net'
       : '/',
     // For Production, replace set baseUrl to CDN
     // And set the CDN origin to `yourdomain.com/static`
@@ -40,7 +40,7 @@ module.exports = {
       proxy: {
         '/api*': {
           // Forward frontend dev server request for /api to django dev server
-          target: 'http://localhost:8000/',
+          target: 'https://thessa-dev.azurewebsites.net/',
         }
       },
       watchOptions: {
