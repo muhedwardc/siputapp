@@ -2,7 +2,7 @@ import axios from 'axios'
 import store from '../store'
 
 let config = {
-    baseURL: 'http://thessa-dev.southeastasia.cloudapp.azure.com/api',
+    baseURL: 'https://thessa-dev.southeastasia.cloudapp.azure.com/api',
     headers: {
       'Content-Type': 'application/json',
     }

@@ -3,7 +3,7 @@
 import os
 from .dev import *
 
-BASE_URL = "http://thessa-dev.southeastasia.cloudapp.azure.com"
+BASE_URL = "https://thessa-dev.southeastasia.cloudapp.azure.com"
 
 ############
 # DATABASE #
