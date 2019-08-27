@@ -5,6 +5,7 @@
                 @on-complete="onComplete"
                 class="form-wizard"
                 stepSize="sm"
+                :startIndex="2"
                 errorColor="#FF6666"
                 color="#1996F5">
                 <tab-content title="Informasi Ujian" :before-change="validateExamInfo" @on-validate="validateExamInfo">
@@ -288,7 +289,7 @@
                             <p class="mt-2 mb-0">Dosen terpilih: <span v-text="dosenStr"></span></p>
                             <p v-if="dosenValidation" class="ma-0 error--text">{{ dosenValidation }}</p>
                         </v-layout>
-                        <v-btn class="primary ma-0 mb-2 mt-2 text-capitalize" @click="filterDosen = !filterDosen" :loading="loadingDosen"><v-icon left>filter_list</v-icon>{{ !filterDosen ? 'Filter Dosen yang Tersedia' : 'Semua Dosen'}}</v-btn>
+                        <v-btn class="primary ma-0 mb-2 mt-2 text-capitalize" @click="changeFilter" :loading="loadingDosen"><v-icon left>filter_list</v-icon>{{ !filterDosen ? 'Filter Dosen yang Tersedia' : 'Semua Dosen'}}</v-btn>
                     </v-layout>
                     <v-data-table
                         :headers="dosenHeaders"
@@ -514,6 +515,9 @@ export default {
     },
 
     methods: {
+        changeFilter() {
+            this.filterDosen = !this.filterDosen
+        },
         validateExamInfo() {
             return this.$refs.form1.validate() && !!this.exam.skripsi.naskah
         },
@@ -558,6 +562,7 @@ export default {
         deleteRole(id) {
             this.selectedPenguji[this.selectedPenguji.indexOf(id)] = null
             const index = this.dosen.findIndex(dosen => id == dosen.id)
+            const filterIndex = this.dosenWithFilter.findIndex(dosen => id == dosen.id)
             const { email, nama } = this.dosen[index]
             delete this.dosen[index].selectedType
             this.dosen[index].selectedType = null
@@ -565,6 +570,14 @@ export default {
             this.dosen[index]['nama'] = 'updating'
             this.dosen[index]['email'] = email
             this.dosen[index]['nama'] = nama
+            if (filterIndex !== -1) {
+                delete this.dosenWithFilter[filterIndex].selectedType
+                this.dosenWithFilter[filterIndex].selectedType = null
+                this.dosenWithFilter[filterIndex]['email'] = 'updating' 
+                this.dosenWithFilter[filterIndex]['nama'] = 'updating'
+                this.dosenWithFilter[filterIndex]['email'] = email
+                this.dosenWithFilter[filterIndex]['nama'] = nama
+            }
         },
         setType(i, dosenId){
             if (i == 3) {
@@ -576,18 +589,28 @@ export default {
                 if (foundIndex !== -1) {
                     const foundId = this.selectedPenguji[foundIndex]
                     const index = this.dosen.findIndex(dosen => foundId == dosen.id)
+                    const filterIndex = this.dosenWithFilter.findIndex(dosen => dosenId == dosen.id)
                     this.selectedPenguji[foundIndex] = null
                     const { email, nama } = this.dosen[index]
                     delete this.dosen[index].selectedType
-                    this.selectedPenguji.push(dosenId)
                     this.dosen[index].selectedType = this.dosenTypes[i]
                     this.dosen[index]['email'] = 'updating' 
                     this.dosen[index]['nama'] = 'updating'
                     this.dosen[index]['email'] = email
                     this.dosen[index]['nama'] = nama
+                    if (filterIndex !== -1) {
+                        delete this.dosenWithFilter[filterIndex].selectedType
+                        this.dosenWithFilter[filterIndex].selectedType = this.dosenTypes[i]
+                        this.dosenWithFilter[filterIndex]['email'] = 'updating' 
+                        this.dosenWithFilter[filterIndex]['nama'] = 'updating'
+                        this.dosenWithFilter[filterIndex]['email'] = email
+                        this.dosenWithFilter[filterIndex]['nama'] = nama
+                    }
+                    this.selectedPenguji.push(dosenId)
                 } else {
                     this.selectedPenguji.push(dosenId)
                     const index = this.dosen.findIndex(dosen => dosenId == dosen.id)
+                    const filterIndex = this.dosenWithFilter.findIndex(dosen => dosenId == dosen.id)
                     const { email, nama } = this.dosen[index]
                     if (index !== -1) {
                         this.dosen[index]['selectedType'] = this.dosenTypes[i]
@@ -596,14 +619,24 @@ export default {
                         this.dosen[index]['email'] = email
                         this.dosen[index]['nama'] = nama
                     }
+                    if (filterIndex !== -1) {
+                        this.dosenWithFilter[filterIndex].selectedType = this.dosenTypes[i]
+                        this.dosenWithFilter[filterIndex]['email'] = 'updating' 
+                        this.dosenWithFilter[filterIndex]['nama'] = 'updating'
+                        this.dosenWithFilter[filterIndex]['email'] = email
+                        this.dosenWithFilter[filterIndex]['nama'] = nama
+                    }
                 }
             } else {
                 const index = this.dosen.findIndex(dosen => this.selectedPenguji[i] == dosen.id)
+                const filterIndex = this.dosenWithFilter.findIndex(dosen => dosenId == dosen.id)
                 this.selectedPenguji[this.selectedPenguji.indexOf(dosenId)] = null
                 if (index !== -1) {
                     this.selectedPenguji[i] = null
                     delete this.dosen[index].selectedType
                 }
+                if (filterIndex !== -1) {
+                    }
                 const id = this.dosen.findIndex(dosen => dosen.id == dosenId)
                 const { email, nama } = this.dosen[id]
                 this.selectedPenguji[i] = dosenId
@@ -612,6 +645,14 @@ export default {
                 this.dosen[id]['nama'] = 'updating'
                 this.dosen[id]['email'] = email
                 this.dosen[id]['nama'] = nama
+                if (filterIndex !== -1) {
+                    delete this.dosenWithFilter[filterIndex].selectedType
+                    this.dosenWithFilter[filterIndex].selectedType = this.dosenTypes[i]
+                    this.dosenWithFilter[filterIndex]['email'] = 'updating' 
+                    this.dosenWithFilter[filterIndex]['nama'] = 'updating'
+                    this.dosenWithFilter[filterIndex]['email'] = email
+                    this.dosenWithFilter[filterIndex]['nama'] = nama
+                }
                 this.selectedPenguji[i] = dosenId
             }
             this.cleanArr()
