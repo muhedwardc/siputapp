@@ -5,7 +5,6 @@
                 @on-complete="onComplete"
                 class="form-wizard"
                 stepSize="sm"
-                :startIndex="2"
                 errorColor="#FF6666"
                 color="#1996F5">
                 <tab-content title="Informasi Ujian" :before-change="validateExamInfo" @on-validate="validateExamInfo">
