@@ -30,19 +30,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if ordering:
             queryset = queryset.order_by(ordering)
 
-        date = self.request.GET.get('date')
-        session = self.request.GET.get('session')
-
-        # filter dosen yang tidak menguji hari tertentu
-        if date and session:
-            list_available_dosen = list()
-            for obj in queryset:
-                exams_today = obj.exams.filter(ujian__tanggal=date, ujian__sesi=session)
-                if not exams_today.exists():
-                    list_available_dosen.append(obj)
-
-            queryset = list_available_dosen
-
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -52,6 +39,19 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def dosen(self, request, *args, **kwargs):
         list_dosen = self.get_queryset().filter(is_admin=False)
+
+        date = self.request.GET.get('date')
+        session = self.request.GET.get('session')
+
+        # filter dosen yang tidak menguji hari tertentu
+        if date and session:
+            list_available_dosen = list()
+            for obj in list_dosen:
+                exams_today = obj.exams.filter(ujian__tanggal=date, ujian__sesi=session)
+                if not exams_today.exists():
+                    list_available_dosen.append(obj)
+
+            list_dosen = list_available_dosen
 
         pagination = request.GET.get('page')
         if pagination == 'all':
