@@ -1,6 +1,6 @@
 {
-    "name": "Siputapp",
-    "description": "Web Apps for Thesis Examinations",
+    "name": "Thessa",
+    "description": "Web App for Thesis Examinations",
     "repository": "https://github.com/muhedwardc/siputapp",
     "keywords": ["django", "vue", "vuejs", "vue cli 3", "django rest framework"],
     "env": {
