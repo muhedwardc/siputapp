@@ -1017,8 +1017,10 @@ export default {
     .recap-table
         border-radius: 8px
         box-shadow: 1px 1px 20px 2px #dedede
-        border-collapse: collapse
-        width: 100%
+
+        table 
+            border-collapse: collapse !important
+            width: 100%
 
         tr
             &:not(:last-of-type)
@@ -1077,7 +1079,7 @@ export default {
         
         table 
             width: 100%
-            collapse: collapse
+            border-collapse: collapse !important
 
             tr
                 &:first-of-type,
