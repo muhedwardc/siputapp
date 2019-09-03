@@ -77,6 +77,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @dosen.mapping.post
     def register_dosen(self, request, *args, **kwargs):
+        # Cek apakah sudah ada user dengan email yang terdaftar
+        user = User.objects.filter(email=request.data.get('email'))
+        if user.exists():
+            return Response({
+                'message': 'Pengguna dengan email %s telah terdaftar.' % request.data.get('email')
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(is_admin=False)
@@ -88,6 +95,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @akademik.mapping.post
     def register_akademik(self, request, *args, **kwargs):
+        # Cek apakah sudah ada user dengan email yang terdaftar
+        user = User.objects.filter(email=request.data.get('email'))
+        if user.exists():
+            return Response({
+                'message': 'Pengguna dengan email %s telah terdaftar.' % request.data.get('email')
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(is_admin=True)
