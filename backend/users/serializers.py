@@ -10,17 +10,6 @@ class FullUserSerializer(serializers.ModelSerializer):
     konsentrasi = serializers.CharField(required=False)
     exams_this_month = serializers.SerializerMethodField()
 
-    def get_exams_this_month(self, user):
-        today = datetime.date.today()
-        next_month = (today.replace(day=28) + datetime.timedelta(days=4)) 
-
-        first_day = today.replace(day=1)
-        last_day = next_month - datetime.timedelta(days=next_month.day)
-
-        exams = user.exams.filter(ujian__tanggal__gte=first_day, ujian__tanggal__lte=last_day)
-        exams_this_month = exams.count()
-        return exams_this_month
-
     class Meta:
         model = User
         exclude = ('password', 'last_login')

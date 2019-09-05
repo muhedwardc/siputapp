@@ -142,6 +142,9 @@ class PengelolaViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class LoginAPI(views.APIView):
+    """
+    This view is not used because login using google
+    """
     serializer_class = FullUserSerializer
     permission_classes = (permissions.AllowAny, )
 
@@ -194,6 +197,9 @@ class LoginGoogle(views.APIView):
                 }, status=status.HTTP_404_NOT_FOUND)
 
 class ChangePasswordAPI(views.APIView):
+    """
+    This function is not used because login using google.
+    """
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request):
