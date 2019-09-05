@@ -8,7 +8,6 @@ from django.contrib.auth import authenticate
 class FullUserSerializer(serializers.ModelSerializer):
     prodi = serializers.CharField(required=False)
     konsentrasi = serializers.CharField(required=False)
-    exams_this_month = serializers.SerializerMethodField()
 
     class Meta:
         model = User
