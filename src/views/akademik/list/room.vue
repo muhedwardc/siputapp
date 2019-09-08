@@ -328,7 +328,7 @@ export default {
             try {
                 const res = type == 0 ? await this.$thessa.createNewRoom(data) : await this.$thessa.createNewSession(data)
                 this[this.types[type]] = res.data
-                this.showSnackbar({message: 'Berhasil membuat ' + type == 0 ? 'Ruangan' : 'Sesi' + ' baru', type: 'success'})
+                this.showSnackbar({message: 'Berhasil membuat ' + (type == 0 ? 'Ruangan' : 'Sesi') + ' baru', type: 'success'})
                 this.creating = false
                 this.discard()
             } catch (error) {
@@ -416,7 +416,7 @@ export default {
             try {
                 await type == 0 ? this.$thessa.deleteRoom(id) : this.$thessa.deleteSession(id)
                 this.showSnackbar({message: 'Berhasil menghapus ' + str, type: 'success'})
-                this[this.types[type]].splice(this[this.types[type]].findIndex(item => item.id == id))
+                this[this.types[type]].splice(this[this.types[type]].findIndex(item => item.id == id), 1)
                 this.editing = false
                 this.reset()
             } catch (error) {
