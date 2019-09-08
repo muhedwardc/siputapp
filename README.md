@@ -51,4 +51,8 @@ $ npm run build
 $ python manage.py runserver
 ```
 
+## Deployment Guide
+Tutorial to deploy this project to cloud virtual server can be learn here:
+https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-18-04
+
 ** this project template is adapted from [https://github.com/gtalarico/django-vue-template](https://github.com/gtalarico/django-vue-template)
