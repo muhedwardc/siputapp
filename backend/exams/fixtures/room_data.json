@@ -1,9 +1,0 @@
-[
-    {
-        "model": "exams.Room",
-        "pk": 1,
-        "fields": {
-            "nama": "Ruang Sidang"
-        } 
-    }
-]
