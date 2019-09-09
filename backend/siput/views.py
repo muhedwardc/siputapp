@@ -37,7 +37,6 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         else:
             return SiputPengujiSerializer
 
-
     def list(self, request):
         list_exam = self.get_queryset().exclude(ujian__status=3)
         page = self.paginate_queryset(list_exam)
@@ -98,12 +97,18 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
     @action(detail=True)
     def essays(self, request, *args, **kwargs):
+        """
+        This function is not used.
+        """
         skripsi = self.get_object().ujian.skripsi
         serializer = EssaySerializer(skripsi)
         return Response(serializer.data)
     
     @action(detail=True)
     def students(self, request, *args, **kwargs):
+        """
+        This function is not used.
+        """
         students = self.get_object().ujian.skripsi.students
         serializer = StudentSerializer(students, many=True)
         return Response(serializer.data)
@@ -380,6 +385,9 @@ class SiputExamViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
         })
 
 class SiputProfileViewSet(viewsets.ModelViewSet):
+    """
+    This function is not used.
+    """
     permission_classes = (permissions.IsAuthenticated, )
     serializer_class = ProfileSerializer
     
