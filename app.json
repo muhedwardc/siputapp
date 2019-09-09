@@ -1,0 +1,27 @@
+{
+    "name": "Thessa",
+    "description": "Web App for Thesis Examinations",
+    "repository": "https://github.com/muhedwardc/siputapp",
+    "keywords": ["django", "vue", "vuejs", "vue cli 3", "django rest framework"],
+    "env": {
+      "DJANGO_SETTINGS_MODULE": {
+        "description": "Set Django Settings to Production",
+        "value": "backend.settings.prod"
+      }
+     },
+     "engines": {
+        "yarn": "1.4.0",
+        "npm": "6.2.0"
+     },
+    "addons": [
+
+     ],
+     "buildpacks": [
+       {
+         "url": "heroku/nodejs"
+        },
+        {
+          "url": "heroku/python"
+        }
+    ]
+  }

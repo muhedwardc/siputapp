@@ -1,0 +1,67 @@
+[
+    {
+        "model": "users.User",
+        "pk": 2,
+        "fields": {
+            "nama": "Ridi Ferdiana",
+            "email": "ridi.ferdiana@mail.ugm.ac.id",
+            "password": "Passw0rd",
+            "nip": "67481827321",
+            "prodi": "TI",
+            "konsentrasi": "RPL",
+            "is_admin": false
+        }
+    },
+    {
+        "model": "users.User",
+        "pk": 3,
+        "fields": {
+            "nama": "Rudi Hartanto",
+            "email": "rudi.hartanto@mail.ugm.ac.id",
+            "password": "Passw0rd",
+            "nip": "64287139412",
+            "prodi": "TI",
+            "konsentrasi": "RPL",
+            "is_admin": false
+        }
+    },
+    {
+        "model": "users.User",
+        "pk": 4,
+        "fields": {
+            "nama": "Igi Ardiyanto",
+            "email": "igi.ardiyanto@mail.ugm.ac.id",
+            "password": "Passw0rd",
+            "nip": "61746278178",
+            "prodi": "TI",
+            "konsentrasi": "RSI",
+            "is_admin": false
+        }
+    },
+    {
+        "model": "users.User",
+        "pk": 5,
+        "fields": {
+            "nama": "Dani Adhipta",
+            "email": "dani.adhipta@mail.ugm.ac.id",
+            "password": "Passw0rd",
+            "nip": "26428179389",
+            "prodi": "TI",
+            "konsentrasi": "RSI",
+            "is_admin": false
+        }
+    },
+    {
+        "model": "users.User",
+        "pk": 6,
+        "fields": {
+            "nama": "Warsun Najib",
+            "email": "warsun.najib@mail.ugm.ac.id",
+            "password": "Passw0rd",
+            "nip": "64278163782",
+            "prodi": "TI",
+            "konsentrasi": "RSK",
+            "is_admin": false
+        }
+    }
+]
