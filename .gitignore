@@ -7,6 +7,7 @@ node_modules
 db.sqlite3
 
 # local env files
+.env
 .env.local
 .env.*.local
 

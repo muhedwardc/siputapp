@@ -11,7 +11,9 @@ Before getting started you should have the following installed and running:
 - [X] Pipenv - [instructions](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv)
 
 ## Setup Project
-
+1. Clone this repository
+2. Edit and rename the file `backend/settings/configs.py.example` to `backend/settings/configs.py`
+3. Run the following command in your terminal of choice
 ```
 $ npm install
 $ pipenv install --dev && pipenv shell

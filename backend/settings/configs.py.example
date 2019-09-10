@@ -1,5 +1,8 @@
 import os
 
+SETTINGS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(SETTINGS_DIR)
+
 BASE_URL = "https://thessa-dev.southeastasia.cloudapp.azure.com"
 
 ############

@@ -1,11 +1,6 @@
 import os
 from backend.settings.configs import *
 
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-SETTINGS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_DIR = os.path.dirname(SETTINGS_DIR)
-
 # Application definition
 
 INSTALLED_APPS = [
