@@ -12,8 +12,8 @@ Before getting started you should have the following installed and running:
 
 ## Setup Project
 1. Clone this repository
-2. Edit and rename the file `backend/settings/configs.py.example` to `backend/settings/configs.py`
-3. Edit and rename the file `.env.example` to `.env`
+2. Create new file `backend/settings/configs.py` and copy code from `backend/settings/configs.py.example` to the file
+3. Create new file `.env` and and copy code from `.env.example` to the file
 4. Run the following command in your terminal of choice
 ```
 $ npm install
