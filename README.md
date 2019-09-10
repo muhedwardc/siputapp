@@ -13,7 +13,8 @@ Before getting started you should have the following installed and running:
 ## Setup Project
 1. Clone this repository
 2. Edit and rename the file `backend/settings/configs.py.example` to `backend/settings/configs.py`
-3. Run the following command in your terminal of choice
+3. Edit and rename the file `.env.example` to `.env`
+4. Run the following command in your terminal of choice
 ```
 $ npm install
 $ pipenv install --dev && pipenv shell
@@ -23,6 +24,7 @@ $ python manage.py createsuperuser
 $ python manage.py loaddata session_data.json
 $ python manage.py loaddata room_data.json
 $ python manage.py loaddata so_data.json
+$ npm run build
 ```
 
 ## Running Development Servers
