@@ -24,7 +24,6 @@ $ python manage.py createsuperuser
 $ python manage.py loaddata session_data.json
 $ python manage.py loaddata room_data.json
 $ python manage.py loaddata so_data.json
-$ npm run build
 ```
 
 ## Running Development Servers
@@ -52,7 +51,11 @@ development server only on `:8000`, but you have to build build the Vue app firs
 and the page will not reload on changes.
 
 ```
-$ npm run build
+Development env
+$ npm run build --development
+or Production env
+$ npm run build (using production env)
+
 $ python manage.py runserver
 ```
 
