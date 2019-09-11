@@ -1,20 +1,14 @@
 var path = require('path')
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 module.exports = {
   outputDir: 'dist',
   assetsDir: 'static',
-  publicPath: IS_PRODUCTION ? 'https://thessa-dev.southeastasia.cloudapp.azure.com' : '/',
+  publicPath: process.env.VUE_APP_PUBLIC_PATH,
   devServer: {
     proxy: {
       '/api*': {
-        target: 'https://thessa-dev.southeastasia.cloudapp.azure.com/',
+        target: process.env.VUE_APP_API_PROXY
       }
-    },
-    watchOptions: {
-      ignored: [
-        path.resolve(__dirname, 'public/uploads/skripsi')
-      ]
     }
   }
 }
