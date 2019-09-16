@@ -16,6 +16,7 @@ django-cors-headers = "*"
 google-api-python-client = "*"
 requests = "*"
 pyjwt = "*"
+django-environ = "*"
 
 [dev-packages]
 pylint = "*"

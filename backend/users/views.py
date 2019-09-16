@@ -30,19 +30,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if ordering:
             queryset = queryset.order_by(ordering)
 
-        date = self.request.GET.get('date')
-        session = self.request.GET.get('session')
-
-        # filter dosen yang tidak menguji hari tertentu
-        if date and session:
-            list_available_dosen = list()
-            for obj in queryset:
-                exams_today = obj.exams.filter(ujian__tanggal=date, ujian__sesi=session)
-                if not exams_today.exists():
-                    list_available_dosen.append(obj)
-
-            queryset = list_available_dosen
-
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -52,6 +39,19 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def dosen(self, request, *args, **kwargs):
         list_dosen = self.get_queryset().filter(is_admin=False)
+
+        date = self.request.GET.get('date')
+        session = self.request.GET.get('session')
+
+        # filter dosen yang tidak menguji hari tertentu
+        if date and session:
+            list_available_dosen = list()
+            for obj in list_dosen:
+                exams_today = obj.exams.filter(ujian__tanggal=date, ujian__sesi=session)
+                if not exams_today.exists():
+                    list_available_dosen.append(obj)
+
+            list_dosen = list_available_dosen
 
         pagination = request.GET.get('page')
         if pagination == 'all':
@@ -77,6 +77,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @dosen.mapping.post
     def register_dosen(self, request, *args, **kwargs):
+        # Cek apakah sudah ada user dengan email yang terdaftar
+        user = User.objects.filter(email=request.data.get('email'))
+        if user.exists():
+            return Response({
+                'message': 'Pengguna dengan email %s telah terdaftar.' % request.data.get('email')
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(is_admin=False)
@@ -88,6 +95,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @akademik.mapping.post
     def register_akademik(self, request, *args, **kwargs):
+        # Cek apakah sudah ada user dengan email yang terdaftar
+        user = User.objects.filter(email=request.data.get('email'))
+        if user.exists():
+            return Response({
+                'message': 'Pengguna dengan email %s telah terdaftar.' % request.data.get('email')
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(is_admin=True)
@@ -128,6 +142,9 @@ class PengelolaViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class LoginAPI(views.APIView):
+    """
+    This view is not used because login using google
+    """
     serializer_class = FullUserSerializer
     permission_classes = (permissions.AllowAny, )
 
@@ -180,6 +197,9 @@ class LoginGoogle(views.APIView):
                 }, status=status.HTTP_404_NOT_FOUND)
 
 class ChangePasswordAPI(views.APIView):
+    """
+    This function is not used because login using google.
+    """
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request):
