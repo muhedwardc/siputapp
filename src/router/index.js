@@ -25,7 +25,6 @@ const router = new Router({
 Vue.use(Meta)
 
 router.beforeEach((to, from, next) => {
-  document.title = to.name || 'Thesa';
   const user = Cookie.getJSON('_usr')
 
   const authRequired = to.matched.some(record => record.meta.requiresAuth)
@@ -51,6 +50,12 @@ router.beforeEach((to, from, next) => {
     }
   }
   next()
+})
+
+router.afterEach(to => {
+  Vue.nextTick(() => {
+    document.title = to.name
+  })
 })
 
 export default router

@@ -23,35 +23,18 @@
                         :value="'tab-' + i"
                         :transition="false" 
                         :reverse-transition="false">
-                        <h3 class="mb-2">{{ i == days.length-1 ? day.name : readableDate(day.date) }}</h3>
-                        <v-card flat v-if="day.exams.length > 0" class="mt-3">
-                            <v-layout class="exam-item" column v-for="exam in day.exams" :key="exam.id" @click="$router.push(`/ujian/${exam.id}`)">
-                                <v-layout class="ml-0 mr-0" row justify-space-between>
-                                    <h4><span class="warning--text" v-if="exam.skripsi.is_capstone">Capstone: </span>{{exam.skripsi.judul}}</h4>
-                                    <v-chip label class="ma-0 exam-status" color="primary" text-color="white">Belum mulai</v-chip>
+                        <h3 class="mb-2">{{ i == days.length-1 ? day.name : formatDate(day.date, 'dddd, DD MMMM YYYY') }}</h3>
+                        <app-loading></app-loading>
+                        <template v-if="!$store.state.loadViewContent">
+                            <template v-if="day.exams.length > 0">
+                                <v-layout column v-for="exam in day.exams" :key="exam.id">
+                                    <app-exam-card :item="exam" :type="1"></app-exam-card>
                                 </v-layout>
-                                <p class="mb-0"><span :class="isToday(exam.tanggal) ? 'purple--text font-weight-bold' : ''">{{ isToday(exam.tanggal) ? 'Hari ini' : readableDate(exam.tanggal) }}</span> - {{ exam.sesi }} - {{ exam.ruang }}</p>
-                                <p class="mb-0">Mahasiswa: {{ readableString(exam.skripsi.mahasiswa, 'nama') }}</p>
-                                <p class="mb-0">Penguji: {{ readableString(exam.penguji, 'dosen') }}</p>
-                            </v-layout>
-                        </v-card>
-                        <p v-else>Tidak ada ujian.</p>
+                            </template>
+                            <p v-else>Tidak ada ujian.</p>
+                        </template>
                     </v-tab-item>
                 </v-tabs>
-            </v-layout>
-        </v-flex>
-        <v-flex class="notifications pl-4" hidden-md-and-down lg4>
-            <h3 class="mb-2">Notifikasi</h3>
-            <v-layout column>
-                <app-home-notification
-                    v-for="n in notifications"
-                    :key="n.id"
-                    :id="n.id"
-                    :time="n.time"
-                    :room="n.room"
-                    :text="n.text"
-                    :type="n.type">
-                </app-home-notification>
             </v-layout>
         </v-flex>
     </v-layout>
@@ -60,7 +43,6 @@
 
 
 <script>
-import { mapActions } from 'vuex'
 import moment from 'moment'
 export default {
     data() {
@@ -101,32 +83,19 @@ export default {
                     exams: []
                 }
             ],
-            notifications: [
-                {
-                    text: 'Ujian Sedang Berlangsung',
-                    room: 'E6',
-                    time: '08.00 WIB',
-                    type: 'info',
-                    id: 1
-                },
-                {
-                    text: 'Dosen Kurang',
-                    room: 'E8',
-                    time: '08.00 WIB',
-                    type: 'error',
-                    id: 2
-                },
-            ],
             todayDate: '',
             activeTab: 0,
         }
     },
 
-    methods: {
-        ...mapActions([
-            'showSnackbar'
-        ]),
+    computed: {
+        thisMonth() {
+            moment.locale('id')
+            return moment().format('MMMM YYYY')
+        }
+    },
 
+    methods: {
         assignDates() {
             const startOfWeek = moment().startOf('isoWeek').toDate();
             this.days.map((day, i) => {
@@ -136,19 +105,6 @@ export default {
             const index = this.days.findIndex(day => day.date == this.todayDate)
             if (index !== -1) this.activeTab = 'tab-' + index
             else this.activeTab = 'tab-' + (this.days.length - 1)
-        },
-
-        readableString(arr, par) {
-            let res = ''
-            for (let i = 0; i < arr.length; i ++ ){
-                res += arr[i][par] + (i == arr.length-1 ? '' : ', ')
-            }
-            return res
-        },
-
-        readableDate(date) {
-            moment.locale('id')
-            return moment(date, 'DD/MM/YYYY').format('dddd, DD MMMM YYYY')
         },
 
         classifyExamsByDate(exams){
@@ -168,25 +124,22 @@ export default {
             })
         },
 
-        isToday(date) {
-            moment.locale('id')
-            return moment().format('DD/MM/YYYY') === date
-        },
-
-        fetchUjian() {
+        async fetchUjian() {
+            this.$store.state.loadViewContent = true
             const startOfWeek = moment().startOf('isoWeek').toDate()
             const startDate = moment(startOfWeek).format('YYYY-MM-DD')
             const endDate = moment(startOfWeek).add(2, 'week').format('YYYY-MM-DD')
-            axios.get(`/exams/?mulai=${startDate}&selesai=${endDate}`, { headers: { 'Authorization': this.$store.getters.authToken }})
-                .then(r => {
-                    this.classifyExamsByDate(r.data.results)
+            try {
+                const response = await this.$thessa.getExamsBetweenDate(startDate, endDate)
+                this.classifyExamsByDate(response.data.results)
+                this.$store.state.loadViewContent = false
+            } catch (error) {
+                this.showSnackbar({
+                    message: error.message,
+                    type: 'error'
                 })
-                .catch(err => {
-                    this.showSnackbar({
-                        message: err.message,
-                        type: 'error'
-                    })
-                })
+                this.$store.state.loadViewContent = false   
+            }
         }
     },
 
@@ -213,11 +166,7 @@ export default {
     .v-tabs__container .v-tabs__div:last-of-type {
         border-right: none;
     }
-
-    .notifications .layout.column:not(:only-child) {
-        margin: unset !important;
-    }
-
+    
     .v-tabs__bar {
         border-radius: 4px;
         overflow: hidden;
@@ -225,20 +174,6 @@ export default {
 
     .day-active {
         color: white;
-    }
-
-    .exam-item {
-        padding: 8px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px 5px rgba(0, 0, 0, .03);
-        margin-top: 16px;
-        cursor: pointer;
-    }
-
-    .exam-status > .v-chip__content {
-        height: auto;
-        padding-top: 2px;
-        padding-bottom: 2px;
     }
 </style>
 

@@ -14,7 +14,7 @@ class Session(models.Model):
     selesai = models.TimeField()
 
     def __str__(self):
-        return '{} : {} - {} WIB'.format(self.nama, self.mulai, self.selesai)
+        return '{} - {} WIB'.format(self.mulai.strftime('%H:%M'), self.selesai.strftime('%H:%M'))
 
 class Exam(models.Model):
     STATUS_CHOICES = {
@@ -28,7 +28,9 @@ class Exam(models.Model):
     sesi = models.ForeignKey(Session, related_name='exams', on_delete=models.DO_NOTHING)
     ruang = models.ForeignKey(Room, related_name='exams', on_delete=models.DO_NOTHING)
     status = models.IntegerField(choices=STATUS_CHOICES, default=1, blank=True, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.skripsi.judul
@@ -40,11 +42,13 @@ class Exam(models.Model):
         verbose_name_plural = 'Exams'
 
 class Penguji(models.Model):
-    dosen = models.ForeignKey(User, related_name='exams', on_delete=models.DO_NOTHING)
+    dosen = models.ForeignKey(User, related_name='exams', on_delete=models.CASCADE, null=True, blank=True)
     ujian = models.ForeignKey(Exam, related_name='penguji', on_delete=models.CASCADE)
     is_leader = models.BooleanField(default=False)
     is_present = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.dosen.nama

@@ -1,21 +1,51 @@
 <template>
     <div class="dosen-home">
-        <v-container grid-list-md class="no-padding">
-            <h3 class="mb-1">UJIAN HARI INI</h3>
-            <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
-            <v-layout row wrap v-else>
-                <v-flex xs12 sm4 md4 v-for="e in todayExams.slice(0, 3)" :key="e.id">
-                    <app-exam-card :item="e" />
-                </v-flex>
-            </v-layout>
-            <h3 class="mt-3 mb-1">UJIAN LAIN</h3>
-            <span v-if="nextExams.length === 0">Tidak ada ujian yang belum direspon</span>
-            <v-layout row wrap v-else>
-                <v-flex xs12 sm4 md4 v-for="e in nextExams" :key="e.id">
-                    <app-exam-card :item="e" class="mb-3" />
-                </v-flex>
-            </v-layout>
-        </v-container>
+        <app-loading></app-loading>
+        <v-layout column v-if="!$store.state.loadViewContent">
+            <v-container grid-list-lg class="no-padding mt-2">
+                <h3 class="mb-1">Ujian Tugas Akhir Hari Ini</h3>
+                <span v-if="todayExams.length === 0">Hari ini tidak ada ujian</span>
+                <v-layout v-else row wrap>
+                    <v-flex xs12 sm6 v-for="e in todayExams.slice(0, 3)" :key="e.id">
+                        <app-exam-card :item="e"/>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+            <v-container grid-list-lg class="no-padding mt-2">
+                <h3 class="mb-1 mt-4">Ujian Tugas Akhir yang akan datang</h3>
+                <span v-if="nextExams.length === 0">Tidak ada ujian lagi</span>
+                <v-layout v-else row wrap>
+                    <v-flex xs12 sm6 v-for="e in nextExams" :key="e.id">
+                        <app-exam-card :item="e"/>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </v-layout>
+        <app-info-box @close="hasFinisedExam = false" :appear="hasFinisedExam" title="Ujian Tugas Akhir telah diselesaikan">
+            <template v-slot:content>
+                <p>Anda telah menyelesaikan ujian:</p>
+                <v-layout class="exam-detail mb-2" column>
+                    <p class="mb-1" v-text="finishedExam.skripsi.judul"></p>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>event</v-icon>
+                        <span v-text="finishedExam.tanggal"></span>
+                    </v-layout>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>access_time</v-icon>
+                        <span v-text="finishedExam.sesi"></span>
+                    </v-layout>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>location_on</v-icon>
+                        <span v-text="finishedExam.ruang"></span>
+                    </v-layout>
+                    <v-layout class="mb-1">
+                        <v-icon class="mr-1" small>person</v-icon>
+                        <span>{{ joinToString(finishedExam.skripsi.mahasiswa, 'nama') }}</span>
+                    </v-layout>
+                </v-layout>
+                <p class="mb-0">Untuk melihat berkas hasil ujian skripsi dapat dilihat di halaman <router-link :to="'/ujian/' + finishedExam.id">detail ujian</router-link> ketika Ketua Sidang telah menyelesaikan ujian.</p>
+            </template>
+        </app-info-box>
     </div>
 </template>
 
@@ -23,6 +53,7 @@
 import moment from 'moment'
 import Cookie from 'js-cookie'
 import { mapActions } from 'vuex';
+import { setTimeout } from 'timers';
 
 export default {
     data() {
@@ -30,14 +61,15 @@ export default {
             exams: [],
             todayExams: [],
             nextExams: [],
-            newAssignedExams: 0
+            newAssignedExams: 0,
+            finishedExam: null,
+            hasFinisedExam: false
         }
     },
 
     methods: {
         ...mapActions([
-            'showSnackbar',
-            'removeCookies'
+            'logUserOut'
         ]),
 
         filterUjian() {
@@ -47,37 +79,34 @@ export default {
                 this.nextExams.push(e)
             })
         },
-
-        getExams() {
-            axios.get('/me/exams/', {
-                headers: {
-                    'Authorization': this.$store.getters.authToken
+        
+        async getExams() {
+            this.$store.state.loadViewContent = true
+            try {
+                const response = await this.$thessa.getMyExams()
+                this.exams = response.data.results
+                this.exams.length > 0 ? this.filterUjian() : null
+                const message = this.todayExams.length > 0 ? 'Hari ini ada ' + this.todayExams.length + ' ujian' : 'Hari ini tidak ada ujian'
+                if (!Cookie.get('visit_home')) {
+                    this.showSnackbar({
+                        message,
+                        type: 'success'
+                    })
+                    Cookie.set('visit_home', true)
                 }
-            })
-                .then(r => {
-                    this.exams = r.data.results
-                    this.exams.length > 0 ? this.filterUjian() : null
-                    let message = this.todayExams.length > 0 ? 'Hari ini ada ' + this.todayExams.length + ' ujian' : 'Hari ini tidak ada ujian'
-                    if (!Cookie.get('visit_home')) {
-                        this.showSnackbar({
-                            message,
-                            type: 'info'
-                        })
-                        Cookie.set('visit_home', true)
-                    }
-                })
-                .catch(err => {
-                    const errArr = err.message.split(' ')
-                    if (errArr[errArr.length-1] == '401') {
-                        this.removeCookies()
-                        this.$router.replace('/login')
-                    } else {
-                        this.showSnackbar({
-                            message: err.message,
-                            type: 'error'
-                        })
-                    }
-                })
+                this.$store.state.loadViewContent = false
+            } catch (error) {
+                if (error.response && error.response.status == 401) {
+                    this.logUserOut()
+                    this.$router.replace('/login')
+                } else {
+                    this.showSnackbar({
+                        message: err.message,
+                        type: 'error'
+                    })
+                }
+                this.$store.state.loadViewContent = false
+            }
         }
     },
 
@@ -90,13 +119,24 @@ export default {
 
     created() {
         this.$store.state.auth.token ? this.getExams() : null
+        if (this.$store.state.finishedExam) {
+            this.finishedExam = this.$store.state.finishedExam
+            setTimeout(() => {
+                this.hasFinisedExam = true
+            }, 500)
+            this.$store.state.finishedExam = null
+        }
     }
 }
 </script>
 
-<style lang="scss" scoped>
-    .no-padding {
+<style lang="sass" scoped>
+    .no-padding 
         padding: 0;
-    }
+
+    .exam-detail
+        padding: 12px;
+        border-radius: 4px;
+        background-color: #EBEBEB;
 </style>
 

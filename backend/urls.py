@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from rest_framework import routers
 
 from .api.views import index_view, MessageViewSet
-from .users.views import LoginAPI, ChangePasswordAPI
+from .users.views import LoginAPI, ChangePasswordAPI, LoginGoogle
 from knox.views import LogoutView
 
 
@@ -23,6 +23,8 @@ urlpatterns = [
     # http://localhost:8000/api/auth/change_password/
     path('api/auth/change_password/', ChangePasswordAPI.as_view()),
 
+    path('api/auth/login-google/', LoginGoogle.as_view()),
+
     # http://localhost:8000/api/users/
     path('api/users/', include('backend.users.urls')),
 
@@ -36,13 +38,12 @@ urlpatterns = [
     path('api/', include(router.urls)),
 
     # http://localhost:8000/api/admin/
-    path('admin/', admin.site.urls),
-
-    # http://localhost:8000/
-    re_path(r'^.*', index_view, name='index'),
+    path('admin/', admin.site.urls)
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns.append(re_path(r'^.*', index_view, name='index'))
 

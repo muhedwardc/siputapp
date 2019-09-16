@@ -13,8 +13,13 @@ psycopg2-binary = "*"
 pillow = "*"
 django-rest-knox = "*"
 django-cors-headers = "*"
+google-api-python-client = "*"
+requests = "*"
+pyjwt = "*"
+django-environ = "*"
 
 [dev-packages]
+pylint = "*"
 
 [requires]
 python_version = "3.6"

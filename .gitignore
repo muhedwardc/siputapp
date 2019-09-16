@@ -2,9 +2,12 @@
 node_modules
 /dist
 /skripsi
+/media
+/public/uploads/
 db.sqlite3
 
 # local env files
+.env
 .env.local
 .env.*.local
 

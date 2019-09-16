@@ -8,10 +8,10 @@
 		class="sidebar">
 		<v-list class="profile pa-3">
 			<v-layout justify-center class="pa-1">
-				<img width="50px" height="50px" src="/static/images/ugm-logo.png" alt="ugm-logo">
+				<app-logo></app-logo>
 			</v-layout>
 		</v-list>
-		<v-list>
+		<v-list v-if="$store.state.auth.token">
 			<v-list-tile
 				v-for="route in routes" 
 				:key="route.title"
@@ -59,7 +59,7 @@ export default {
 				{
 					title: 'Profil',
 					icon: 'person',
-					path: '/dosen/profil'
+					path: '/profil'
 				}
 			],
 			akademikRoutes: [
@@ -75,18 +75,33 @@ export default {
 				},
 				{
 					title: 'Daftar Ujian',
-					icon: 'list',
+					icon: 'today',
 					path: '/ujian'
 				},
 				{
-					title: 'Daftar Pengguna',
-					icon: 'list',
-					path: '/daftar-pengguna'
+					title: 'Daftar Dosen',
+					icon: 'group',
+					path: '/daftar-dosen'
+				},
+				{
+					title: 'Daftar Akademik',
+					icon: 'group',
+					path: '/daftar-akademik'
+				},
+				{
+					title: 'Ruang dan Sesi',
+					icon: 'meeting_room',
+					path: '/ruang-sesi'
+				},
+				{
+					title: 'Pengurus',
+					icon: 'account_balance',
+					path: '/pengurus-departemen'
 				},
 				{
 					title: 'Profil',
 					icon: 'person',
-					path: '/akademik/profil'
+					path: '/profil'
 				}
 			]
 		}
@@ -104,24 +119,20 @@ export default {
 
 	methods: {
 		...mapActions([
-			'removeCookies',
-			'showSnackbar'
+			'logUserOut',
 		]),
 
-		logout() {
-			axios.post('/auth/logout/', {}, {
-				headers: {
-					'Authorization': this.$store.getters.authToken
-				}
-			})
-			.then(() => {
-				this.removeCookies()
-					.then(() => this.$router.replace('/login'))
-			})
-			.catch(err => this.showSnackbar({
-				message: err.message,
-				type: 'error'
-			}))
+		async logout() {
+			try {
+				await this.$thessa.logout()
+				await this.logUserOut()
+				await this.$router.replace('/login')
+			} catch (error) {
+				this.showSnackbar({
+					message: error.message,
+					type: 'error'
+				})
+			}
 		}
 	}
 }
@@ -131,7 +142,6 @@ export default {
 <style lang="sass">
 	.sidebar .v-list__tile--active 
 		background: rgba(0, 0, 0, .02) !important
-		color: #3f51b5 !important
 		font-weight: bold !important
 
 	.sidebar 

@@ -12,11 +12,13 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             nip=nip
         )
-        user.set_password(password)
+        if password:
+            user.set_password(password)
+
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, nama, email, nip, password):
+    def create_superuser(self, nama, email, nip, password=None):
         if not email:
             raise ValueError('Pengguna harus memiliki email!')
 
@@ -37,23 +39,15 @@ class User(AbstractBaseUser):
         ('TE', 'Teknik Elektro')
     }
 
-    # KONSENTRASI_CHOICES = {
-    #     ('RPL', 'Rekayasa Perangkat Lunak'),
-    #     ('RSI', 'Rekayasa Sistem Informasi'),
-    #     ('RSK', 'Rekayasa Sistem Komputer')
-    # }
-
-
-    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True)
-    nama = models.CharField(max_length=50, blank=True)
+    nama = models.CharField(max_length=250, blank=True)
     email = models.EmailField(
-        max_length=50, verbose_name='alamat email', unique=True)
+        max_length=50, verbose_name='Alamat Email', unique=True)
     nip = models.CharField(
         max_length=20, verbose_name='Nomor Induk Pegawai', blank=True)
-    prodi = models.CharField(max_length=20, choices=PRODI_CHOICES, blank=True, null=True)
+    prodi = models.CharField(max_length=20, choices=PRODI_CHOICES, verbose_name='Program Studi', blank=True, null=True)
     konsentrasi = models.CharField(max_length=50, blank=True, null=True)
+    foto = models.CharField(max_length=250, null=True, blank=True)
     is_admin = models.BooleanField(default=False)
-    last_login = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     objects = UserManager()
 
@@ -65,6 +59,7 @@ class User(AbstractBaseUser):
 
     class Meta:
         db_table = 'users'
+        ordering = ['-id']
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 
@@ -75,9 +70,17 @@ class User(AbstractBaseUser):
         return True
 
     @property
-    def is_active(self):
-        return True
-
-    @property
     def is_staff(self):
         return self.is_admin
+
+class Pengelola(models.Model):
+    jabatan = models.CharField(max_length=250, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.jabatan
+    
+    class Meta:
+        db_table = 'pengelola'
+        verbose_name = 'Pengelola'
+        verbose_name_plural = 'Pengelola'
