@@ -11,7 +11,7 @@
   "dependencies": {
     "core-js": "^2.6.5",
     "js-cookie": "^2.2.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "pdfmake": "^0.1.54",
     "vee-validate": "^2.2.0",
